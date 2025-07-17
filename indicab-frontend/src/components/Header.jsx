@@ -77,8 +77,23 @@ const Header = () => {
               </Link>
             </li>
             <li className="nav-item">
+              <Link className="nav-link text-white" to="/packages" onClick={closeMenu}>
+                Travel Packages
+              </Link>
+            </li>
+            <li className="nav-item">
+              <Link className="nav-link text-white" to="/blog" onClick={closeMenu}>
+                Blog
+              </Link>
+            </li>
+            <li className="nav-item">
               <Link className="nav-link text-white" to="/history" onClick={closeMenu}>
                 Booking History
+              </Link>
+            </li>
+            <li className="nav-item">
+              <Link className="nav-link text-white" to="/contact" onClick={closeMenu}>
+                Contact Us
               </Link>
             </li>
           </ul>
