@@ -7,6 +7,9 @@ import Recommendations from './components/Recommendations';
 import ServiceCities from './components/ServiceCities';
 import AppSection from './components/AppSection';
 import BookingHistory from './components/BookingHistory';
+import ContactUs from './components/ContactUs';
+import TravelPackages from './components/TravelPackages';
+import Blog from './components/Blog';
 
 function App() {
   const [isLoaded, setIsLoaded] = useState(false);
@@ -46,6 +49,9 @@ function App() {
           </>
         } />
         <Route path="/history" element={<BookingHistory />} />
+        <Route path="/contact" element={<ContactUs />} />
+        <Route path="/packages" element={<TravelPackages />} />
+        <Route path="/blog" element={<Blog />} />
       </Routes>
     </Router>
   );
