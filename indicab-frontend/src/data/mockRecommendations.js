@@ -1,0 +1,126 @@
+// export const mockRecommendations = [
+//   {
+//     id: 1,
+//     title: "Visit the iconic Taj Mahal",
+//     location: "Delhi → Agra",
+//     price: "₹2,499",
+//     rating: "4.8",
+//     reviews: "2.2k",
+//     image:
+//       "https://images.unsplash.com/photo-1564507592333-c60657eea523?w=400&h=200&fit=crop",
+//   },
+//   {
+//     id: 2,
+//     title: "Quick getaway to Pune",
+//     location: "Mumbai → Pune",
+//     price: "₹1,999",
+//     rating: "4.6",
+//     reviews: "1.8k",
+//     image:
+//       "https://images.unsplash.com/photo-1595658658481-d53d3f999875?w=400&h=200&fit=crop",
+//   },
+//   {
+//     id: 3,
+//     title: "Explore the royal Mysore Palace",
+//     location: "Bangalore → Mysore",
+//     price: "₹1,899",
+//     rating: "4.7",
+//     reviews: "1.5k",
+//     image:
+//       "https://images.unsplash.com/photo-1582510003544-4d00b7f74220?w=400&h=200&fit=crop",
+//   }
+// ];
+
+
+export const mockRecommendations = [
+  {
+    id: 1,
+    title: "Marvel at the Ajanta Caves",
+    location: "Aurangabad → Ajanta",
+    price: "₹2,499",
+    rating: "4.9",
+    reviews: "3.1k",
+    image: "https://whc.unesco.org/uploads/thumbs/site_0243_0001-750-750-20151104152442.jpg",
+  },
+  {
+    id: 2,
+    title: "Explore the Ellora Caves",
+    location: "Aurangabad → Ellora",
+    price: "₹2,299",
+    rating: "4.8",
+    reviews: "2.7k",
+    image: "https://blog-content.ixigo.com/wp-content/uploads/2013/08/800px-AJANTA_CAVES_-_C.SHELARE_4.jpg",
+  },
+  {
+    id: 3,
+    title: "Hill retreat in Mahabaleshwar",
+    location: "Pune → Mahabaleshwar",
+    price: "₹1,899",
+    rating: "4.7",
+    reviews: "2.4k",
+    image: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/34/Table_Land_2.jpg/250px-Table_Land_2.jpg",
+  },
+  {
+    id: 4,
+    title: "Scenic drive to Lonavala",
+    location: "Mumbai → Lonavala",
+    price: "₹1,499",
+    rating: "4.6",
+    reviews: "2.1k",
+    image: "https://www.pawnalakecamping.net/wp-content/uploads/2023/04/rajmachi.jpg",
+  },
+  {
+    id: 5,
+    title: "Relax at Ganpatipule Beach",
+    location: "Ratnagiri → Ganpatipule",
+    price: "₹1,799",
+    rating: "4.8",
+    reviews: "1.9k",
+    image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSNhyO7uZ5Jk2L-Eu7hqtTa71vzEQU4yx9xBw&s",
+  },
+  {
+    id: 6,
+    title: "Heritage walk at Gateway of India",
+    location: "Mumbai → Gateway of India",
+    price: "₹999",
+    rating: "4.5",
+    reviews: "8.2k",
+    image: "https://images.unsplash.com/photo-1598434192043-71111c1b3f41?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8Z2F0ZXdheSUyMG9mJTIwaW5kaWF8ZW58MHx8MHx8fDA%3D",
+  },
+  {
+    id: 7,
+    title: "Adventure in Khandala",
+    location: "Mumbai → Khandala",
+    price: "₹1,599",
+    rating: "4.6",
+    reviews: "1.7k",
+    image: "https://images.unsplash.com/photo-1618805714320-f8825019c1be?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8a2hhbmRhbGF8ZW58MHx8MHx8fDA%3D",
+  },
+  {
+    id: 8,
+    title: "Nature escape to Matheran",
+    location: "Mumbai → Matheran",
+    price: "₹1,399",
+    rating: "4.7",
+    reviews: "1.5k",
+    image: "https://images.unsplash.com/photo-1632091239504-f2473a06d7ce?q=80&w=734&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+  },
+  {
+    id: 9,
+    title: "Spiritual visit to Shirdi",
+    location: "Pune → Shirdi",
+    price: "₹1,899",
+    rating: "4.8",
+    reviews: "2.3k",
+    image: "https://images.unsplash.com/photo-1629640890590-7836d69c5237?q=80&w=1171&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+  },
+  {
+    id: 10,
+    title: "Wildlife adventure at Tadoba",
+    location: "Nagpur → Tadoba National Park",
+    price: "₹2,799",
+    rating: "4.9",
+    reviews: "1.2k",
+    image: "https://images.unsplash.com/photo-1454023492550-5696f8ff10e1?w=400&h=200&fit=crop",
+  }
+];

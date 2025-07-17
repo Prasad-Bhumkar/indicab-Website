@@ -1,0 +1,495 @@
+/* CSS Variables */
+:root {
+  --primary-green: #059669;
+  --secondary-green: #0d9488;
+  --accent-orange: #f59e0b;
+  --dark-green: #064e3b;
+  --light-green: #ecfdf5;
+  --success-green: #10b981;
+  --transition: all 0.3s ease;
+  --box-shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.1);
+  --box-shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.15);
+
+  /* Custom Palette */
+  --custom-bg: #dfd9ec;
+  --custom-text: #3d3c4f;
+  --custom-accent: #e6a5b8;
+  --custom-dark: #4b2e36;
+}
+
+/* Base Styles */
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  line-height: 1.6;
+  margin: 0;
+  padding: 0;
+  background-color: #ffffff;
+  color: #212529;
+  scroll-behavior: smooth;
+}
+
+/* Typography */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-weight: 700;
+  color: #111827;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+/* Layout */
+.container {
+  max-width: 1140px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+/* Hero Section */
+.hero-section {
+  background: linear-gradient(135deg, var(--primary-green) 0%, var(--secondary-green) 100%);
+  min-height: 100vh;
+  position: relative;
+  overflow: hidden;
+  color: white;
+  padding: 4rem 0;
+}
+
+.hero-section::before {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 200px;
+  background: url("image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 120'%3E%3Cpath d='M0,60 C300,120 900,0 1200,60 L1200,120 L0,120 Z' fill='%2365a30d'/%3E%3C/svg%3E") no-repeat center bottom;
+  background-size: cover;
+}
+
+/* Navbar */
+.navbar-brand {
+  font-weight: 700;
+  font-size: 1.5rem;
+  color: white !important;
+}
+
+.navbar-toggler {
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+.navbar-toggler-icon {
+  background-image: url("data:image/svg+xml;charset=utf8,%3Csvg viewBox='0 0 30 30' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath stroke='rgba(255,255,255,0.7)' stroke-width='2' stroke-linecap='round' stroke-miterlimit='10' d='M4 7h22M4 15h22M4 23h22'/%3E%3C/svg%3E");
+}
+
+.navbar-collapse {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.9s ease-in-out;
+}
+
+.navbar-collapse.show {
+  max-height: 500px;
+}
+
+@media (min-width: 992px) {
+  .navbar-collapse {
+    display: flex !important;
+    visibility: visible !important;
+    max-height: none !important;
+  }
+}
+
+/* Buttons */
+.btn-primary-custom {
+  background-color: var(--accent-orange);
+  border-color: var(--accent-orange);
+  color: white;
+  font-weight: 600;
+  padding: 12px 24px;
+  border-radius: 8px;
+  transition: var(--transition);
+}
+
+.btn-primary-custom:hover {
+  background-color: #e08e0b;
+  border-color: #e08e0b;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+}
+
+.btn-outline-custom {
+  border: 2px solid white;
+  color: white;
+  font-weight: 600;
+  padding: 10px 20px;
+  border-radius: 8px;
+  transition: var(--transition);
+}
+
+.btn-outline-custom:hover {
+  background-color: white;
+  color: var(--primary-green);
+}
+
+.download-btn {
+  background: black;
+  color: white;
+  padding: 12px 24px;
+  border-radius: 8px;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: var(--transition);
+}
+
+.download-btn:hover {
+  background: #333;
+  color: white;
+  transform: translateY(-2px);
+}
+
+/* Booking Form */
+.booking-form {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-radius: 16px;
+  box-shadow: var(--box-shadow-sm);
+  padding: 2rem;
+  margin-top: 2rem;
+}
+
+/* Vehicle Showcase */
+.vehicle-showcase {
+  padding: 1.5rem;
+  background-color: #f8f9fa;
+  border-radius: 12px;
+  box-shadow: var(--box-shadow-sm);
+}
+
+.vehicle-card {
+  background: white;
+  border: 1px solid #e9ecef;
+  border-radius: 10px;
+  padding: 1rem;
+  transition: var(--transition);
+  cursor: pointer;
+}
+
+.vehicle-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--box-shadow-lg);
+}
+
+.vehicle-card img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+}
+
+.vehicle-card.selected {
+  border-color: var(--primary-green);
+  box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.5);
+  background-color: var(--light-green);
+}
+
+/* Route Cards */
+.route-card {
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: var(--box-shadow-sm);
+  transition: var(--transition);
+  margin-bottom: 1.5rem;
+}
+
+.route-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--box-shadow-lg);
+}
+
+.route-image {
+  height: 200px;
+  background-size: cover;
+  background-position: center;
+  position: relative;
+}
+
+.route-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(45deg, rgba(5, 150, 105, 0.8), rgba(13, 148, 136, 0.6));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.route-title {
+  color: white;
+  font-size: 2rem;
+  font-weight: 700;
+  text-align: center;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.price-badge {
+  background-color: var(--accent-orange);
+  color: white;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+
+/* Recommendation Cards */
+.recommendation-card {
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: var(--box-shadow-sm);
+  transition: var(--transition);
+  position: relative;
+}
+
+.recommendation-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--box-shadow-lg);
+}
+
+.recommendation-image {
+  height: 200px;
+  background-size: cover;
+  background-position: center;
+}
+
+.heart-icon {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.heart-icon:hover {
+  background: white;
+  transform: scale(1.1);
+}
+
+/* Service Cities */
+.service-cities {
+  background-color: #f8f9fa;
+  padding: 4rem 0;
+}
+
+.city-badge {
+  background-color: white;
+  border: 1px solid #e9ecef;
+  color: #495057;
+  padding: 8px 16px;
+  border-radius: 20px;
+  margin: 4px;
+  display: inline-block;
+  transition: var(--transition);
+  cursor: pointer;
+}
+
+.city-badge:hover {
+  background-color: var(--primary-green);
+  color: white;
+  border-color: var(--primary-green);
+  transform: translateY(-3px) scale(1.05);
+  box-shadow: var(--box-shadow-sm);
+}
+
+/* App Section */
+.app-section {
+  background: linear-gradient(135deg, var(--dark-green) 0%, var(--primary-green) 100%);
+  color: white;
+  padding: 4rem 0;
+}
+
+.app-features {
+  display: flex;
+  justify-content: space-around;
+  margin: 2rem 0;
+}
+
+.app-feature {
+  text-align: center;
+  padding: 1rem;
+}
+
+.app-feature i {
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+  color: var(--accent-orange);
+}
+
+.download-buttons {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  margin-top: 2rem;
+}
+
+/* Utility Classes */
+.text-center {
+  text-align: center;
+}
+
+.text-muted {
+  color: #6c757d;
+}
+
+.fw-semibold {
+  font-weight: 600;
+}
+
+.mb-1 {
+  margin-bottom: 0.25rem;
+}
+.mb-2 {
+  margin-bottom: 0.5rem;
+}
+.mb-3 {
+  margin-bottom: 1rem;
+}
+.mb-4 {
+  margin-bottom: 1.5rem;
+}
+.mb-5 {
+  margin-bottom: 2rem;
+}
+.mt-3 {
+  margin-top: 1rem;
+}
+.mt-5 {
+  margin-top: 2rem;
+}
+.pt-3 {
+  padding-top: 1rem;
+}
+.pb-3 {
+  padding-bottom: 1rem;
+}
+
+/* === Extra Small Devices (Phones) === */
+@media (max-width: 575.98px) {
+  .hero-section {
+    min-height: auto;
+    padding: 2rem 0;
+  }
+
+  .navbar-brand {
+    font-size: 1.1rem;
+  }
+
+  .booking-form {
+    margin-top: 1rem;
+    padding: 1.5rem;
+  }
+
+  .route-title {
+    font-size: 1.25rem;
+  }
+
+  .app-features {
+    flex-direction: column;
+  }
+
+  .download-buttons {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .vehicle-card {
+    flex: 1 1 100%;
+  }
+
+  .btn-primary-custom,
+  .download-btn {
+    width: 100%;
+    text-align: center;
+  }
+}
+
+/* === Small Devices (Landscape Phones) === */
+@media (min-width: 576px) and (max-width: 767.98px) {
+  .booking-form {
+    margin-top: 1.5rem;
+    padding: 1.25rem;
+  }
+
+  .price-badge {
+    font-size: 1rem;
+  }
+
+  .vehicle-card {
+    flex: 1 1 48%;
+  }
+}
+
+/* === Medium Devices (Tablets) === */
+@media (min-width: 768px) and (max-width: 991.98px) {
+  .container {
+    max-width: 720px;
+  }
+
+  .app-features {
+    flex-direction: row;
+    justify-content: space-between;
+  }
+
+  .vehicle-card {
+    flex: 1 1 30%;
+  }
+}
+
+/* === Large Devices (Desktops) === */
+@media (min-width: 992px) and (max-width: 1199.98px) {
+  .container {
+    max-width: 960px;
+  }
+
+  .booking-form {
+    padding: 2.5rem;
+  }
+}
+
+/* === Extra Large Devices (Large Desktops) === */
+@media (min-width: 1200px) and (max-width: 1399.98px) {
+  .container {
+    max-width: 1140px;
+  }
+
+  .hero-section::before {
+    height: 250px;
+  }
+}
+
+/* === XXL Devices (4K Monitors) === */
+@media (min-width: 1400px) {
+  .container {
+    max-width: 1320px;
+  }
+
+  .hero-section::before {
+    height: 300px;
+  }
+}
