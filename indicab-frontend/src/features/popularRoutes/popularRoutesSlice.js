@@ -1,8 +1,14 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
 
-export const fetchPopularRoutes = createAsyncThunk('popularRoutes/fetchPopularRoutes', async () => {
-  const response = await axios.get('http://localhost:8000/api/routes');
+export const fetchPopularRoutes = createAsyncThunk('popularRoutes/fetchPopularRoutes', async (_, { getState }) => {
+  const token = getState().auth.token;
+  const config = {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  };
+  const response = await axios.get('http://localhost:8000/api/routes', config);
   return response.data;
 });
 
