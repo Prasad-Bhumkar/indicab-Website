@@ -252,7 +252,7 @@ const TravelPackages = () => {
                 <div key={pkg.id} className="col-lg-4 col-md-6 mb-4">
                   <div className={`package-card hourly-card ${pkg.popular ? 'popular' : ''}`}
                        style={{ animationDelay: `${index * 0.2}s` }}>
-                    {pkg.popular && <div className="popular-badge">Most Popular</div>}
+                    {/* {pkg.popular && <div className="popular-badge">Most Popular</div>} */}
                     <div className="package-badge">{pkg.badge}</div>
                     <div className="package-header">
                       <h5 className="package-title">{pkg.title}</h5>

@@ -32,7 +32,7 @@ const AboutUs = () => {
   ];
 
   const leadership = [
-    { name: 'Satish Tandale', title: 'Founder & CEO', image: 'https://photos.fife.usercontent.google.com/pw/AP1GczNhkSrqapAWFZi-Os1V0x2J72gmmnWMKnW6bJI6BR91MU3-ZWhYKGWTAw=w710-h946-s-no-gm?authuser=1', social: { linkedin: '#', twitter: '#' } },
+    { name: 'Ravi Bade', title: 'Founder & CEO', image: 'https://media.licdn.com/dms/image/v2/D5603AQHmMRpgc-OYcg/profile-displayphoto-shrink_200_200/B56ZPze4ZtH0AY-/0/1734956780304?e=1756944000&v=beta&t=0Al0kIUfUNQgMwcfqINEcDY9DJpWjn6FCsRipIF98w8', social: { linkedin: '#', twitter: '#' } },
     { name: 'Ravi Bade', title: 'Chief Operating Officer', image: 'https://media.licdn.com/dms/image/v2/D5603AQHmMRpgc-OYcg/profile-displayphoto-shrink_200_200/B56ZPze4ZtH0AY-/0/1734956780304?e=1756944000&v=beta&t=0Al0kIUfUNQgMwcfqINEcDY9DJpWjn6FCsRipIF98w8', social: { linkedin: '#', twitter: '#' } },
     { name: 'Prasad Bhumkar', title: 'Head of Technology', image: 'https://avatars.githubusercontent.com/u/182353409?v=4', social: { linkedin: '#', twitter: '#' } },
   ];
