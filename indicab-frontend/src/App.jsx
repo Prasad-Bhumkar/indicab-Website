@@ -43,43 +43,43 @@ function App() {
       </div>
     );
   }
-return (
-  <Router>
-    <ConnectionStatus />
-    <Header />
-    <Routes>
-      <Route
-        path="/"
-        element={
-          <>
-            <HeroSection />
-            <PopularRoutes />
-            <Recommendations />
-            <ServiceCities />
-            <AppSection />
-          </>
-        }
-      />
-      <Route path="/history" element={<BookingHistory />} />
-      <Route path="/contact" element={<ContactUs />} />
-      <Route path="/packages" element={<TravelPackages />} />
-      <Route path="/blog" element={<Blog />} />
-      <Route path="/about" element={<AboutUs />} />
-      <Route path="/driver/register" element={<DriverRegister />} />
-      <Route path="/driver/dashboard" element={<DriverDashboard />} />
-      <Route path="/payment" element={<PaymentForm />} />
-      <Route path="/admin/*" element={<AdminRoutes />} />
-      <Route
-        path="/profile"
-        element={
-          <ProtectedRoute>
-            <ProfilePage />
-          </ProtectedRoute>
-        }
-      />
-    </Routes>
-  </Router>
-);
+  return (
+    <Router basename="/indicab-Website">
+      <ConnectionStatus />
+      <Header />
+      <Routes>
+        <Route
+          path="/"
+          element={
+            <>
+              <HeroSection />
+              <PopularRoutes />
+              <Recommendations />
+              <ServiceCities />
+              <AppSection />
+            </>
+          }
+        />
+        <Route path="/history" element={<BookingHistory />} />
+        <Route path="/contact" element={<ContactUs />} />
+        <Route path="/packages" element={<TravelPackages />} />
+        <Route path="/blog" element={<Blog />} />
+        <Route path="/about" element={<AboutUs />} />
+        <Route path="/driver/register" element={<DriverRegister />} />
+        <Route path="/driver/dashboard" element={<DriverDashboard />} />
+        <Route path="/payment" element={<PaymentForm />} />
+        <Route path="/admin/*" element={<AdminRoutes />} />
+        <Route
+          path="/profile"
+          element={
+            <ProtectedRoute>
+              <ProfilePage />
+            </ProtectedRoute>
+          }
+        />
+      </Routes>
+    </Router>
+  );
 }
 
 export default App;
