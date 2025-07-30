@@ -1,0 +1,39 @@
+.metadata/
+
+# IDE
+.idea/
+.vscode/
+.project
+.classpath
+.factorypath
+.settings/
+.springBeans
+.sts4-cache
+nbproject/private/
+nbbuild/
+dist/
+nbdist/
+.nb-gradle/
+
+# Build artifacts
+build/
+target/
+.mvn/wrapper/maven-wrapper.jar
+
+# Node
+node_modules/
+npm-debug.log
+yarn-error.log
+pnpm-debug.log
+
+# Dependency directories
+/node_modules
+/.pnp
+.pnp.js
+
+# Misc
+.DS_Store
+Thumbs.db
+HELP.md
+
+.config/
