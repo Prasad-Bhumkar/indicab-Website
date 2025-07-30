@@ -1,13 +1,17 @@
-import React, { useState, useEffect } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
-import { fetchBookings, updateBooking } from '../features/bookingHistory/bookingHistorySlice';
-import RideTracker from './RideTracker';
+import React, { useState, useEffect } from "react";
+import { useSelector, useDispatch } from "react-redux";
+import {
+  fetchBookings,
+  updateBooking,
+} from "../features/bookingHistory/bookingHistorySlice";
+import RideTracker from "./RideTracker";
 
 const BookingHistory = () => {
-  const [activeTab, setActiveTab] = useState('All');
+  const [activeTab, setActiveTab] = useState("All");
   const bookings = useSelector((state) => state.bookingHistory.bookings);
   const loading = useSelector((state) => state.bookingHistory.loading);
   const error = useSelector((state) => state.bookingHistory.error);
+  const isOffline = useSelector((state) => state.bookingHistory.isOffline);
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -19,73 +23,154 @@ const BookingHistory = () => {
   };
 
   const handleCancelBooking = (bookingId) => {
-    const bookingToUpdate = bookings.find(b => b.id === bookingId);
+    const bookingToUpdate = bookings.find((b) => b.id === bookingId);
     if (bookingToUpdate) {
-      dispatch(updateBooking({ ...bookingToUpdate, status: 'Cancelled' }));
+      dispatch(updateBooking({ ...bookingToUpdate, status: "Cancelled" }));
     }
   };
 
   const handleRateBooking = (bookingId, rating) => {
-    const bookingToUpdate = bookings.find(b => b.id === bookingId);
+    const bookingToUpdate = bookings.find((b) => b.id === bookingId);
     if (bookingToUpdate) {
       dispatch(updateBooking({ ...bookingToUpdate, rating }));
     }
   };
 
-  const filteredBookings = bookings.filter(booking => {
-    if (activeTab === 'All') {
+  const filteredBookings = bookings.filter((booking) => {
+    if (activeTab === "All") {
       return true;
     }
     return booking.status === activeTab;
   });
 
   if (loading) {
-    return <div>Loading bookings...</div>;
-  }
-
-  if (error) {
-    return <div>Error loading bookings: {error}</div>;
+    return (
+      <div className="container mt-5">
+        <div
+          className="d-flex justify-content-center align-items-center"
+          style={{ minHeight: "50vh" }}
+        >
+          <div className="text-center">
+            <div className="spinner-border text-primary" role="status">
+              <span className="visually-hidden">Loading...</span>
+            </div>
+            <p className="mt-3">Loading your booking history...</p>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (
     <div className="container mt-5">
-      <h2 className="mb-4">Booking History</h2>
+      <div className="d-flex justify-content-between align-items-center mb-4">
+        <h2 className="mb-0">Booking History</h2>
+        {isOffline && (
+          <span className="badge bg-warning text-dark">
+            <i className="bi bi-wifi-off me-1"></i>
+            Offline Mode
+          </span>
+        )}
+      </div>
+
+      {error && isOffline && (
+        <div className="alert alert-warning" role="alert">
+          <i className="bi bi-exclamation-triangle me-2"></i>
+          <strong>Backend Unavailable:</strong> {error} Showing cached data.
+          <button
+            className="btn btn-sm btn-outline-warning ms-3"
+            onClick={() => dispatch(fetchBookings())}
+          >
+            <i className="bi bi-arrow-clockwise me-1"></i>
+            Retry Connection
+          </button>
+        </div>
+      )}
+
+      {error && !isOffline && (
+        <div className="alert alert-danger" role="alert">
+          <i className="bi bi-exclamation-triangle me-2"></i>
+          <strong>Error:</strong> {error}
+          <button
+            className="btn btn-sm btn-outline-danger ms-3"
+            onClick={() => dispatch(fetchBookings())}
+          >
+            <i className="bi bi-arrow-clockwise me-1"></i>
+            Retry
+          </button>
+        </div>
+      )}
       <ul className="nav nav-tabs mb-4">
         <li className="nav-item">
-          <button className={`nav-link ${activeTab === 'All' ? 'active' : ''}`} onClick={() => handleTabChange('All')}>All</button>
+          <button
+            className={`nav-link ${activeTab === "All" ? "active" : ""}`}
+            onClick={() => handleTabChange("All")}
+          >
+            All
+          </button>
         </li>
         <li className="nav-item">
-          <button className={`nav-link ${activeTab === 'Upcoming' ? 'active' : ''}`} onClick={() => handleTabChange('Upcoming')}>Upcoming</button>
+          <button
+            className={`nav-link ${activeTab === "Upcoming" ? "active" : ""}`}
+            onClick={() => handleTabChange("Upcoming")}
+          >
+            Upcoming
+          </button>
         </li>
         <li className="nav-item">
-          <button className={`nav-link ${activeTab === 'Completed' ? 'active' : ''}`} onClick={() => handleTabChange('Completed')}>Completed</button>
+          <button
+            className={`nav-link ${activeTab === "Completed" ? "active" : ""}`}
+            onClick={() => handleTabChange("Completed")}
+          >
+            Completed
+          </button>
         </li>
         <li className="nav-item">
-          <button className={`nav-link ${activeTab === 'Cancelled' ? 'active' : ''}`} onClick={() => handleTabChange('Cancelled')}>Cancelled</button>
+          <button
+            className={`nav-link ${activeTab === "Cancelled" ? "active" : ""}`}
+            onClick={() => handleTabChange("Cancelled")}
+          >
+            Cancelled
+          </button>
         </li>
       </ul>
 
       <div className="tab-content">
-        {filteredBookings.map(booking => (
+        {filteredBookings.map((booking) => (
           <div key={booking.id} className="card mb-3">
             <div className="card-body">
-              <h5 className="card-title">{booking.from} to {booking.to}</h5>
+              <h5 className="card-title">
+                {booking.from} to {booking.to}
+              </h5>
               <p className="card-text">Date: {booking.date}</p>
               <p className="card-text">Vehicle: {booking.vehicle}</p>
               <p className="card-text">Fare: ₹{booking.amount}</p>
               <p className="card-text">Status: {booking.status}</p>
-              {booking.status === 'Upcoming' && (
+              {booking.status === "Upcoming" && (
                 <>
-                  <button className="btn btn-danger" onClick={() => handleCancelBooking(booking.id)}>Cancel Booking</button>
+                  <button
+                    className="btn btn-danger"
+                    onClick={() => handleCancelBooking(booking.id)}
+                  >
+                    Cancel Booking
+                  </button>
                   <RideTracker />
                 </>
               )}
-              {booking.status === 'Completed' && (
+              {booking.status === "Completed" && (
                 <div>
                   <h6>Rate your ride:</h6>
                   <div>
-                    {[1, 2, 3, 4, 5].map(star => (
-                      <button key={star} className={`btn btn-link ${booking.rating && booking.rating >= star ? 'text-warning' : 'text-muted'}`} onClick={() => handleRateBooking(booking.id, star)}>
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <button
+                        key={star}
+                        className={`btn btn-link ${
+                          booking.rating && booking.rating >= star
+                            ? "text-warning"
+                            : "text-muted"
+                        }`}
+                        onClick={() => handleRateBooking(booking.id, star)}
+                      >
                         <i className="bi bi-star-fill"></i>
                       </button>
                     ))}

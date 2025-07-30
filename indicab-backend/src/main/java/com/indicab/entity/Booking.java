@@ -30,12 +30,8 @@ public class Booking {
 
     private String license;
 
-    private String name;
-
     @Column(name = "payment_method")
     private String paymentMethod;
-
-    private String phone;
 
     @Column(name = "phone_number")
     private String phoneNumber;
@@ -47,7 +43,7 @@ public class Booking {
 
     public Booking() {}
 
-    public Booking(String from, String to, String date, String vehicle, Double amount, String fullName, String license, String name, String paymentMethod, String phone, String phoneNumber, String pickupAddress, String status) {
+    public Booking(String from, String to, String date, String vehicle, Double amount, String fullName, String license, String paymentMethod, String phoneNumber, String pickupAddress, String status) {
         this.from = from;
         this.to = to;
         this.date = date;
@@ -55,9 +51,7 @@ public class Booking {
         this.amount = amount;
         this.fullName = fullName;
         this.license = license;
-        this.name = name;
         this.paymentMethod = paymentMethod;
-        this.phone = phone;
         this.phoneNumber = phoneNumber;
         this.pickupAddress = pickupAddress;
         this.status = status;
@@ -123,28 +117,12 @@ public class Booking {
         this.license = license;
     }
 
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
     public String getPaymentMethod() {
         return paymentMethod;
     }
 
     public void setPaymentMethod(String paymentMethod) {
         this.paymentMethod = paymentMethod;
-    }
-
-    public String getPhone() {
-        return phone;
-    }
-
-    public void setPhone(String phone) {
-        this.phone = phone;
     }
 
     public String getPhoneNumber() {

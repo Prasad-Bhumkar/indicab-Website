@@ -35,3 +35,5 @@ pnpm-debug.log
 .DS_Store
 Thumbs.db
 HELP.md
+
+.config/

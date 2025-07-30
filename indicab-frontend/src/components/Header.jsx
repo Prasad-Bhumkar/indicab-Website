@@ -1,9 +1,20 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { useSelector, useDispatch } from 'react-redux';
+import { logout } from '../features/auth/authSlice';
+import { selectCurrentUser } from '../features/auth/authSelectors';
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 992);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const user = useSelector(selectCurrentUser);
+  const handleLogout = () => {
+    dispatch(logout());
+    closeMenu();
+    navigate('/');
+  };
 
   useEffect(() => {
     const handleResize = () => {
@@ -77,6 +88,11 @@ const Header = () => {
               </Link>
             </li>
             <li className="nav-item">
+              <Link className="nav-link text-white" to="/about" onClick={closeMenu}>
+                About Us
+              </Link>
+            </li>
+            <li className="nav-item">
               <Link className="nav-link text-white" to="/packages" onClick={closeMenu}>
                 Travel Packages
               </Link>
@@ -96,6 +112,38 @@ const Header = () => {
                 Contact Us
               </Link>
             </li>
+            {user && (
+              <>
+                {/* Show dashboard links based on role */}
+                {user.role === 'admin' && (
+                  <li className="nav-item">
+                    <Link className="nav-link text-white" to="/admin" onClick={closeMenu}>
+                      Admin Dashboard
+                    </Link>
+                  </li>
+                )}
+                {user.role === 'driver' && (
+                  <li className="nav-item">
+                    <Link className="nav-link text-white" to="/driver/dashboard" onClick={closeMenu}>
+                      Driver Dashboard
+                    </Link>
+                  </li>
+                )}
+                <li className="nav-item">
+                  <span className="nav-link text-white">Welcome, {user.name}</span>
+                </li>
+                  <li className="nav-item">
+                    <Link className="nav-link text-white" to="/profile" onClick={closeMenu}>
+                      Profile
+                    </Link>
+                  </li>
+                <li className="nav-item">
+                  <button className="nav-link text-white btn btn-link" style={{textDecoration: 'none'}} onClick={handleLogout}>
+                    Logout
+                  </button>
+                </li>
+              </>
+            )}
           </ul>
         </div>
       </div>

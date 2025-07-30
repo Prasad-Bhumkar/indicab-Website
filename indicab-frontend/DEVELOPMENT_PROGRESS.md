@@ -4,6 +4,7 @@ This file tracks the development status of main features/components in the Indic
 
 | Feature / Component       | Status       | Notes                          |
 |---------------------------|--------------|--------------------------------|
+| User Authentication       | Completed    | Implemented user registration, login, and session management |
 | Booking Form              | Completed    | Form for booking rides         |
 | Booking History           | Completed    | Displays past bookings with status and rating |
 | Ride Tracker              | Completed    | Shows progress bar for rides   |

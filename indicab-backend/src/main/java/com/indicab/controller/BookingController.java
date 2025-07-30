@@ -48,9 +48,9 @@ public class BookingController {
         booking.setAmount(bookingDetails.getAmount());
         booking.setFullName(bookingDetails.getFullName());
         booking.setLicense(bookingDetails.getLicense());
-        booking.setName(bookingDetails.getName());
+        // Removed setName call, use setFullName only
         booking.setPaymentMethod(bookingDetails.getPaymentMethod());
-        booking.setPhone(bookingDetails.getPhone());
+        // Removed setPhone call, use setPhoneNumber only
         booking.setPhoneNumber(bookingDetails.getPhoneNumber());
         booking.setPickupAddress(bookingDetails.getPickupAddress());
         booking.setStatus(bookingDetails.getStatus());

@@ -12,6 +12,40 @@ const AppSection = () => {
 
   return (
     <section className="app-section" id="app-section">
+      {/* Moving Background Animations */}
+      <div className="app-background-animation">
+        {/* Floating Shapes */}
+        <div className="app-floating-shape app-shape-1"></div>
+        <div className="app-floating-shape app-shape-2"></div>
+        <div className="app-floating-shape app-shape-3"></div>
+        <div className="app-floating-shape app-shape-4"></div>
+        <div className="app-floating-shape app-shape-5"></div>
+
+        {/* Moving Particles */}
+        <div className="app-particles">
+          <div className="app-particle app-particle-1"></div>
+          <div className="app-particle app-particle-2"></div>
+          <div className="app-particle app-particle-3"></div>
+          <div className="app-particle app-particle-4"></div>
+          <div className="app-particle app-particle-5"></div>
+          <div className="app-particle app-particle-6"></div>
+        </div>
+
+        {/* Flowing Lines */}
+        <div className="app-flowing-lines">
+          <div className="app-line app-line-1"></div>
+          <div className="app-line app-line-2"></div>
+          <div className="app-line app-line-3"></div>
+        </div>
+
+        {/* Pulsing Circles */}
+        <div className="app-pulsing-circles">
+          <div className="app-circle app-circle-1"></div>
+          <div className="app-circle app-circle-2"></div>
+          <div className="app-circle app-circle-3"></div>
+        </div>
+      </div>
+
       <div className="container">
         <div className="row">
           <div className="col-12 text-center">
@@ -21,7 +55,7 @@ const AppSection = () => {
             </p>
           </div>
         </div>
-        
+
         <div className="app-features">
           <div className="app-feature">
             <i className="bi bi-phone"></i>
