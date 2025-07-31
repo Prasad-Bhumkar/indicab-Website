@@ -103,6 +103,7 @@ The following features are planned for future development:
 *   **Driver Management:** A system for drivers to register, manage their vehicles, and accept ride requests.
 *   **Admin Dashboard:** A dashboard for administrators to manage users, drivers, bookings, and other aspects of the application.
 
+
 ## Backend (`indicab-backend`)
 
 The backend is a Spring Boot application that provides the API for the ride-booking service.
@@ -126,3 +127,12 @@ The frontend is a React application that provides the user interface for the rid
 *   **`src/main.jsx`**: The entry point for the React application.
 *   **`package.json`**: The Node.js project configuration file, which defines dependencies and scripts.
 *   **`DEVELOPMENT_PROGRESS.md`**: Tracks the development status of the main features.
+
+## License
+
+© 2024 Prasad Bhumkar. All rights reserved.
+
+This project is a personal creation and is protected under applicable copyright laws.  
+Unauthorized copying, distribution, modification, or use of this project or its contents by any means is strictly prohibited without explicit written permission from the author.
+
+For licensing inquiries or permissions, please contact: your@email.com
