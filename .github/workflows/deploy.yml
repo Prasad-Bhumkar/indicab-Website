@@ -102,4 +102,4 @@ jobs:
           text: 'Deployment to production ${{ job.status }}'
           webhook_url: ${{ secrets.SLACK_WEBHOOK }}
           fields: 'repo,message,commit,author'
-        if: always() && secrets.SLACK_WEBHOOK != ''
+        if: always()
