@@ -236,6 +236,368 @@ These are **intentional missing secrets** - will be configured when deploying to
 
 ---
 
+## Detailed Tasks & Checkpoints
+
+### Phase 1: Testing Expansion (CURRENT - Week 1)
+
+#### Backend Unit Tests (Target: 60% coverage)
+- [ ] **UserServiceImpl Tests** - Expand from 1 test
+  - [ ] User registration success/failure cases
+  - [ ] Email duplicate validation
+  - [ ] Password encoding verification
+  - [ ] User lookup by email
+  
+- [ ] **BookingServiceImpl Tests** - Expand from partial
+  - [ ] Create booking success cases
+  - [ ] Default status assignment (PENDING)
+  - [ ] Booking retrieval by ID
+  - [ ] Booking status updates
+  - [ ] Delete booking functionality
+  
+- [ ] **PaymentServiceImpl Tests** - NEW (currently 0%)
+  - [ ] Create payment for Stripe
+  - [ ] Create payment for Razorpay
+  - [ ] Payment status updates
+  - [ ] Payment retrieval by booking
+  - [ ] Failure reason handling
+  
+- [ ] **DriverServiceImpl Tests** - NEW (currently 0%)
+  - [ ] Driver registration
+  - [ ] Driver approval workflow
+  - [ ] Driver lookup
+  - [ ] Driver status updates
+  
+- [ ] **RazorpayServiceImpl Tests** - NEW (currently 0%)
+  - [ ] Order creation
+  - [ ] Payment verification
+  - [ ] Refund processing
+  - [ ] Error handling
+
+#### Backend Integration Tests (Target: 40%+ coverage)
+- [ ] **AuthControllerIntegrationTest** - Expand existing
+  - [ ] User registration endpoint
+  - [ ] User login endpoint
+  - [ ] Token refresh endpoint
+  - [ ] Logout endpoint
+  - [ ] JWT validation
+  
+- [ ] **BookingControllerIntegrationTest** - Expand existing
+  - [ ] Create booking endpoint
+  - [ ] Get booking endpoint
+  - [ ] Update booking endpoint
+  - [ ] Delete booking endpoint
+  - [ ] List bookings endpoint
+  
+- [ ] **PaymentControllerIntegrationTest** - NEW
+  - [ ] Create payment endpoint
+  - [ ] Get payment status endpoint
+  - [ ] Payment history endpoint
+  
+- [ ] **DriverControllerIntegrationTest** - NEW
+  - [ ] Driver registration endpoint
+  - [ ] Driver approval endpoint
+  - [ ] Get driver details endpoint
+
+#### Frontend Component Tests (Target: 20%+ coverage)
+- [ ] **Header Component**
+  - [ ] Navigation rendering
+  - [ ] Authentication state display
+  - [ ] User menu functionality
+  
+- [ ] **BookingForm Component**
+  - [ ] Form input validation
+  - [ ] Date picker functionality
+  - [ ] Submit button handling
+  
+- [ ] **PaymentForm Component** (Stripe)
+  - [ ] Form rendering
+  - [ ] Card input validation
+  - [ ] Submit handling
+  
+- [ ] **RazorpayPaymentForm Component**
+  - [ ] Form rendering
+  - [ ] Payment initiation
+  
+- [ ] **Login/Register Components**
+  - [ ] Form validation
+  - [ ] Success/error handling
+  - [ ] Redirect after auth
+
+#### Testing Infrastructure
+- [ ] Configure code coverage reporting (codecov)
+- [ ] Set up test environment variables
+- [ ] Document testing standards and patterns
+- [ ] Create test data factory utilities
+
+---
+
+### Phase 2: GitHub Actions CI/CD Secrets (Week 1)
+
+#### Configure GitHub Repository Secrets
+- [ ] Navigate to Settings → Secrets and Variables → Actions
+- [ ] Add `SONAR_HOST_URL` (optional)
+  - [ ] Value: SonarQube server URL (e.g., https://sonarqube.example.com)
+- [ ] Add `SONAR_TOKEN` (optional)
+  - [ ] Value: Generated from SonarQube account
+- [ ] Add `DEPLOY_PRIVATE_KEY` (required for production)
+  - [ ] Value: SSH private key for deployment server
+  - [ ] Format: PEM format, multiline
+- [ ] Add `DEPLOY_HOST` (required for production)
+  - [ ] Value: Production server IP/hostname
+- [ ] Add `DEPLOY_USER` (required for production)
+  - [ ] Value: SSH username for deployment
+- [ ] Add `DEPLOY_PATH` (required for production)
+  - [ ] Value: Deployment directory path on server
+- [ ] Add `SLACK_WEBHOOK` (optional)
+  - [ ] Value: Slack webhook URL for notifications
+  - [ ] Format: https://hooks.slack.com/services/...
+
+#### Test CI/CD Pipeline
+- [ ] Trigger test.yml workflow manually
+  - [ ] Verify Maven build succeeds
+  - [ ] Verify tests execute
+  - [ ] Verify codecov reports upload
+- [ ] Trigger build.yml workflow manually
+  - [ ] Verify Docker images build successfully
+  - [ ] Verify image tags are correct
+- [ ] Verify deploy.yml dry-run (without actual deployment)
+  - [ ] Check workflow structure
+  - [ ] Verify secret access works
+
+---
+
+### Phase 3: Feature Completion (Week 2-3)
+
+#### Driver Approval Workflow
+- [ ] Create admin endpoints in DriverController
+  - [ ] GET /api/drivers/pending (list pending approvals)
+  - [ ] POST /api/drivers/{id}/approve (approve driver)
+  - [ ] POST /api/drivers/{id}/reject (reject driver)
+  - [ ] GET /api/drivers/{id}/status (get current status)
+- [ ] Implement DriverApprovalService
+  - [ ] Send approval/rejection emails
+  - [ ] Update driver status
+  - [ ] Audit logging
+- [ ] Create admin UI screens
+  - [ ] Driver approval list
+  - [ ] Approve/reject buttons with confirmations
+  - [ ] Status badges and filters
+- [ ] Add authorization checks
+  - [ ] Only admins can approve/reject
+  - [ ] Role-based access control
+
+#### Payment Webhook Handlers
+- [ ] Implement Stripe webhook endpoint
+  - [ ] POST /api/webhooks/stripe
+  - [ ] Verify webhook signature
+  - [ ] Handle payment_intent.succeeded
+  - [ ] Handle payment_intent.payment_failed
+  - [ ] Update booking status
+  - [ ] Idempotency handling
+  
+- [ ] Implement Razorpay webhook endpoint
+  - [ ] POST /api/webhooks/razorpay
+  - [ ] Verify payment signature
+  - [ ] Handle payment.authorized
+  - [ ] Handle payment.failed
+  - [ ] Update booking status
+  - [ ] Idempotency handling
+  
+- [ ] Add webhook retry logic
+  - [ ] Exponential backoff
+  - [ ] Max retry attempts
+  - [ ] Dead letter queue handling
+  
+- [ ] Test webhook handlers
+  - [ ] Use webhook.site for testing
+  - [ ] Verify signature verification
+  - [ ] Test idempotency
+
+#### Complete Profile Management
+- [ ] Create profile endpoints
+  - [ ] GET /api/users/profile (get current user)
+  - [ ] PUT /api/users/profile (update profile)
+  - [ ] PUT /api/users/password (change password)
+  - [ ] DELETE /api/users/account (delete account)
+- [ ] Implement profile update service
+  - [ ] Validate input data
+  - [ ] Hash passwords
+  - [ ] Audit logging
+- [ ] Create frontend profile UI
+  - [ ] Display profile information
+  - [ ] Edit profile form
+  - [ ] Change password form
+  - [ ] Account deletion confirmation
+
+#### Pagination Implementation
+- [ ] Add pagination to list endpoints
+  - [ ] GET /api/bookings?page=0&size=10
+  - [ ] GET /api/drivers?page=0&size=10
+  - [ ] GET /api/payments?page=0&size=10
+- [ ] Create PagedResponseDTO wrapper
+  - [ ] Content list
+  - [ ] Current page
+  - [ ] Total pages
+  - [ ] Total elements
+- [ ] Update frontend components
+  - [ ] Add page navigation
+  - [ ] Update pagination state
+  - [ ] Handle edge cases
+
+---
+
+### Phase 4: Performance & Security (Week 3-4)
+
+#### Caching Layer (Redis)
+- [ ] Add Redis dependency to pom.xml
+- [ ] Configure Redis connection properties
+- [ ] Implement cache service
+  - [ ] User profile caching
+  - [ ] Service city caching
+  - [ ] Route caching
+- [ ] Add cache invalidation
+  - [ ] On profile update
+  - [ ] On service city change
+  - [ ] On route modification
+- [ ] Monitor cache hit rates
+
+#### Rate Limiting & Throttling
+- [ ] Add rate limiting to AuthController
+  - [ ] 5 login attempts per 15 minutes
+  - [ ] 10 registration attempts per hour
+- [ ] Add rate limiting to PaymentController
+  - [ ] 1 payment creation per 10 seconds
+- [ ] Implement sliding window algorithm
+- [ ] Test rate limit responses
+
+#### Audit Logging
+- [ ] Add audit logging to sensitive operations
+  - [ ] User login/logout
+  - [ ] Payment creation
+  - [ ] Driver approval/rejection
+  - [ ] Profile updates
+- [ ] Create AuditLog entity
+  - [ ] User ID
+  - [ ] Operation
+  - [ ] Timestamp
+  - [ ] IP address
+  - [ ] User agent
+- [ ] Create audit log repository
+
+#### Database Query Optimization
+- [ ] Analyze slow queries using logs
+- [ ] Add database indexes for common queries
+  - [ ] Payment by booking ID
+  - [ ] Driver by status
+  - [ ] Booking by user and date range
+- [ ] Verify index usage with EXPLAIN
+- [ ] Run performance benchmarks
+
+---
+
+### Phase 5: Polish & Deployment (Week 4+)
+
+#### Admin Dashboard Completion
+- [ ] Implement dashboard widgets
+  - [ ] Total bookings (today/week/month)
+  - [ ] Revenue metrics
+  - [ ] Active users count
+  - [ ] Pending approvals count
+- [ ] Implement data tables
+  - [ ] Users management
+  - [ ] Bookings management
+  - [ ] Payments management
+  - [ ] Drivers management
+- [ ] Add export functionality
+  - [ ] Export to CSV
+  - [ ] Export to PDF
+- [ ] Add filters and search
+
+#### PWA Support
+- [ ] Add service worker
+  - [ ] Cache static assets
+  - [ ] Handle offline mode
+  - [ ] Background sync
+- [ ] Create manifest.json
+  - [ ] App name and description
+  - [ ] Icons
+  - [ ] Theme colors
+- [ ] Test PWA installation
+
+#### API Documentation Enhancement
+- [ ] Review Swagger/OpenAPI documentation
+- [ ] Add response examples
+- [ ] Add request/response schemas
+- [ ] Add error code documentation
+- [ ] Publish API documentation
+
+#### Frontend Performance Optimization
+- [ ] Analyze bundle size
+  - [ ] Use webpack-bundle-analyzer
+  - [ ] Identify large dependencies
+- [ ] Implement code splitting
+  - [ ] Route-based splitting
+  - [ ] Component lazy loading
+- [ ] Optimize images
+  - [ ] Use WebP format
+  - [ ] Add responsive images
+- [ ] Minify and compress assets
+
+#### Security Headers Verification
+- [ ] Verify HSTS header
+- [ ] Verify CSP header
+- [ ] Verify X-Frame-Options
+- [ ] Verify X-Content-Type-Options
+- [ ] Use security scanner tool
+
+#### Load Testing
+- [ ] Set up load testing with JMeter/Gatling
+- [ ] Define load profiles
+  - [ ] 100 concurrent users
+  - [ ] 1000 concurrent users
+  - [ ] 5000 concurrent users
+- [ ] Test critical endpoints
+  - [ ] Login endpoint
+  - [ ] Booking creation
+  - [ ] Payment processing
+- [ ] Analyze results and optimize
+
+---
+
+### Phase 6: Monitoring & Analytics (Post-Deployment)
+
+#### Sentry Error Tracking
+- [ ] Configure Sentry for backend
+  - [ ] Add Spring Boot integration
+  - [ ] Configure environment
+  - [ ] Set sample rate
+- [ ] Configure Sentry for frontend
+  - [ ] Add React integration
+  - [ ] Configure environment
+  - [ ] Set sample rate
+- [ ] Create alert rules
+  - [ ] Critical errors
+  - [ ] High error rate
+  - [ ] Performance degradation
+
+#### APM & Performance Monitoring
+- [ ] Configure New Relic or Datadog (optional)
+- [ ] Monitor API response times
+- [ ] Monitor database query performance
+- [ ] Monitor memory usage
+- [ ] Set up alerts
+
+#### Analytics Implementation
+- [ ] Add Google Analytics (optional)
+- [ ] Track user events
+  - [ ] Page views
+  - [ ] Booking creation
+  - [ ] Payment completion
+  - [ ] Driver registration
+- [ ] Create dashboards
+
+---
+
 ## File Structure Overview
 
 ```
