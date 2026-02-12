@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -45,7 +44,6 @@ const ContactUs = () => {
       setErrors({});
       setIsSubmitted(true);
       // Here you would typically send the form data to a server
-      console.log('Form submitted:', formData);
       setTimeout(() => {
         setIsSubmitted(false);
         setFormData({

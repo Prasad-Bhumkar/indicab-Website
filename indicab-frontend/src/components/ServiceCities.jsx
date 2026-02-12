@@ -6,8 +6,6 @@ const ServiceCities = () => {
   const dispatch = useDispatch()
   const { cities, stats, loading, error } = useSelector((state) => state.serviceCities)
 
-  //console.log('ServiceCities state:', { cities, stats, loading, error })
-
   useEffect(() => {
     dispatch(fetchServiceCities())
   }, [dispatch])

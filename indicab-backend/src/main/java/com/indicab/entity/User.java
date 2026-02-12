@@ -1,6 +1,10 @@
 package com.indicab.entity;
 
 import jakarta.persistence.*;
+import java.time.LocalDateTime;
+import java.util.List;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 @Entity
 @Table(name = "users")
@@ -15,7 +19,6 @@ public class User {
     @Column(nullable = false, unique = true)
     private String email;
 
-
     @Column(nullable = false)
     private String password;
 
@@ -27,6 +30,33 @@ public class User {
 
     @Column(nullable = false)
     private String role = "USER";
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Booking> bookings;
+
+    @CreationTimestamp
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private LocalDateTime createdAt;
+
+    @UpdateTimestamp
+    @Column(name = "updated_at", nullable = false)
+    private LocalDateTime updatedAt;
+
+    // Driver-specific fields
+    @Column(nullable = true)
+    private String licenseNumber;
+
+    @Column(nullable = true)
+    private String vehicleType;
+
+    @Column(nullable = true)
+    private String driverStatus = "NONE"; // NONE, PENDING, APPROVED, REJECTED
+
+    @Column(nullable = true)
+    private LocalDateTime driverAppliedAt;
+
+    @Column(nullable = true)
+    private LocalDateTime driverApprovedAt;
 
     // Add validation annotations if using DTOs
 
@@ -50,4 +80,28 @@ public class User {
 
     public String getRole() { return role; }
     public void setRole(String role) { this.role = role; }
+
+    public List<Booking> getBookings() { return bookings; }
+    public void setBookings(List<Booking> bookings) { this.bookings = bookings; }
+
+    public LocalDateTime getCreatedAt() { return createdAt; }
+    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+
+    public LocalDateTime getUpdatedAt() { return updatedAt; }
+    public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
+
+    public String getLicenseNumber() { return licenseNumber; }
+    public void setLicenseNumber(String licenseNumber) { this.licenseNumber = licenseNumber; }
+
+    public String getVehicleType() { return vehicleType; }
+    public void setVehicleType(String vehicleType) { this.vehicleType = vehicleType; }
+
+    public String getDriverStatus() { return driverStatus; }
+    public void setDriverStatus(String driverStatus) { this.driverStatus = driverStatus; }
+
+    public LocalDateTime getDriverAppliedAt() { return driverAppliedAt; }
+    public void setDriverAppliedAt(LocalDateTime driverAppliedAt) { this.driverAppliedAt = driverAppliedAt; }
+
+    public LocalDateTime getDriverApprovedAt() { return driverApprovedAt; }
+    public void setDriverApprovedAt(LocalDateTime driverApprovedAt) { this.driverApprovedAt = driverApprovedAt; }
 }

@@ -1,85 +1,149 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import axios from 'axios';
+import { apiClient } from '../../config/apiConfig';
 
-// Mock fallback data
-const mockDriver = {
-  id: 1,
-  name: 'Amit Kumar',
-  phone: '+91-9123456789',
-  license: 'MH12AB1234',
-  rating: 4.8,
-};
-const mockDrivers = [
-  mockDriver,
-  { id: 2, name: 'Priya Singh', phone: '+91-9988776655', license: 'MH14CD5678', rating: 4.7 },
-];
-const mockRides = [
-  { id: 1, route: 'Mumbai → Pune', date: '2025-07-01', fare: 1500 },
-  { id: 2, route: 'Pune → Nashik', date: '2025-07-02', fare: 2100 },
-];
-
-export const registerDriver = createAsyncThunk('driver/registerDriver', async (driverData) => {
-  try {
-    const response = await axios.post('http://localhost:8000/api/driver/register', driverData);
-    if (!response.data) {
-      return mockDriver;
+export const applyAsDriver = createAsyncThunk(
+  'driver/applyAsDriver',
+  async (registrationData, { rejectWithValue }) => {
+    try {
+      const response = await apiClient.post('/driver/apply', registrationData);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || 'Failed to apply as driver');
     }
-    return response.data;
-  } catch (error) {
-    return mockDriver;
   }
-});
+);
 
-export const fetchAllDrivers = createAsyncThunk('driver/fetchAllDrivers', async () => {
-  try {
-    const response = await axios.get('http://localhost:8000/api/driver/all');
-    if (!response.data) {
-      return mockDrivers;
+export const fetchPendingApplications = createAsyncThunk(
+  'driver/fetchPendingApplications',
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await apiClient.get('/driver/pending');
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || 'Failed to fetch pending applications');
     }
-    return response.data;
-  } catch (error) {
-    return mockDrivers;
   }
-});
+);
 
-export const fetchDriverRides = createAsyncThunk('driver/fetchDriverRides', async () => {
-  try {
-    const response = await axios.get('http://localhost:8000/api/driver/rides');
-    if (!response.data) {
-      return mockRides;
+export const fetchApprovedDrivers = createAsyncThunk(
+  'driver/fetchApprovedDrivers',
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await apiClient.get('/driver/approved');
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || 'Failed to fetch approved drivers');
     }
-    return response.data;
-  } catch (error) {
-    return mockRides;
   }
-});
+);
+
+export const fetchAllDrivers = createAsyncThunk(
+  'driver/fetchAllDrivers',
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await apiClient.get('/driver/all');
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || 'Failed to fetch drivers');
+    }
+  }
+);
+
+export const fetchDriverById = createAsyncThunk(
+  'driver/fetchDriverById',
+  async (driverId, { rejectWithValue }) => {
+    try {
+      const response = await apiClient.get(`/driver/${driverId}`);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || 'Failed to fetch driver');
+    }
+  }
+);
+
+export const reviewDriverApplication = createAsyncThunk(
+  'driver/reviewDriverApplication',
+  async (approvalData, { rejectWithValue }) => {
+    try {
+      const response = await apiClient.post('/driver/review-application', approvalData);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || 'Failed to review application');
+    }
+  }
+);
 
 const initialState = {
   drivers: [],
-  driver: null,
-  rides: [],
+  pendingApplications: [],
+  approvedDrivers: [],
+  currentDriver: null,
   loading: false,
   error: null,
+  successMessage: null,
 };
 
 const driverSlice = createSlice({
   name: 'driver',
   initialState,
-  reducers: {},
+  reducers: {
+    clearError: (state) => {
+      state.error = null;
+    },
+    clearSuccessMessage: (state) => {
+      state.successMessage = null;
+    },
+  },
   extraReducers: (builder) => {
+    // Apply as Driver
     builder
-      .addCase(registerDriver.pending, (state) => {
+      .addCase(applyAsDriver.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+        state.successMessage = null;
+      })
+      .addCase(applyAsDriver.fulfilled, (state, action) => {
+        state.loading = false;
+        state.currentDriver = action.payload;
+        state.successMessage = 'Application submitted successfully. Pending admin review.';
+      })
+      .addCase(applyAsDriver.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      });
+
+    // Fetch Pending Applications
+    builder
+      .addCase(fetchPendingApplications.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
-      .addCase(registerDriver.fulfilled, (state, action) => {
+      .addCase(fetchPendingApplications.fulfilled, (state, action) => {
         state.loading = false;
-        state.driver = action.payload;
+        state.pendingApplications = action.payload;
       })
-      .addCase(registerDriver.rejected, (state, action) => {
+      .addCase(fetchPendingApplications.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.error.message;
+        state.error = action.payload;
+      });
+
+    // Fetch Approved Drivers
+    builder
+      .addCase(fetchApprovedDrivers.pending, (state) => {
+        state.loading = true;
+        state.error = null;
       })
+      .addCase(fetchApprovedDrivers.fulfilled, (state, action) => {
+        state.loading = false;
+        state.approvedDrivers = action.payload;
+      })
+      .addCase(fetchApprovedDrivers.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      });
+
+    // Fetch All Drivers
+    builder
       .addCase(fetchAllDrivers.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -90,21 +154,46 @@ const driverSlice = createSlice({
       })
       .addCase(fetchAllDrivers.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.error.message;
-      })
-      .addCase(fetchDriverRides.pending, (state) => {
+        state.error = action.payload;
+      });
+
+    // Fetch Driver by ID
+    builder
+      .addCase(fetchDriverById.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
-      .addCase(fetchDriverRides.fulfilled, (state, action) => {
+      .addCase(fetchDriverById.fulfilled, (state, action) => {
         state.loading = false;
-        state.rides = action.payload;
+        state.currentDriver = action.payload;
       })
-      .addCase(fetchDriverRides.rejected, (state, action) => {
+      .addCase(fetchDriverById.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.error.message;
+        state.error = action.payload;
+      });
+
+    // Review Driver Application
+    builder
+      .addCase(reviewDriverApplication.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+        state.successMessage = null;
+      })
+      .addCase(reviewDriverApplication.fulfilled, (state, action) => {
+        state.loading = false;
+        state.successMessage = `Driver application ${action.payload.driverStatus.toLowerCase()}`;
+        // Update the driver in pendingApplications if present
+        const index = state.pendingApplications.findIndex(d => d.id === action.payload.id);
+        if (index !== -1) {
+          state.pendingApplications.splice(index, 1);
+        }
+      })
+      .addCase(reviewDriverApplication.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
       });
   },
 });
 
+export const { clearError, clearSuccessMessage } = driverSlice.actions;
 export default driverSlice.reducer;

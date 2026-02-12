@@ -1,11 +1,17 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import DriverDashboard from './features/driver/DriverDashboard';
-import DriverRegister from './features/driver/DriverRegister';
-import ProfilePage from './features/profile/ProfilePage';
-import PaymentForm from './features/payment/PaymentForm';
-import AdminRoutes from './features/admin/AdminRoutes';
 
+// Lazy load route components for code splitting
+const DriverDashboard = React.lazy(() => import('./features/driver/DriverDashboard'));
+const DriverRegister = React.lazy(() => import('./features/driver/DriverRegister'));
+const ProfilePage = React.lazy(() => import('./features/profile/ProfilePage'));
+const PaymentForm = React.lazy(() => import('./features/payment/PaymentForm'));
+const AdminRoutes = React.lazy(() => import('./features/admin/AdminRoutes'));
+const BlogPage = React.lazy(() => import('./components/Blog'));
+const AboutUsPage = React.lazy(() => import('./components/AboutUs'));
+const TravelPackagesPage = React.lazy(() => import('./components/TravelPackages'));
+
+// Eagerly load frequently used components
 import Header from './components/Header';
 import HeroSection from './components/HeroSection';
 import PopularRoutes from './components/PopularRoutes';
@@ -14,12 +20,19 @@ import ServiceCities from './components/ServiceCities';
 import AppSection from './components/AppSection';
 import BookingHistory from './components/BookingHistory';
 import ContactUs from './components/ContactUs';
-import TravelPackages from './components/TravelPackages';
-import Blog from './components/Blog';
-import AboutUs from './components/AboutUs';
 import ConnectionStatus from './components/ConnectionStatus';
-// ...existing code...
+import Login from './components/Login';
+import Register from './components/Register';
 import ProtectedRoute from './features/auth/ProtectedRoute';
+
+// Loading fallback component
+const LoadingFallback = () => (
+  <div className="d-flex justify-content-center align-items-center" style={{ minHeight: '400px' }}>
+    <div className="spinner-border text-primary" role="status">
+      <span className="visually-hidden">Loading...</span>
+    </div>
+  </div>
+);
 
 function App() {
   const [isLoaded, setIsLoaded] = useState(false);
@@ -60,20 +73,73 @@ function App() {
             </>
           }
         />
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
         <Route path="/history" element={<BookingHistory />} />
         <Route path="/contact" element={<ContactUs />} />
-        <Route path="/packages" element={<TravelPackages />} />
-        <Route path="/blog" element={<Blog />} />
-        <Route path="/about" element={<AboutUs />} />
-        <Route path="/driver/register" element={<DriverRegister />} />
-        <Route path="/driver/dashboard" element={<DriverDashboard />} />
-        <Route path="/payment" element={<PaymentForm />} />
-        <Route path="/admin/*" element={<AdminRoutes />} />
+        <Route
+          path="/packages"
+          element={
+            <Suspense fallback={<LoadingFallback />}>
+              <TravelPackagesPage />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/blog"
+          element={
+            <Suspense fallback={<LoadingFallback />}>
+              <BlogPage />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/about"
+          element={
+            <Suspense fallback={<LoadingFallback />}>
+              <AboutUsPage />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/driver/register"
+          element={
+            <Suspense fallback={<LoadingFallback />}>
+              <DriverRegister />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/driver/dashboard"
+          element={
+            <Suspense fallback={<LoadingFallback />}>
+              <DriverDashboard />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/payment"
+          element={
+            <Suspense fallback={<LoadingFallback />}>
+              <PaymentForm />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/admin/*"
+          element={
+            <Suspense fallback={<LoadingFallback />}>
+              <AdminRoutes />
+            </Suspense>
+          }
+        />
         <Route
           path="/profile"
           element={
             <ProtectedRoute>
-              <ProfilePage />
+              <Suspense fallback={<LoadingFallback />}>
+                <ProfilePage />
+              </Suspense>
             </ProtectedRoute>
           }
         />

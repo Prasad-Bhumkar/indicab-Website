@@ -1,0 +1,124 @@
+name: Test & Code Quality
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  backend-tests:
+    runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: indicab_test
+        options: >-
+          --health-cmd="mysqladmin ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=3
+        ports:
+          - 3306:3306
+
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Run backend tests
+        working-directory: indicab-backend
+        run: mvn clean test -B
+        env:
+          SPRING_DATASOURCE_URL: jdbc:mysql://localhost:3306/indicab_test
+          SPRING_DATASOURCE_USERNAME: root
+          SPRING_DATASOURCE_PASSWORD: root
+
+      - name: Upload coverage reports
+        uses: codecov/codecov-action@v3
+        with:
+          files: ./indicab-backend/target/site/jacoco/index.html
+          fail_ci_if_error: false
+
+  frontend-tests:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: 'indicab-frontend/package-lock.json'
+
+      - name: Install dependencies
+        working-directory: indicab-frontend
+        run: npm ci
+
+      - name: Run frontend tests
+        working-directory: indicab-frontend
+        run: npm test -- --run
+
+      - name: Run ESLint
+        working-directory: indicab-frontend
+        run: npx eslint src --ext .js,.jsx --max-warnings 0
+        continue-on-error: true
+
+  code-quality:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Run SonarQube analysis
+        working-directory: indicab-backend
+        run: |
+          mvn clean verify sonar:sonar \
+            -Dsonar.projectKey=indicab \
+            -Dsonar.host.url=${{ secrets.SONAR_HOST_URL }} \
+            -Dsonar.login=${{ secrets.SONAR_TOKEN }}
+        continue-on-error: true
+
+  security-scan:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Run OWASP Dependency Check
+        working-directory: indicab-backend
+        run: mvn dependency-check:check
+        continue-on-error: true
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Audit frontend dependencies
+        working-directory: indicab-frontend
+        run: npm audit --audit-level=moderate
+        continue-on-error: true

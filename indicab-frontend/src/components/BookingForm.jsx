@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import { apiClient } from '../config/apiConfig';
 import { closeBookingConfirmationModal } from '../features/bookingConfirmationModal/bookingConfirmationModalSlice';
 import { useSelector, useDispatch } from 'react-redux';
 import BookingConfirmationModal from './BookingConfirmationModal';
@@ -19,10 +19,13 @@ const BookingForm = () => {
   const [passengerName, setPassengerName] = useState('');
   const [passengerEmail, setPassengerEmail] = useState('');
   const [passengerPhone, setPassengerPhone] = useState('');
+  const [pickupAddress, setPickupAddress] = useState('');
+  const [licenseNumber, setLicenseNumber] = useState('');
   const [paymentMethod, setPaymentMethod] = useState('Credit Card');
   const [errors, setErrors] = useState({});
   const [calculatedFare, setCalculatedFare] = useState(0);
   const [submitError, setSubmitError] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const vehicles = [
     {
@@ -130,6 +133,14 @@ const BookingForm = () => {
     else if (!phoneRegex.test(passengerPhone))
       newErrors.passengerPhone = 'Phone number must be 10 digits.';
 
+    if (!licenseNumber) newErrors.licenseNumber = 'License number is required.';
+    else if (licenseNumber.length < 5)
+      newErrors.licenseNumber = 'License number must be at least 5 characters.';
+
+    if (!pickupAddress) newErrors.pickupAddress = 'Pickup address is required.';
+    else if (pickupAddress.length < 5)
+      newErrors.pickupAddress = 'Pickup address must be at least 5 characters.';
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -144,15 +155,17 @@ const BookingForm = () => {
         date: departDate,
         vehicle: selectedVehicle.type,
         amount: calculatedFare,
-        status: 'Upcoming',
+        status: 'PENDING',
         fullName: passengerName,
-        email: passengerEmail,
         phoneNumber: passengerPhone,
+        license: licenseNumber,
+        pickupAddress: pickupAddress,
         paymentMethod: paymentMethod,
       };
 
       try {
-        const response = await axios.post('http://localhost:8000/api/bookings', newBooking);
+        setIsSubmitting(true);
+        const response = await apiClient.post('/api/bookings', newBooking);
         const savedBooking = response.data;
         dispatch(addBooking(savedBooking));
 
@@ -173,8 +186,11 @@ const BookingForm = () => {
 
         dispatch(openBookingConfirmationModal(details));
       } catch (error) {
-        setSubmitError('Failed to save booking. Please try again.');
+        const errorMsg = error.response?.data?.message || 'Failed to save booking. Please try again.';
+        setSubmitError(errorMsg);
         console.error('Booking submission error:', error);
+      } finally {
+        setIsSubmitting(false);
       }
     }
   };
@@ -202,6 +218,8 @@ const BookingForm = () => {
     setPassengerName('');
     setPassengerEmail('');
     setPassengerPhone('');
+    setPickupAddress('');
+    setLicenseNumber('');
     setPaymentMethod('Credit Card');
     setSubmitError(null);
   };
@@ -394,6 +412,34 @@ const BookingForm = () => {
             )}
           </div>
 
+          <div className="col-md-6">
+            <label className="form-label fw-semibold">License Number</label>
+            <input
+              type="text"
+              className={`form-control ${errors.licenseNumber ? 'is-invalid' : ''}`}
+              placeholder="Enter your driving license number"
+              value={licenseNumber}
+              onChange={(e) => setLicenseNumber(e.target.value)}
+            />
+            {errors.licenseNumber && (
+              <div className="invalid-feedback">{errors.licenseNumber}</div>
+            )}
+          </div>
+
+          <div className="col-md-6">
+            <label className="form-label fw-semibold">Pickup Address</label>
+            <input
+              type="text"
+              className={`form-control ${errors.pickupAddress ? 'is-invalid' : ''}`}
+              placeholder="Enter your pickup address"
+              value={pickupAddress}
+              onChange={(e) => setPickupAddress(e.target.value)}
+            />
+            {errors.pickupAddress && (
+              <div className="invalid-feedback">{errors.pickupAddress}</div>
+            )}
+          </div>
+
           {/* Payment Method */}
           <div className="col-md-6">
             <label className="form-label fw-semibold">Payment Method</label>
@@ -413,8 +459,8 @@ const BookingForm = () => {
             {submitError && <div className="text-danger mb-2">{submitError}</div>}
             <div className="d-flex justify-content-between align-items-center">
               <h5 className="fw-semibold mb-0">Estimated Fare: ₹{calculatedFare.toFixed(2)}</h5>
-              <button type="submit" className="btn btn-primary-custom py-3">
-                Confirm Booking
+              <button type="submit" className="btn btn-primary-custom py-3" disabled={isSubmitting}>
+                {isSubmitting ? 'Processing...' : 'Confirm Booking'}
               </button>
             </div>
           </div>
