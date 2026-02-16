@@ -2,16 +2,21 @@ package com.indicab.controller;
 
 import com.indicab.dto.BookingRequestDTO;
 import com.indicab.dto.BookingResponseDTO;
+import com.indicab.dto.PagedResponseDTO;
 import com.indicab.entity.Booking;
 import com.indicab.mapper.BookingMapper;
 import com.indicab.service.BookingService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -22,9 +27,10 @@ import java.util.stream.Collectors;
 /**
  * Booking controller handling booking-related API requests
  * Uses response DTOs to avoid exposing entities directly
+ * Supports pagination for efficient data retrieval
  */
 @RestController
-@RequestMapping("/api/bookings")
+@RequestMapping("/api/v1/bookings")
 @Tag(name = "Bookings", description = "Ride booking management endpoints")
 @SecurityRequirement(name = "Bearer Token")
 public class BookingController {
@@ -33,9 +39,36 @@ public class BookingController {
     private BookingService bookingService;
 
     @GetMapping
-    @Operation(summary = "Get all bookings", description = "Retrieve list of all bookings")
+    @Operation(summary = "Get all bookings with pagination", description = "Retrieve paginated list of bookings")
+    @ApiResponse(responseCode = "200", description = "Paginated list of bookings retrieved successfully")
+    public ResponseEntity<PagedResponseDTO<BookingResponseDTO>> getAllBookings(
+            @Parameter(description = "Page number (0-indexed)", example = "0")
+            @RequestParam(defaultValue = "0") int page,
+            @Parameter(description = "Page size", example = "10")
+            @RequestParam(defaultValue = "10") int size) {
+
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Booking> bookingsPage = bookingService.getAllBookingsPaged(pageable);
+
+        List<BookingResponseDTO> content = bookingsPage.getContent().stream()
+                .map(BookingMapper::toDto)
+                .collect(Collectors.toList());
+
+        PagedResponseDTO<BookingResponseDTO> response = new PagedResponseDTO<>(
+                content,
+                page,
+                size,
+                bookingsPage.getTotalElements(),
+                bookingsPage.getTotalPages()
+        );
+
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/legacy")
+    @Operation(summary = "Get all bookings (legacy)", description = "Retrieve all bookings without pagination (deprecated - use /api/bookings with page params)")
     @ApiResponse(responseCode = "200", description = "List of bookings retrieved successfully")
-    public ResponseEntity<List<BookingResponseDTO>> getAllBookings() {
+    public ResponseEntity<List<BookingResponseDTO>> getAllBookingsLegacy() {
         List<Booking> bookings = bookingService.getAllBookings();
         List<BookingResponseDTO> response = bookings.stream()
                 .map(BookingMapper::toDto)

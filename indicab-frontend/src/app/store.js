@@ -9,7 +9,6 @@ import bookingHistoryReducer from '../features/bookingHistory/bookingHistorySlic
 import mockRoutesReducer from '../features/mockRoutes/mockRoutesSlice';
 
 import profileReducer from '../features/profile/profileSlice';
-import paymentReducer from '../features/payment/paymentSlice';
 import driverReducer from '../features/driver/driverSlice';
 import adminReducer from '../features/admin/adminSlice';
 import authReducer from '../features/auth/authSlice';
@@ -25,7 +24,6 @@ export const store = configureStore({
     mockRoutes: mockRoutesReducer,
     auth: authReducer,
     profile: profileReducer,
-    payment: paymentReducer,
     driver: driverReducer,
     admin: adminReducer,
   },

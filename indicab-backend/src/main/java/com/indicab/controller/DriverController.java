@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/driver")
+@RequestMapping("/api/v1/driver")
 @Tag(name = "Driver Management", description = "Driver registration and approval endpoints")
 @SecurityRequirement(name = "Bearer Token")
 public class DriverController {

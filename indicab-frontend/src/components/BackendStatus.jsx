@@ -9,7 +9,7 @@ const BackendStatus = () => {
     setStatus('checking');
     try {
       // Use booking endpoint as health check since we don't have a dedicated health endpoint
-      await apiClient.get('/api/bookings', { timeout: 5000 });
+      await apiClient.get('/v1/bookings', { timeout: 5000 });
       setStatus('online');
       setLastChecked(new Date());
     } catch (error) {

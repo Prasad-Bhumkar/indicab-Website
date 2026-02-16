@@ -18,8 +18,25 @@ describe('ServiceCities Component', () => {
   })
 
   it('should render service cities section', () => {
+    // Create store with loaded cities
+    const storeWithCities = configureStore({
+      reducer: {
+        serviceCities: () => ({
+          cities: ['Bangalore', 'Mumbai', 'Delhi'],
+          stats: {
+            citiesCovered: 3,
+            happyCustomers: '50000+',
+            trustedDrivers: '10000+',
+            support: '24/7',
+          },
+          loading: false,
+          error: null,
+        }),
+      },
+    })
+
     render(
-      <Provider store={store}>
+      <Provider store={storeWithCities}>
         <ServiceCities />
       </Provider>
     )

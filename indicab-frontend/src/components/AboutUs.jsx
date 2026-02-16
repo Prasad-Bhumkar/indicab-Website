@@ -1,12 +1,13 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FaUsers, FaCity, FaCar, FaShieldAlt, FaHandshake, FaHeart, FaMapMarkedAlt, FaAward, FaUsersCog, FaLinkedin, FaTwitter } from 'react-icons/fa';
+import { FaUsers, FaCity, FaCar, FaShieldAlt, FaHandshake, FaHeart, FaMapMarkedAlt, FaAward, FaUsersCog, FaLinkedin, FaTwitter, FaChevronDown } from 'react-icons/fa';
 import { motion } from 'framer-motion';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 
 const AboutUs = () => {
   const navigate = useNavigate();
+  const [expandedTimeline, setExpandedTimeline] = useState(null);
 
   const stats = [
     { icon: <FaUsers />, value: '1M+', label: 'Rides Completed' },
@@ -24,16 +25,15 @@ const AboutUs = () => {
   ];
 
   const timeline = [
-    { year: 2015, event: 'IndiCab is founded by Rahul Sharma with a vision to revolutionize intercity travel in India.' },
-    { year: 2017, event: 'Expanded services to 10 cities and reached 100,000 rides.' },
-    { year: 2019, event: 'Launched our mobile app, making booking easier than ever.' },
-    { year: 2021, event: 'Reached the milestone of 1 million rides and introduced a new fleet of premium vehicles.' },
-    { year: 2024, event: 'Continuing to grow, with a network of over 10,000 drivers across 25+ cities.' },
+    { year: '2015', event: 'Founded with vision to revolutionize intercity travel' },
+    { year: '2017', event: 'Expanded to 10 cities, 100K+ rides' },
+    { year: '2019', event: 'Launched mobile app' },
+    { year: '2021', event: '1M rides milestone, premium fleet' },
+    { year: '2024', event: '25+ cities, 10K+ drivers' },
   ];
 
   const leadership = [
     { name: 'Ravi Bade', title: 'Founder & CEO', image: 'https://media.licdn.com/dms/image/v2/D5603AQHmMRpgc-OYcg/profile-displayphoto-shrink_200_200/B56ZPze4ZtH0AY-/0/1734956780304?e=1756944000&v=beta&t=0Al0kIUfUNQgMwcfqINEcDY9DJpWjn6FCsRipIF98w8', social: { linkedin: '#', twitter: '#' } },
-    { name: 'Ravi Bade', title: 'Chief Operating Officer', image: 'https://media.licdn.com/dms/image/v2/D5603AQHmMRpgc-OYcg/profile-displayphoto-shrink_200_200/B56ZPze4ZtH0AY-/0/1734956780304?e=1756944000&v=beta&t=0Al0kIUfUNQgMwcfqINEcDY9DJpWjn6FCsRipIF98w8', social: { linkedin: '#', twitter: '#' } },
     { name: 'Prasad Bhumkar', title: 'Head of Technology', image: 'https://avatars.githubusercontent.com/u/182353409?v=4', social: { linkedin: '#', twitter: '#' } },
   ];
 
@@ -49,7 +49,7 @@ const AboutUs = () => {
     <div className="about-us">
       <section className="hero-banner" style={{ backgroundImage: 'url(https://images.unsplash.com/photo-1587614382346-4ec580c381a8?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80)' }}>
         <div className="hero-overlay"></div>
-        <motion.div 
+        <motion.div
           className="hero-content text-center"
           initial="hidden"
           animate="visible"
@@ -71,9 +71,9 @@ const AboutUs = () => {
             <button onClick={() => navigate('/')} className="btn btn-primary-custom mt-3">Book a Ride</button>
           </motion.div>
         </motion.div>
-        <motion.div 
+        <motion.div
           className="hero-stats"
-          style={{display:"flex", justifyContent:"space-around"}}
+          style={{ display: "flex", justifyContent: "space-around" }}
           initial="hidden"
           animate="visible"
           variants={{
@@ -93,8 +93,6 @@ const AboutUs = () => {
           ))}
         </motion.div>
       </section>
-
-
 
       <section className="about-us-section bg-light">
         <div className="container">
@@ -125,32 +123,56 @@ const AboutUs = () => {
         </div>
       </section>
 
-      <section className="about-us-section">
-        <div className="container">
-          <div className="row">
-            <div className="col-12 text-center">
-              <h2 className="section-title">Our Milestones</h2>
+      {/* UNIQUE: Our Journey Section with Highway Animation */}
+      <section className="about-journey-animated">
+        <div className="journey-background">
+          {/* Sky */}
+          <div className="journey-sky"></div>
+
+          {/* Highway Road */}
+          <div className="journey-road">
+            <div className="road-lane road-lane-1"></div>
+            <div className="road-lane road-lane-2"></div>
+            <div className="road-markings">
+              {[...Array(20)].map((_, i) => (
+                <div key={i} className="road-mark"></div>
+              ))}
             </div>
           </div>
-          <div className="row">
-            <div className="col-12">
-              <div className="timeline-container-vertical">
-                {timeline.map((item, index) => (
-                  <motion.div
-                    key={index}
-                    className="timeline-item-vertical"
-                    initial={{ opacity: 0, y: 50 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.5, delay: index * 0.2 }}
-                  >
-                    <div className="timeline-year-vertical">{item.year}</div>
-                    <div className="timeline-content">
-                      <p>{item.event}</p>
-                    </div>
-                  </motion.div>
-                ))}
+
+          {/* Animated Cab */}
+          <div className="journey-cab">
+            <div className="cab-body">🚕</div>
+          </div>
+
+          {/* Timeline Container */}
+          <div className="container timeline-journey-container">
+            <div className="row">
+              <div className="col-12 text-center">
+                <h2 className="section-title journey-title">Our Journey</h2>
               </div>
+            </div>
+
+            <div className="timeline-journey">
+              {timeline.map((item, index) => (
+                <motion.div
+                  key={index}
+                  className="journey-milestone"
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.6, delay: index * 0.15 }}
+                >
+                  <div className="milestone-marker">
+                    <div className="milestone-dot"></div>
+                    <div className="milestone-pulse"></div>
+                  </div>
+                  <div className="milestone-content">
+                    <div className="milestone-year">{item.year}</div>
+                    <p className="milestone-event">{item.event}</p>
+                  </div>
+                </motion.div>
+              ))}
             </div>
           </div>
         </div>

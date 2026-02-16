@@ -212,18 +212,6 @@ const ContactUs = () => {
               </div>
             </div>
             <div className="accordion-item" style={{ marginBottom: '1rem', border: 'none', borderRadius: '10px' }}>
-              <h2 className="accordion-header" id="headingTwo">
-                <button className="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo" style={{ borderRadius: '10px' }}>
-                  What are the available payment options?
-                </button>
-              </h2>
-              <div id="collapseTwo" className="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#faqAccordion">
-                <div className="accordion-body">
-                  We accept all major credit and debit cards, UPI, various mobile wallets, and cash payments to the driver.
-                </div>
-              </div>
-            </div>
-            <div className="accordion-item" style={{ marginBottom: '1rem', border: 'none', borderRadius: '10px' }}>
               <h2 className="accordion-header" id="headingThree">
                 <button className="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree" style={{ borderRadius: '10px' }}>
                   What is your cancellation policy?

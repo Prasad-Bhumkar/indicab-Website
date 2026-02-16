@@ -23,7 +23,8 @@ const BookingHistory = () => {
   };
 
   const handleCancelBooking = (bookingId) => {
-    const bookingToUpdate = bookings.find((b) => b.id === bookingId);
+    const bookingsArray = Array.isArray(bookings) ? bookings : [];
+    const bookingToUpdate = bookingsArray.find((b) => b.id === bookingId);
     if (bookingToUpdate) {
       dispatch(updateBooking({ ...bookingToUpdate, status: "Cancelled" }));
     }
@@ -36,7 +37,10 @@ const BookingHistory = () => {
     }
   };
 
-  const filteredBookings = bookings.filter((booking) => {
+  // Safely ensure bookings is an array
+  const bookingsArray = Array.isArray(bookings) ? bookings : [];
+
+  const filteredBookings = bookingsArray.filter((booking) => {
     if (activeTab === "All") {
       return true;
     }

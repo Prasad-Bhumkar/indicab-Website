@@ -1,24 +1,20 @@
 package com.indicab.config;
 
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.web.servlet.config.annotation.CorsRegistry;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-
-@Configuration
+/**
+ * DEPRECATED: This configuration is no longer used.
+ * 
+ * CORS configuration has been consolidated into SecurityConfig.java to follow the single responsibility principle
+ * and avoid configuration conflicts.
+ * 
+ * The corsConfigurationSource() bean in SecurityConfig.java now handles all CORS configuration using the
+ * cors.allowed-origins environment variable for proper environment-specific configuration.
+ * 
+ * This class is kept only for reference and should be deleted in a future cleanup.
+ * 
+ * @see com.indicab.config.SecurityConfig#corsConfigurationSource()
+ * @deprecated Use SecurityConfig instead
+ */
+@Deprecated(since = "1.2", forRemoval = true)
 public class CorsConfig {
-
-    @Bean
-    public WebMvcConfigurer corsConfigurer() {
-        return new WebMvcConfigurer() {
-            @Override
-            public void addCorsMappings(CorsRegistry registry) {
-                registry.addMapping("/api/**")
-                        .allowedOrigins("http://localhost:5173", "http://localhost:3000", "http://localhost:8080")
-                        .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
-                        .allowedHeaders("*")
-                        .allowCredentials(true);
-            }
-        };
-    }
+    // This class is deprecated. See SecurityConfig for active CORS configuration.
 }

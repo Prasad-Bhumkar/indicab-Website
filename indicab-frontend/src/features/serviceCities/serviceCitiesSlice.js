@@ -1,14 +1,19 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-// import axios from 'axios';
-import { mockCities, mockStats } from '../../data/mockServiceCities';
+import { apiClient } from '../../config/apiConfig';
 
 export const fetchServiceCities = createAsyncThunk('serviceCities/fetchServiceCities', async () => {
-  // const response = await axios.get('http://localhost:8000/api/service-cities');
-  // return response.data;
-  return {
-    cities: mockCities,
-    stats: mockStats,
-  };
+  try {
+    const response = await apiClient.get('/v1/service-cities');
+    
+    // Return API response directly
+    return {
+      cities: Array.isArray(response.data) ? response.data : response.data.cities || [],
+      stats: response.data.stats || {},
+    };
+  } catch (error) {
+    // Let the error bubble up to be handled by extraReducers
+    throw new Error(error.response?.data?.message || 'Failed to fetch service cities');
+  }
 });
 
 const serviceCitiesSlice = createSlice({
@@ -28,7 +33,6 @@ const serviceCitiesSlice = createSlice({
       })
       .addCase(fetchServiceCities.fulfilled, (state, action) => {
         state.loading = false;
-        // Assuming the API returns an object with 'cities' array and 'stats' object
         state.cities = action.payload.cities || [];
         state.stats = action.payload.stats || {};
       })
@@ -40,4 +44,3 @@ const serviceCitiesSlice = createSlice({
 });
 
 export default serviceCitiesSlice.reducer;
-

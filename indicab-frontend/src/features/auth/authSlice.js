@@ -10,8 +10,16 @@ const initialState = {
 
 export const loginUser = createAsyncThunk('auth/loginUser', async (credentials, { rejectWithValue }) => {
   try {
-    const response = await apiClient.post('/api/auth/login', credentials);
-    return response.data;
+    const response = await apiClient.post('/v1/auth/login', credentials);
+    // Backend now returns { accessToken, refreshToken, tokenType, user: { id, name, email, phone, address, role } }
+    return {
+      token: response.data.accessToken,
+      refreshToken: response.data.refreshToken,
+      user: response.data.user || {
+        email: credentials.email,
+        authenticated: true
+      },
+    };
   } catch (error) {
     return rejectWithValue(error.response?.data || error.message);
   }
@@ -19,8 +27,16 @@ export const loginUser = createAsyncThunk('auth/loginUser', async (credentials, 
 
 export const registerUser = createAsyncThunk('auth/registerUser', async (userData, { rejectWithValue }) => {
   try {
-    const response = await apiClient.post('/api/auth/register', userData);
-    return response.data;
+    const response = await apiClient.post('/v1/auth/register', userData);
+    // Backend now returns { accessToken, refreshToken, tokenType, user: { id, name, email, phone, address, role } }
+    return {
+      token: response.data.accessToken,
+      refreshToken: response.data.refreshToken,
+      user: response.data.user || {
+        email: userData.email,
+        authenticated: true
+      },
+    };
   } catch (error) {
     return rejectWithValue(error.response?.data || error.message);
   }
@@ -28,7 +44,7 @@ export const registerUser = createAsyncThunk('auth/registerUser', async (userDat
 
 export const logoutUser = createAsyncThunk('auth/logoutUser', async (_, { rejectWithValue }) => {
   try {
-    await apiClient.post('/api/auth/logout');
+    await apiClient.post('/v1/auth/logout');
     return null;
   } catch (error) {
     // Even if logout fails on server, clear client-side tokens
@@ -61,6 +77,9 @@ const authSlice = createSlice({
         state.token = action.payload.token;
         state.user = action.payload.user;
         localStorage.setItem('token', action.payload.token);
+        if (action.payload.refreshToken) {
+          localStorage.setItem('refreshToken', action.payload.refreshToken);
+        }
       })
       .addCase(loginUser.rejected, (state, action) => {
         state.loading = false;
@@ -75,6 +94,9 @@ const authSlice = createSlice({
         state.token = action.payload.token;
         state.user = action.payload.user;
         localStorage.setItem('token', action.payload.token);
+        if (action.payload.refreshToken) {
+          localStorage.setItem('refreshToken', action.payload.refreshToken);
+        }
       })
       .addCase(registerUser.rejected, (state, action) => {
         state.loading = false;
@@ -99,6 +121,5 @@ const authSlice = createSlice({
 });
 
 export const { logout, setCredentials } = authSlice.actions;
-export { logoutUser };
 
 export default authSlice.reducer;

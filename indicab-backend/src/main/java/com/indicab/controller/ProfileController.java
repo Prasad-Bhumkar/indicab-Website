@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
  * Profile controller for user profile management
  */
 @RestController
-@RequestMapping("/api/profile")
+@RequestMapping("/api/v1/profile")
 public class ProfileController {
 
     @Autowired

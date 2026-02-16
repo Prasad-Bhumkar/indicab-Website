@@ -3,8 +3,23 @@ package com.indicab.mapper;
 import com.indicab.entity.User;
 import com.indicab.dto.UserProfileDTO;
 
+/**
+ * Mapper utility for converting between User entity and profile DTOs
+ */
 public class UserMapper {
+
+    private UserMapper() {
+        // Private constructor to prevent instantiation
+    }
+
+    /**
+     * Convert User entity to UserProfileDTO
+     * Returns null if user is null
+     */
     public static UserProfileDTO toDto(User user) {
+        if (user == null) {
+            return null;
+        }
         UserProfileDTO dto = new UserProfileDTO();
         dto.setName(user.getName());
         dto.setEmail(user.getEmail());
@@ -13,10 +28,25 @@ public class UserMapper {
         return dto;
     }
 
+    /**
+     * Update User entity from UserProfileDTO
+     * Safely handles null dto
+     */
     public static void updateUserFromDto(User user, UserProfileDTO dto) {
-        user.setName(dto.getName());
-        user.setEmail(dto.getEmail());
-        user.setPhone(dto.getPhone());
-        user.setAddress(dto.getAddress());
+        if (user == null || dto == null) {
+            return;
+        }
+        if (dto.getName() != null) {
+            user.setName(dto.getName());
+        }
+        if (dto.getEmail() != null) {
+            user.setEmail(dto.getEmail());
+        }
+        if (dto.getPhone() != null) {
+            user.setPhone(dto.getPhone());
+        }
+        if (dto.getAddress() != null) {
+            user.setAddress(dto.getAddress());
+        }
     }
 }

@@ -1,0 +1,142 @@
+[      93ms] [WARNING] Sentry is disabled. Install @sentry/react and @sentry/tracing to enable error tracking. @ http://localhost/assets/index-Xc_AaVol.js:75
+[    6372ms] [ERROR] Failed to load resource: the server responded with a status of 500 () @ http://localhost:8000/api/routes:0
+[    6376ms] [ERROR] [2026-02-15T10:15:45.891Z] [ERROR] [API] ERROR API_RESPONSE - Status: 500 AxiosError: Request failed with status code 500
+    at qx (http://localhost/assets/index-Xc_AaVol.js:61:1087)
+    at XMLHttpRequest.P (http://localhost/assets/index-Xc_AaVol.js:61:5927) @ http://localhost/assets/index-Xc_AaVol.js:63
+[    6377ms] [ERROR] [2026-02-15T10:15:45.893Z] [ERROR] [API_RESPONSE] An internal server error occurred AxiosError: Request failed with status code 500
+    at qx (http://localhost/assets/index-Xc_AaVol.js:61:1087)
+    at XMLHttpRequest.P (http://localhost/assets/index-Xc_AaVol.js:61:5927) @ http://localhost/assets/index-Xc_AaVol.js:63
+[   63230ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost/marker-icon-2x.png:0
+[   63230ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost/marker-shadow.png:0
+[   66827ms] [ERROR] TypeError: n.filter is not a function
+    at FR (http://localhost/assets/index-Xc_AaVol.js:67:177221)
+    at Lh (http://localhost/assets/index-Xc_AaVol.js:38:17009)
+    at df (http://localhost/assets/index-Xc_AaVol.js:40:3139)
+    at W_ (http://localhost/assets/index-Xc_AaVol.js:40:44737)
+    at V_ (http://localhost/assets/index-Xc_AaVol.js:40:39727)
+    at TP (http://localhost/assets/index-Xc_AaVol.js:40:39655)
+    at Fl (http://localhost/assets/index-Xc_AaVol.js:40:39508)
+    at bf (http://localhost/assets/index-Xc_AaVol.js:40:35875)
+    at Fg (http://localhost/assets/index-Xc_AaVol.js:40:36678)
+    at Ti (http://localhost/assets/index-Xc_AaVol.js:38:3274) @ http://localhost/assets/index-Xc_AaVol.js:39
+[   66827ms] [ERROR] Error caught by boundary: TypeError: n.filter is not a function
+    at FR (http://localhost/assets/index-Xc_AaVol.js:67:177221)
+    at Lh (http://localhost/assets/index-Xc_AaVol.js:38:17009)
+    at df (http://localhost/assets/index-Xc_AaVol.js:40:3139)
+    at W_ (http://localhost/assets/index-Xc_AaVol.js:40:44737)
+    at V_ (http://localhost/assets/index-Xc_AaVol.js:40:39727)
+    at TP (http://localhost/assets/index-Xc_AaVol.js:40:39655)
+    at Fl (http://localhost/assets/index-Xc_AaVol.js:40:39508)
+    at bf (http://localhost/assets/index-Xc_AaVol.js:40:35875)
+    at Fg (http://localhost/assets/index-Xc_AaVol.js:40:36678)
+    at Ti (http://localhost/assets/index-Xc_AaVol.js:38:3274) {componentStack: 
+    at FR (http://localhost/assets/index-Xc_AaVol…http://localhost/assets/index-Xc_AaVol.js:76:156)} @ http://localhost/assets/index-Xc_AaVol.js:75
+[   73922ms] [ERROR] TypeError: n.filter is not a function
+    at FR (http://localhost/assets/index-Xc_AaVol.js:67:177221)
+    at Lh (http://localhost/assets/index-Xc_AaVol.js:38:17009)
+    at W_ (http://localhost/assets/index-Xc_AaVol.js:40:43963)
+    at V_ (http://localhost/assets/index-Xc_AaVol.js:40:39727)
+    at TP (http://localhost/assets/index-Xc_AaVol.js:40:39655)
+    at Fl (http://localhost/assets/index-Xc_AaVol.js:40:39508)
+    at bf (http://localhost/assets/index-Xc_AaVol.js:40:35875)
+    at Fg (http://localhost/assets/index-Xc_AaVol.js:40:36678)
+    at Ti (http://localhost/assets/index-Xc_AaVol.js:38:3274)
+    at http://localhost/assets/index-Xc_AaVol.js:40:34207 @ http://localhost/assets/index-Xc_AaVol.js:39
+[   73922ms] [ERROR] Error caught by boundary: TypeError: n.filter is not a function
+    at FR (http://localhost/assets/index-Xc_AaVol.js:67:177221)
+    at Lh (http://localhost/assets/index-Xc_AaVol.js:38:17009)
+    at W_ (http://localhost/assets/index-Xc_AaVol.js:40:43963)
+    at V_ (http://localhost/assets/index-Xc_AaVol.js:40:39727)
+    at TP (http://localhost/assets/index-Xc_AaVol.js:40:39655)
+    at Fl (http://localhost/assets/index-Xc_AaVol.js:40:39508)
+    at bf (http://localhost/assets/index-Xc_AaVol.js:40:35875)
+    at Fg (http://localhost/assets/index-Xc_AaVol.js:40:36678)
+    at Ti (http://localhost/assets/index-Xc_AaVol.js:38:3274)
+    at http://localhost/assets/index-Xc_AaVol.js:40:34207 {componentStack: 
+    at FR (http://localhost/assets/index-Xc_AaVol…http://localhost/assets/index-Xc_AaVol.js:76:156)} @ http://localhost/assets/index-Xc_AaVol.js:75
+[  166426ms] [ERROR] TypeError: n.filter is not a function
+    at FR (http://localhost/assets/index-Xc_AaVol.js:67:177221)
+    at Lh (http://localhost/assets/index-Xc_AaVol.js:38:17009)
+    at W_ (http://localhost/assets/index-Xc_AaVol.js:40:43963)
+    at V_ (http://localhost/assets/index-Xc_AaVol.js:40:39727)
+    at TP (http://localhost/assets/index-Xc_AaVol.js:40:39655)
+    at Fl (http://localhost/assets/index-Xc_AaVol.js:40:39508)
+    at bf (http://localhost/assets/index-Xc_AaVol.js:40:35875)
+    at Fg (http://localhost/assets/index-Xc_AaVol.js:40:36678)
+    at Ti (http://localhost/assets/index-Xc_AaVol.js:38:3274)
+    at http://localhost/assets/index-Xc_AaVol.js:40:34207 @ http://localhost/assets/index-Xc_AaVol.js:39
+[  166427ms] [ERROR] Error caught by boundary: TypeError: n.filter is not a function
+    at FR (http://localhost/assets/index-Xc_AaVol.js:67:177221)
+    at Lh (http://localhost/assets/index-Xc_AaVol.js:38:17009)
+    at W_ (http://localhost/assets/index-Xc_AaVol.js:40:43963)
+    at V_ (http://localhost/assets/index-Xc_AaVol.js:40:39727)
+    at TP (http://localhost/assets/index-Xc_AaVol.js:40:39655)
+    at Fl (http://localhost/assets/index-Xc_AaVol.js:40:39508)
+    at bf (http://localhost/assets/index-Xc_AaVol.js:40:35875)
+    at Fg (http://localhost/assets/index-Xc_AaVol.js:40:36678)
+    at Ti (http://localhost/assets/index-Xc_AaVol.js:38:3274)
+    at http://localhost/assets/index-Xc_AaVol.js:40:34207 {componentStack: 
+    at FR (http://localhost/assets/index-Xc_AaVol…http://localhost/assets/index-Xc_AaVol.js:76:156)} @ http://localhost/assets/index-Xc_AaVol.js:75
+[  172224ms] [WARNING] Sentry is disabled. Install @sentry/react and @sentry/tracing to enable error tracking. @ http://localhost/assets/index-Xc_AaVol.js:75
+[  172766ms] [ERROR] TypeError: n.filter is not a function
+    at FR (http://localhost/assets/index-Xc_AaVol.js:67:177221)
+    at Lh (http://localhost/assets/index-Xc_AaVol.js:38:17009)
+    at df (http://localhost/assets/index-Xc_AaVol.js:40:3139)
+    at W_ (http://localhost/assets/index-Xc_AaVol.js:40:44737)
+    at V_ (http://localhost/assets/index-Xc_AaVol.js:40:39727)
+    at TP (http://localhost/assets/index-Xc_AaVol.js:40:39655)
+    at Fl (http://localhost/assets/index-Xc_AaVol.js:40:39508)
+    at bf (http://localhost/assets/index-Xc_AaVol.js:40:35875)
+    at Fg (http://localhost/assets/index-Xc_AaVol.js:40:36678)
+    at Ti (http://localhost/assets/index-Xc_AaVol.js:38:3274) @ http://localhost/assets/index-Xc_AaVol.js:39
+[  172767ms] [ERROR] Error caught by boundary: TypeError: n.filter is not a function
+    at FR (http://localhost/assets/index-Xc_AaVol.js:67:177221)
+    at Lh (http://localhost/assets/index-Xc_AaVol.js:38:17009)
+    at df (http://localhost/assets/index-Xc_AaVol.js:40:3139)
+    at W_ (http://localhost/assets/index-Xc_AaVol.js:40:44737)
+    at V_ (http://localhost/assets/index-Xc_AaVol.js:40:39727)
+    at TP (http://localhost/assets/index-Xc_AaVol.js:40:39655)
+    at Fl (http://localhost/assets/index-Xc_AaVol.js:40:39508)
+    at bf (http://localhost/assets/index-Xc_AaVol.js:40:35875)
+    at Fg (http://localhost/assets/index-Xc_AaVol.js:40:36678)
+    at Ti (http://localhost/assets/index-Xc_AaVol.js:38:3274) {componentStack: 
+    at FR (http://localhost/assets/index-Xc_AaVol…http://localhost/assets/index-Xc_AaVol.js:76:156)} @ http://localhost/assets/index-Xc_AaVol.js:75
+[  179170ms] [WARNING] Sentry is disabled. Install @sentry/react and @sentry/tracing to enable error tracking. @ http://localhost/assets/index-Xc_AaVol.js:75
+[  179515ms] [ERROR] Failed to load resource: the server responded with a status of 500 () @ http://localhost:8000/api/routes:0
+[  179524ms] [ERROR] [2026-02-15T10:18:39.039Z] [ERROR] [API] ERROR API_RESPONSE - Status: 500 AxiosError: Request failed with status code 500
+    at qx (http://localhost/assets/index-Xc_AaVol.js:61:1087)
+    at XMLHttpRequest.P (http://localhost/assets/index-Xc_AaVol.js:61:5927) @ http://localhost/assets/index-Xc_AaVol.js:63
+[  179525ms] [ERROR] [2026-02-15T10:18:39.041Z] [ERROR] [API_RESPONSE] An internal server error occurred AxiosError: Request failed with status code 500
+    at qx (http://localhost/assets/index-Xc_AaVol.js:61:1087)
+    at XMLHttpRequest.P (http://localhost/assets/index-Xc_AaVol.js:61:5927) @ http://localhost/assets/index-Xc_AaVol.js:63
+[  196677ms] [ERROR] TypeError: n.filter is not a function
+    at FR (http://localhost/assets/index-Xc_AaVol.js:67:177221)
+    at Lh (http://localhost/assets/index-Xc_AaVol.js:38:17009)
+    at df (http://localhost/assets/index-Xc_AaVol.js:40:3139)
+    at W_ (http://localhost/assets/index-Xc_AaVol.js:40:44737)
+    at V_ (http://localhost/assets/index-Xc_AaVol.js:40:39727)
+    at TP (http://localhost/assets/index-Xc_AaVol.js:40:39655)
+    at Fl (http://localhost/assets/index-Xc_AaVol.js:40:39508)
+    at bf (http://localhost/assets/index-Xc_AaVol.js:40:35875)
+    at Fg (http://localhost/assets/index-Xc_AaVol.js:40:36678)
+    at Ti (http://localhost/assets/index-Xc_AaVol.js:38:3274) @ http://localhost/assets/index-Xc_AaVol.js:39
+[  196677ms] [ERROR] Error caught by boundary: TypeError: n.filter is not a function
+    at FR (http://localhost/assets/index-Xc_AaVol.js:67:177221)
+    at Lh (http://localhost/assets/index-Xc_AaVol.js:38:17009)
+    at df (http://localhost/assets/index-Xc_AaVol.js:40:3139)
+    at W_ (http://localhost/assets/index-Xc_AaVol.js:40:44737)
+    at V_ (http://localhost/assets/index-Xc_AaVol.js:40:39727)
+    at TP (http://localhost/assets/index-Xc_AaVol.js:40:39655)
+    at Fl (http://localhost/assets/index-Xc_AaVol.js:40:39508)
+    at bf (http://localhost/assets/index-Xc_AaVol.js:40:35875)
+    at Fg (http://localhost/assets/index-Xc_AaVol.js:40:36678)
+    at Ti (http://localhost/assets/index-Xc_AaVol.js:38:3274) {componentStack: 
+    at FR (http://localhost/assets/index-Xc_AaVol…http://localhost/assets/index-Xc_AaVol.js:76:156)} @ http://localhost/assets/index-Xc_AaVol.js:75
+[  202734ms] [WARNING] Sentry is disabled. Install @sentry/react and @sentry/tracing to enable error tracking. @ http://localhost/assets/index-Yp0ZUzK0.js:75
+[  202938ms] [ERROR] Failed to load resource: the server responded with a status of 500 () @ http://localhost:8000/api/routes:0
+[  202941ms] [ERROR] [2026-02-15T10:19:02.456Z] [ERROR] [API] ERROR API_RESPONSE - Status: 500 AxiosError: Request failed with status code 500
+    at qx (http://localhost/assets/index-Yp0ZUzK0.js:61:1087)
+    at XMLHttpRequest.P (http://localhost/assets/index-Yp0ZUzK0.js:61:5927) @ http://localhost/assets/index-Yp0ZUzK0.js:63
+[  202942ms] [ERROR] [2026-02-15T10:19:02.457Z] [ERROR] [API_RESPONSE] An internal server error occurred AxiosError: Request failed with status code 500
+    at qx (http://localhost/assets/index-Yp0ZUzK0.js:61:1087)
+    at XMLHttpRequest.P (http://localhost/assets/index-Yp0ZUzK0.js:61:5927) @ http://localhost/assets/index-Yp0ZUzK0.js:63

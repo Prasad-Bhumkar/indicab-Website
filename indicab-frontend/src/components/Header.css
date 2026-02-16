@@ -1,0 +1,157 @@
+/* Navbar gradient background */
+.navbar-gradient {
+  background: linear-gradient(135deg, var(--primary-green) 0%, var(--secondary-green) 100%);
+  position: fixed;
+  top: 0;
+  z-index: 1000;
+}
+
+/* Navbar brand styling */
+.navbar-brand {
+  font-weight: 600;
+  font-size: 1.5rem;
+}
+
+.navbar-brand:hover {
+  opacity: 0.9;
+}
+
+/* Navigation links */
+.navbar-nav .nav-link {
+  transition: all 0.3s ease;
+  padding: 0.75rem 1rem !important;
+}
+
+.navbar-nav .nav-link:hover {
+  opacity: 0.8;
+  transform: translateY(-2px);
+}
+
+/* User dropdown menu styles */
+.user-dropdown-menu {
+  min-width: 220px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  border: none;
+  border-radius: 0.5rem;
+  top: 100% !important;
+  position: absolute;
+  display: none;
+  z-index: 1000;
+  right: 0;
+  left: auto;
+  background-color: #fff;
+}
+
+.user-dropdown-menu.show {
+  display: block;
+  animation: slideDown 0.2s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.user-dropdown-menu .dropdown-item {
+  color: #333;
+  padding: 0.75rem 1rem;
+  transition: all 0.2s ease;
+}
+
+.user-dropdown-menu .dropdown-item:hover {
+  background-color: #f8f9fa;
+  color: var(--primary-green, #228b22);
+  padding-left: 1.25rem;
+}
+
+.user-dropdown-menu .dropdown-header {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.user-dropdown-menu .dropdown-divider {
+  margin: 0.5rem 0;
+}
+
+/* Mobile responsive dropdown */
+@media (max-width: 992px) {
+  .user-dropdown-menu {
+    position: static;
+    background-color: rgba(255, 255, 255, 0.95);
+    box-shadow: none;
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 0;
+    right: auto;
+    left: 0;
+    min-width: 100%;
+  }
+
+  .user-dropdown-menu .dropdown-item {
+    color: #fff;
+    padding: 0.75rem 1.5rem;
+  }
+
+  .user-dropdown-menu .dropdown-item:hover {
+    background-color: rgba(0, 0, 0, 0.1);
+    color: #fff;
+    padding-left: 1.75rem;
+  }
+
+  .user-dropdown-menu .dropdown-header {
+    color: #fff;
+    border-bottom-color: rgba(255, 255, 255, 0.2);
+  }
+
+  .user-dropdown-menu .dropdown-divider {
+    border-color: rgba(255, 255, 255, 0.2);
+  }
+}
+
+/* Button link styling */
+.btn-link {
+  padding: 0 !important;
+}
+
+.btn-link:hover {
+  color: currentColor !important;
+}
+
+/* Dropdown toggle caret */
+.dropdown-toggle::after {
+  transition: transform 0.3s ease;
+}
+
+.dropdown-toggle[aria-expanded="true"]::after {
+  transform: rotate(180deg);
+}
+
+/* Fix for Bootstrap navbar collapse */
+.navbar-collapse {
+  transition: max-height 0.3s ease, opacity 0.3s ease;
+}
+
+/* User dropdown toggle styles */
+.user-dropdown-toggle {
+  text-decoration: none !important;
+  cursor: pointer;
+}
+
+.user-dropdown-toggle:focus {
+  box-shadow: none;
+}
+
+/* Logout button styles */
+.logout-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  width: 100%;
+  text-align: left;
+  padding: 0.75rem 1rem;
+}

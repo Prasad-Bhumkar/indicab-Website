@@ -1,0 +1,38 @@
+[     212ms] [WARNING] Sentry is disabled. Install @sentry/react and @sentry/tracing to enable error tracking. @ http://localhost/assets/index-C66sMzkN.js:75
+[    2957ms] [ERROR] Failed to load resource: the server responded with a status of 401 () @ http://localhost:8000/api/routes:0
+[    2968ms] [WARNING] [2026-02-15T10:07:23.028Z] [WARN] [API_RESPONSE] Unauthorized - clearing token and redirecting to login @ http://localhost/assets/index-C66sMzkN.js:63
+[    2973ms] [ERROR] [2026-02-15T10:07:23.040Z] [ERROR] [API] ERROR API_RESPONSE - Status: 401 AxiosError: Request failed with status code 401
+    at qx (http://localhost/assets/index-C66sMzkN.js:61:1087)
+    at XMLHttpRequest.P (http://localhost/assets/index-C66sMzkN.js:61:5927) @ http://localhost/assets/index-C66sMzkN.js:63
+[    2976ms] [ERROR] [2026-02-15T10:07:23.042Z] [ERROR] [API_RESPONSE] Request failed with status code 401 AxiosError: Request failed with status code 401
+    at qx (http://localhost/assets/index-C66sMzkN.js:61:1087)
+    at XMLHttpRequest.P (http://localhost/assets/index-C66sMzkN.js:61:5927) @ http://localhost/assets/index-C66sMzkN.js:63
+[    3156ms] [ERROR] Failed to load resource: the server responded with a status of 401 () @ http://localhost:8000/api/recommendations:0
+[    3157ms] [WARNING] [2026-02-15T10:07:23.224Z] [WARN] [API_RESPONSE] Unauthorized - clearing token and redirecting to login @ http://localhost/assets/index-C66sMzkN.js:63
+[    3159ms] [ERROR] [2026-02-15T10:07:23.226Z] [ERROR] [API] ERROR API_RESPONSE - Status: 401 AxiosError: Request failed with status code 401
+    at qx (http://localhost/assets/index-C66sMzkN.js:61:1087)
+    at XMLHttpRequest.P (http://localhost/assets/index-C66sMzkN.js:61:5927) @ http://localhost/assets/index-C66sMzkN.js:63
+[    3159ms] [ERROR] [2026-02-15T10:07:23.227Z] [ERROR] [API_RESPONSE] Request failed with status code 401 AxiosError: Request failed with status code 401
+    at qx (http://localhost/assets/index-C66sMzkN.js:61:1087)
+    at XMLHttpRequest.P (http://localhost/assets/index-C66sMzkN.js:61:5927) @ http://localhost/assets/index-C66sMzkN.js:63
+[    3340ms] [WARNING] Sentry is disabled. Install @sentry/react and @sentry/tracing to enable error tracking. @ http://localhost/assets/index-C66sMzkN.js:75
+[  181573ms] [ERROR] Failed to load resource: the server responded with a status of 401 () @ http://localhost:8000/api/auth/register:0
+[  181575ms] [WARNING] [2026-02-15T10:10:21.642Z] [WARN] [API_RESPONSE] Unauthorized - clearing token and redirecting to login @ http://localhost/assets/index-C66sMzkN.js:63
+[  181577ms] [ERROR] [2026-02-15T10:10:21.645Z] [ERROR] [API] ERROR API_RESPONSE - Status: 401 AxiosError: Request failed with status code 401
+    at qx (http://localhost/assets/index-C66sMzkN.js:61:1087)
+    at XMLHttpRequest.P (http://localhost/assets/index-C66sMzkN.js:61:5927) @ http://localhost/assets/index-C66sMzkN.js:63
+[  181578ms] [ERROR] [2026-02-15T10:10:21.646Z] [ERROR] [API_RESPONSE] Request failed with status code 401 AxiosError: Request failed with status code 401
+    at qx (http://localhost/assets/index-C66sMzkN.js:61:1087)
+    at XMLHttpRequest.P (http://localhost/assets/index-C66sMzkN.js:61:5927) @ http://localhost/assets/index-C66sMzkN.js:63
+[  181582ms] [ERROR] Registration failed: Request failed with status code 401 @ http://localhost/assets/index-C66sMzkN.js:66
+[  181702ms] [WARNING] Sentry is disabled. Install @sentry/react and @sentry/tracing to enable error tracking. @ http://localhost/assets/index-C66sMzkN.js:75
+[  243775ms] [ERROR] Failed to load resource: the server responded with a status of 401 () @ http://localhost:8000/api/auth/login:0
+[  243778ms] [WARNING] [2026-02-15T10:11:23.845Z] [WARN] [API_RESPONSE] Unauthorized - clearing token and redirecting to login @ http://localhost/assets/index-C66sMzkN.js:63
+[  243783ms] [ERROR] [2026-02-15T10:11:23.850Z] [ERROR] [API] ERROR API_RESPONSE - Status: 401 AxiosError: Request failed with status code 401
+    at qx (http://localhost/assets/index-C66sMzkN.js:61:1087)
+    at XMLHttpRequest.P (http://localhost/assets/index-C66sMzkN.js:61:5927) @ http://localhost/assets/index-C66sMzkN.js:63
+[  243785ms] [ERROR] [2026-02-15T10:11:23.852Z] [ERROR] [API_RESPONSE] Request failed with status code 401 AxiosError: Request failed with status code 401
+    at qx (http://localhost/assets/index-C66sMzkN.js:61:1087)
+    at XMLHttpRequest.P (http://localhost/assets/index-C66sMzkN.js:61:5927) @ http://localhost/assets/index-C66sMzkN.js:63
+[  243791ms] [ERROR] Login failed: Request failed with status code 401 @ http://localhost/assets/index-C66sMzkN.js:66
+[  243905ms] [WARNING] Sentry is disabled. Install @sentry/react and @sentry/tracing to enable error tracking. @ http://localhost/assets/index-C66sMzkN.js:75

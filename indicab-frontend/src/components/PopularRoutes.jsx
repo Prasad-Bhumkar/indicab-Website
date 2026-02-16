@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { fetchPopularRoutes, addRoute, updateRoute, deleteRoute } from '../features/popularRoutes/popularRoutesSlice'
+import { motion } from 'framer-motion'
+import AnimatedJourney from './AnimatedJourney'
 
 const PopularRoutes = () => {
   const dispatch = useDispatch()
@@ -15,9 +17,15 @@ const PopularRoutes = () => {
   const [editingRoute, setEditingRoute] = useState(null)
 
   useEffect(() => {
+    console.log('PopularRoutes component mounted, fetching routes...')
     dispatch(fetchPopularRoutes())
-    
   }, [dispatch])
+
+  useEffect(() => {
+    console.log('Routes updated:', routes)
+    console.log('Loading:', loading)
+    console.log('Error:', error)
+  }, [routes, loading, error])
 
   const handleAddRoute = (e) => {
     e.preventDefault()
@@ -55,81 +63,114 @@ const PopularRoutes = () => {
   }
 
   if (loading) {
-    return <div>Loading popular routes...</div>
+    return <div className="text-center py-5">Loading popular routes...</div>
   }
 
   if (error) {
-    return <div>Error loading popular routes: {error}</div>
+    return <div className="text-center py-5">Error loading popular routes: {error}</div>
+  }
+
+  if (!routes || routes.length === 0) {
+    console.log('No routes available to render')
+    return <div className="text-center py-5">No routes available</div>
+  }
+
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.15,
+        delayChildren: 0.1,
+      }
+    }
+  }
+
+  const cardVariants = {
+    hidden: { opacity: 0, y: 50, scale: 0.9 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      scale: 1,
+      transition: {
+        duration: 0.6,
+        ease: 'easeOut'
+      }
+    }
   }
 
   return (
     <section className="py-5" id="routes">
       <div className="container">
-        <div className="row">
+        <motion.div
+          className="row"
+          initial={{ opacity: 0, y: -20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+        >
           <div className="col-12">
             <h2 className="fw-bold mb-4">Popular Routes</h2>
           </div>
-        </div>
-        {/* <div className="row mb-4">
-          <div className="col-12">
-            <h3 className="mb-3">Add New Route</h3>
-            <form onSubmit={handleAddRoute}>
-              <div className="row">
-                <div className="col-md-3 mb-3">
-                  <input type="text" className="form-control" placeholder="From" value={newRoute.from} onChange={(e) => setNewRoute({ ...newRoute, from: e.target.value })} required />
-                </div>
-                <div className="col-md-3 mb-3">
-                  <input type="text" className="form-control" placeholder="To" value={newRoute.to} onChange={(e) => setNewRoute({ ...newRoute, to: e.target.value })} required />
-                </div>
-                <div className="col-md-3 mb-3">
-                  <input type="text" className="form-control" placeholder="Price" value={newRoute.price} onChange={(e) => setNewRoute({ ...newRoute, price: e.target.value })} required />
-                </div>
-                <div className="col-md-3 mb-3">
-                  <button type="submit" className="btn btn-primary-custom w-100">Add Route</button>
-                </div>
-              </div>
-            </form>
-          </div>
-        </div> */}
+        </motion.div>
+
         <div className="row">
-          {routes.map((route) => (
+          {routes && routes.length > 0 ? (
+            routes.map((route, index) => {
+              console.log('Rendering route:', index, route)
+              return (
             <div key={route.id} className="col-lg-4 col-md-6 mb-4">
-              <div className="route-card">
-                <div 
-                  className="route-image"
-                  style={{ backgroundImage: `url(${route.image})` }}
-                >
-                  <div className="route-overlay">
-                    <div className="route-title">
-                      {route.to}
+              <div className="route-card-wrapper">
+                <div className="route-card">
+                  <div
+                    className="route-image"
+                    style={{ backgroundImage: `url(${route.image})` }}
+                  >
+                    <div className="route-overlay">
+                      <AnimatedJourney from={route.from} to={route.to} />
                     </div>
                   </div>
-                </div>
-                <div className="p-3">
-                  <div className="d-flex justify-content-between align-items-center mb-2">
-                    <h5 className="mb-0">{route.from} to {route.to}</h5>
-                    <span className="price-badge">₹{route.price}</span>
-                  </div>
-                  <p className="text-muted mb-3">{route.description}</p>
-                  <div className="d-flex justify-content-between">
-                    <button className="btn btn-primary-custom btn-sm">
-                      Book Now
-                    </button>
-                    {/* <button className="btn btn-info btn-sm" onClick={() => handleEditRoute(route)}>
-                      Edit
-                    </button>
-                    <button className="btn btn-danger btn-sm" onClick={() => handleDeleteRoute(route.id)}>
-                      Delete
-                    </button> */}
+                  <div className="p-3">
+                    <div className="d-flex justify-content-between align-items-center mb-3">
+                      <span className="price-badge">
+                        ₹{route.price}
+                      </span>
+                    </div>
+                    <p className="text-muted mb-3">{route.description}</p>
+                    <div className="d-flex justify-content-between">
+                      <button className="btn btn-primary-custom btn-sm w-100">
+                        Book Now
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
-          ))}
+              )
+            })
+          ) : (
+            <div className="col-12 text-center py-5">
+              <p>No routes available</p>
+            </div>
+          )}
         </div>
-        <div className="text-center mt-4">
-          <a href="#" className="text-decoration-none">View All Routes →</a>
-        </div>
+
+        <motion.div
+          className="text-center mt-4"
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true }}
+          transition={{ delay: 0.5 }}
+        >
+          <motion.a
+            href="#"
+            className="text-decoration-none view-all-link"
+            whileHover={{ x: 5 }}
+            transition={{ duration: 0.3 }}
+          >
+            View All Routes →
+          </motion.a>
+        </motion.div>
       </div>
     </section>
   )

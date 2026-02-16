@@ -4,7 +4,7 @@ import { bookingHistory } from '../../data/bookingHistory';
 
 export const fetchBookings = createAsyncThunk('bookingHistory/fetchBookings', async () => {
   const result = await apiCall(
-    () => apiClient.get('/api/bookings'),
+    () => apiClient.get('/v1/bookings'),
     bookingHistory.map(booking => ({ ...booking, amount: booking.fare })) // Map fare to amount for consistency
   );
 
@@ -17,7 +17,7 @@ export const fetchBookings = createAsyncThunk('bookingHistory/fetchBookings', as
 
 export const updateBookingAsync = createAsyncThunk('bookingHistory/updateBookingAsync', async (booking) => {
   const result = await apiCall(
-    () => apiClient.put(`/api/bookings/${booking.id}`, booking),
+    () => apiClient.put(`/v1/bookings/${booking.id}`, booking),
     booking // Return the booking as-is for offline mode
   );
 
@@ -60,7 +60,20 @@ const bookingHistorySlice = createSlice({
       })
       .addCase(fetchBookings.fulfilled, (state, action) => {
         state.loading = false;
-        state.bookings = action.payload.data || [];
+        // Ensure bookings is always an array
+        let bookingsData = action.payload.data || [];
+        if (!Array.isArray(bookingsData)) {
+          // If it's an object with a 'data' or 'bookings' property, extract it
+          if (bookingsData.data && Array.isArray(bookingsData.data)) {
+            bookingsData = bookingsData.data;
+          } else if (bookingsData.bookings && Array.isArray(bookingsData.bookings)) {
+            bookingsData = bookingsData.bookings;
+          } else {
+            // If it's a single booking object, wrap in array
+            bookingsData = bookingsData ? [bookingsData] : [];
+          }
+        }
+        state.bookings = bookingsData;
         state.isOffline = action.payload.isOffline || false;
         if (action.payload.error && action.payload.isOffline) {
           state.error = action.payload.error;

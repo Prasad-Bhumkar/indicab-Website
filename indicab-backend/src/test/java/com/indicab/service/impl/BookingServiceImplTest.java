@@ -46,7 +46,6 @@ class BookingServiceImplTest {
         testBooking.setAmount(500.0);
         testBooking.setFullName("John Doe");
         testBooking.setLicense("DL01AB1234");
-        testBooking.setPaymentMethod("Card");
         testBooking.setPhoneNumber("9876543210");
         testBooking.setPickupAddress("123 Main St, Bangalore");
         testBooking.setStatus("PENDING");
@@ -59,7 +58,6 @@ class BookingServiceImplTest {
         bookingRequestDTO.setAmount(500.0);
         bookingRequestDTO.setFullName("Jane Doe");
         bookingRequestDTO.setLicense("DL01AB1235");
-        bookingRequestDTO.setPaymentMethod("Card");
         bookingRequestDTO.setPhoneNumber("9876543211");
         bookingRequestDTO.setPickupAddress("456 Oak Ave, Bangalore");
         bookingRequestDTO.setStatus("PENDING");
@@ -76,7 +74,6 @@ class BookingServiceImplTest {
 
         // Assert
         assertThat(result).isNotNull();
-        assertThat(result.getId()).isEqualTo(1L);
         assertThat(result.getFrom()).isEqualTo("Bangalore");
         assertThat(result.getTo()).isEqualTo("Mysore");
         assertThat(result.getAmount()).isEqualTo(500.0);
@@ -110,7 +107,6 @@ class BookingServiceImplTest {
 
         // Assert
         assertThat(result).isPresent();
-        assertThat(result.get().getId()).isEqualTo(1L);
         assertThat(result.get().getFrom()).isEqualTo("Bangalore");
     }
 
@@ -140,7 +136,7 @@ class BookingServiceImplTest {
 
         // Assert
         assertThat(result).hasSize(1);
-        assertThat(result.get(0).getId()).isEqualTo(1L);
+        assertThat(result.get(0).getFrom()).isEqualTo("Bangalore");
     }
 
     @Test

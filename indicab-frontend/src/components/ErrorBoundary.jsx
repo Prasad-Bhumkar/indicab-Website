@@ -1,5 +1,6 @@
 import React from 'react';
 import './ErrorBoundary.css';
+import { getSentry } from '../config/sentry';
 
 /**
  * Error Boundary component to catch and display React errors gracefully
@@ -22,14 +23,23 @@ class ErrorBoundary extends React.Component {
   componentDidCatch(error, errorInfo) {
     // Log error details
     console.error('Error caught by boundary:', error, errorInfo);
-    
+
     this.setState({
       error: error.toString(),
       errorInfo: errorInfo.componentStack,
     });
 
-    // You can also log the error to an error reporting service here
-    // Example: Sentry.captureException(error);
+    // Send to Sentry if available
+    const Sentry = getSentry();
+    if (Sentry) {
+      Sentry.captureException(error, {
+        contexts: {
+          react: {
+            componentStack: errorInfo.componentStack,
+          },
+        },
+      });
+    }
   }
 
   handleReset = () => {

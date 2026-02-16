@@ -1,73 +1,92 @@
-import * as Sentry from '@sentry/react';
-import { BrowserTracing } from '@sentry/tracing';
-
 /**
  * Initialize Sentry for error tracking and performance monitoring
- * 
+ *
  * Environment Variables Required:
- * REACT_APP_SENTRY_DSN: Your Sentry project DSN
- * REACT_APP_ENVIRONMENT: Environment name (development, staging, production)
+ * VITE_SENTRY_DSN: Your Sentry project DSN
+ * VITE_ENVIRONMENT: Environment name (development, staging, production)
  */
-export const initSentry = () => {
-  const sentryDSN = process.env.REACT_APP_SENTRY_DSN;
-  const environment = process.env.REACT_APP_ENVIRONMENT || 'development';
 
-  if (!sentryDSN) {
-    console.warn('Sentry DSN not configured. Error tracking is disabled.');
+let sentryInitialized = false;
+let Sentry = null;
+
+export const initSentry = async () => {
+  // Don't initialize multiple times
+  if (sentryInitialized) {
     return;
   }
 
-  Sentry.init({
-    dsn: sentryDSN,
-    environment,
-    
-    // Performance monitoring
-    integrations: [
-      new BrowserTracing({
-        routingInstrumentation: Sentry.reactRouterV6Instrumentation(
-          window.history
-        ),
-      }),
-      new Sentry.Replay({
-        maskAllText: true,
-        blockAllMedia: true,
-      }),
-    ],
+  const dsn = import.meta.env.VITE_SENTRY_DSN;
+  const environment = import.meta.env.VITE_ENVIRONMENT || import.meta.env.MODE || 'development';
 
-    // Set sampling rates for performance monitoring
-    tracesSampleRate: environment === 'production' ? 0.1 : 1.0,
-    
-    // Session replay sampling
-    replaysSessionSampleRate: 0.1,
-    replaysOnErrorSampleRate: 1.0,
+  // Try to use Sentry if available
+  if (dsn) {
+    try {
+      // Dynamically import Sentry if available
+      const SentryReact = await import('@sentry/react');
+      const SentryTracing = await import('@sentry/tracing');
 
-    // Release tracking
-    release: process.env.REACT_APP_VERSION || '1.0.0',
+      Sentry = SentryReact.default || SentryReact;
 
-    // Configure ignored errors
-    ignoreErrors: [
-      // Random plugins/extensions
-      'top.GLOBALS',
-      // Chrome extensions
-      'chrome-extension://',
-      'moz-extension://',
-      // Network errors that aren't actionable
-      'NetworkError',
-      'Non-Error promise rejection captured',
-    ],
+      Sentry.init({
+        dsn,
+        environment,
+        integrations: [
+          new SentryTracing.BrowserTracing(),
+          new Sentry.Replay({
+            maskAllText: true,
+            blockAllMedia: true,
+          }),
+        ],
+        tracesSampleRate: environment === 'production' ? 0.1 : 1.0,
+        replaysSessionSampleRate: 0.1,
+        replaysOnErrorSampleRate: 1.0,
+      });
 
-    // Before sending to Sentry
-    beforeSend(event) {
-      // Don't send errors in development
-      if (environment === 'development') {
-        console.log('Sentry event (not sent in development):', event);
-        return null;
-      }
-      return event;
-    },
-  });
-
-  console.log('Sentry initialized for error tracking');
+      sentryInitialized = true;
+      console.log(`Sentry initialized for ${environment} environment`);
+    } catch (error) {
+      // Sentry packages not available or initialization failed
+      console.warn('Sentry packages not available. Install @sentry/react and @sentry/tracing to enable error tracking.');
+      sentryInitialized = true; // Mark as initialized to avoid repeated attempts
+    }
+  } else {
+    console.info('VITE_SENTRY_DSN not configured. Sentry error tracking is disabled.');
+    sentryInitialized = true;
+  }
 };
 
-export default Sentry;
+/**
+ * Get Sentry instance for manual error reporting
+ */
+export const getSentry = () => {
+  return Sentry;
+};
+
+/**
+ * Capture exception and send to Sentry
+ */
+export const captureException = (error, context = {}) => {
+  if (Sentry) {
+    Sentry.captureException(error, { contexts: context });
+  } else {
+    console.error('Error:', error, 'Context:', context);
+  }
+};
+
+/**
+ * Capture message and send to Sentry
+ */
+export const captureMessage = (message, level = 'info') => {
+  if (Sentry) {
+    Sentry.captureMessage(message, level);
+  } else {
+    console.log(`[${level}] ${message}`);
+  }
+};
+
+export default {
+  initSentry,
+  getSentry,
+  captureException,
+  captureMessage,
+};

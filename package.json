@@ -1,5 +1,12 @@
 {
+  "scripts": {
+    "dev:all": "concurrently \"cd indicab-frontend && npm run dev -- --port 5174\" \"cd indicab-backend && mvnw spring-boot:run\"",
+    "dev:all:mac": "concurrently \"cd indicab-frontend && npm run dev -- --port 5174\" \"cd indicab-backend && ./mvnw spring-boot:run\""
+  },
   "devDependencies": {
     "gh-pages": "^6.3.0"
+  },
+  "dependencies": {
+    "concurrently": "^9.2.1"
   }
 }

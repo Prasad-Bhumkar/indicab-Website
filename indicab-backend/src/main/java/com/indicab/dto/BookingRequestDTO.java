@@ -29,10 +29,7 @@ public class BookingRequestDTO {
     
     @NotBlank(message = "License is required")
     private String license;
-    
-    @NotBlank(message = "Payment method is required")
-    private String paymentMethod;
-    
+
     @NotBlank(message = "Phone number is required")
     @Pattern(regexp = "^(\\+?91)?[6-9]\\d{9}$", message = "Phone number must be a valid Indian number (10 digits or +91 format)")
     private String phoneNumber;
@@ -40,7 +37,21 @@ public class BookingRequestDTO {
     @NotBlank(message = "Pickup address is required")
     @Size(min = 5, max = 255, message = "Pickup address must be between 5 and 255 characters")
     private String pickupAddress;
-    
+
+    @NotBlank(message = "Dropoff address is required")
+    @Size(min = 5, max = 255, message = "Dropoff address must be between 5 and 255 characters")
+    private String dropoffAddress;
+
+    @NotBlank(message = "Email is required")
+    @Email(message = "Email should be valid")
+    private String email;
+
+    private Integer passengerCount = 1;
+
+    private String specialRequirements;
+
+    private String contactPreference = "call";
+
     private String status = "PENDING";
 
     public BookingRequestDTO() {}
@@ -66,14 +77,26 @@ public class BookingRequestDTO {
     public String getLicense() { return license; }
     public void setLicense(String license) { this.license = license; }
 
-    public String getPaymentMethod() { return paymentMethod; }
-    public void setPaymentMethod(String paymentMethod) { this.paymentMethod = paymentMethod; }
-
     public String getPhoneNumber() { return phoneNumber; }
     public void setPhoneNumber(String phoneNumber) { this.phoneNumber = phoneNumber; }
 
     public String getPickupAddress() { return pickupAddress; }
     public void setPickupAddress(String pickupAddress) { this.pickupAddress = pickupAddress; }
+
+    public String getDropoffAddress() { return dropoffAddress; }
+    public void setDropoffAddress(String dropoffAddress) { this.dropoffAddress = dropoffAddress; }
+
+    public String getEmail() { return email; }
+    public void setEmail(String email) { this.email = email; }
+
+    public Integer getPassengerCount() { return passengerCount; }
+    public void setPassengerCount(Integer passengerCount) { this.passengerCount = passengerCount; }
+
+    public String getSpecialRequirements() { return specialRequirements; }
+    public void setSpecialRequirements(String specialRequirements) { this.specialRequirements = specialRequirements; }
+
+    public String getContactPreference() { return contactPreference; }
+    public void setContactPreference(String contactPreference) { this.contactPreference = contactPreference; }
 
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }

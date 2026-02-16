@@ -1,0 +1,18 @@
+{
+  "/auth/login": "/auth-login",
+  "/auth/register": "/auth-register",
+  "/auth/logout": "/auth-logout",
+  "/profile": "/profile",
+  "/driver/register": "/driver-register",
+  "/driver/apply": "/driver-apply",
+  "/driver/pending": "/driver-pending",
+  "/driver/approved": "/driver-approved",
+  "/driver/all": "/driver-all",
+  "/driver/rides": "/driver-rides",
+  "/driver/review-application": "/driver-review-application",
+  "/driver/:id": "/driver-all/:id",
+  "/admin/dashboard": "/admin-dashboard",
+  "/admin/users": "/admin-users",
+  "/admin/drivers": "/admin-drivers",
+  "/admin/bookings": "/admin-bookings"
+}

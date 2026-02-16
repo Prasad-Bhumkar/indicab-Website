@@ -1,0 +1,147 @@
+name: Frontend CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+    paths:
+      - 'indicab-frontend/**'
+      - '.github/workflows/ci.yml'
+  pull_request:
+    branches: [ main, develop ]
+    paths:
+      - 'indicab-frontend/**'
+
+jobs:
+  test:
+    name: Test & Build
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        node-version: [18.x, 20.x]
+    
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+          cache-dependency-path: 'indicab-frontend/package-lock.json'
+      
+      - name: Install dependencies
+        working-directory: indicab-frontend
+        run: npm ci
+      
+      - name: Run linter
+        working-directory: indicab-frontend
+        run: npm run lint || true
+        continue-on-error: true
+      
+      - name: Run tests
+        working-directory: indicab-frontend
+        run: npm run test -- --run --reporter=verbose
+      
+      - name: Build application
+        working-directory: indicab-frontend
+        run: npm run build
+        env:
+          VITE_API_BASE_URL: http://localhost:8000
+      
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v3
+        if: success()
+        with:
+          name: dist-${{ matrix.node-version }}
+          path: indicab-frontend/dist
+          retention-days: 7
+      
+      - name: Check bundle size
+        working-directory: indicab-frontend
+        run: |
+          if [ -f dist/index.html ]; then
+            echo "Build successful!"
+            du -sh dist/
+          else
+            echo "Build failed - no dist folder"
+            exit 1
+          fi
+
+  security:
+    name: Security Audit
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: 'indicab-frontend/package-lock.json'
+      
+      - name: Install dependencies
+        working-directory: indicab-frontend
+        run: npm ci
+      
+      - name: Run npm audit
+        working-directory: indicab-frontend
+        run: npm audit --audit-level=moderate
+        continue-on-error: true
+      
+      - name: Check for outdated packages
+        working-directory: indicab-frontend
+        run: npm outdated || true
+
+  deploy:
+    name: Deploy to Netlify
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    needs: [test, security]
+    
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: 'indicab-frontend/package-lock.json'
+      
+      - name: Install dependencies
+        working-directory: indicab-frontend
+        run: npm ci
+      
+      - name: Build
+        working-directory: indicab-frontend
+        run: npm run build
+        env:
+          VITE_API_BASE_URL: ${{ secrets.VITE_API_BASE_URL }}
+      
+      - name: Deploy to Netlify
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+        run: |
+          npm install -g netlify-cli
+          netlify deploy --prod --dir=indicab-frontend/dist
+        continue-on-error: true
+
+  notify:
+    name: Notify Status
+    runs-on: ubuntu-latest
+    if: always()
+    needs: [test, security, deploy]
+    
+    steps:
+      - name: Check build status
+        run: |
+          if [ "${{ needs.test.result }}" == "success" ]; then
+            echo "✅ All tests passed!"
+          else
+            echo "❌ Tests failed"
+            exit 1
+          fi

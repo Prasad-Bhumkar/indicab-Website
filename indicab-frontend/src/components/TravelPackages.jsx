@@ -1,8 +1,16 @@
 import React, { useState, useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchPackages } from '../features/admin/adminSlice';
 
 const TravelPackages = () => {
+  const dispatch = useDispatch();
+  const { packages, loading } = useSelector((state) => state.admin);
   const [isVisible, setIsVisible] = useState({});
   const [activeFilter, setActiveFilter] = useState('all');
+
+  useEffect(() => {
+    dispatch(fetchPackages());
+  }, [dispatch]);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -167,12 +175,20 @@ const TravelPackages = () => {
   };
 
   const getFilteredPackages = () => {
+    // Use fetched packages from API if available, fallback to hardcoded data
+    const pkgs = packages && packages.length > 0 ? packages : [
+      ...hourlyPackages,
+      ...regionalPackages,
+      ...nationalPackages,
+      ...corporatePackages
+    ];
+
     switch (activeFilter) {
-      case 'hourly': return hourlyPackages;
-      case 'regional': return regionalPackages;
-      case 'national': return nationalPackages;
-      case 'corporate': return corporatePackages;
-      default: return [...hourlyPackages, ...regionalPackages, ...nationalPackages];
+      case 'hourly': return pkgs.filter(p => p.type === 'hourly');
+      case 'regional': return pkgs.filter(p => p.type === 'regional');
+      case 'national': return pkgs.filter(p => p.type === 'national');
+      case 'corporate': return pkgs.filter(p => p.type === 'corporate');
+      default: return pkgs;
     }
   };
 

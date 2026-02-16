@@ -1,0 +1,8 @@
+[     266ms] [WARNING] Sentry is disabled. Install @sentry/react and @sentry/tracing to enable error tracking. @ http://localhost/assets/index-DKKCKLsZ.js:75
+[    3241ms] [ERROR] Access to XMLHttpRequest at 'https://api.indicab.com/api/recommendations' from origin 'http://localhost' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource. @ http://localhost/:0
+[    3248ms] [ERROR] Failed to load resource: net::ERR_FAILED @ https://api.indicab.com/api/recommendations:0
+[    3248ms] [ERROR] Access to XMLHttpRequest at 'https://api.indicab.com/api/routes' from origin 'http://localhost' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource. @ http://localhost/:0
+[    3337ms] [ERROR] Failed to load resource: net::ERR_FAILED @ https://api.indicab.com/api/routes:0
+[   75084ms] [ERROR] Access to XMLHttpRequest at 'https://api.indicab.com/api/auth/register' from origin 'http://localhost' has been blocked by CORS policy: Response to preflight request doesn't pass access control check: No 'Access-Control-Allow-Origin' header is present on the requested resource. @ http://localhost/register:0
+[   75086ms] [ERROR] Registration failed: Network Error @ http://localhost/assets/index-DKKCKLsZ.js:66
+[   75086ms] [ERROR] Failed to load resource: net::ERR_FAILED @ https://api.indicab.com/api/auth/register:0

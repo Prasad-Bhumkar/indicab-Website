@@ -23,6 +23,16 @@ jobs:
         ports:
           - 3306:3306
 
+      redis:
+        image: redis:7-alpine
+        options: >-
+          --health-cmd="redis-cli ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=3
+        ports:
+          - 6379:6379
+
     steps:
       - uses: actions/checkout@v4
       
@@ -40,6 +50,10 @@ jobs:
           SPRING_DATASOURCE_URL: jdbc:mysql://localhost:3306/indicab_test
           SPRING_DATASOURCE_USERNAME: root
           SPRING_DATASOURCE_PASSWORD: root
+          SPRING_REDIS_HOST: localhost
+          SPRING_REDIS_PORT: 6379
+          REDIS_ENABLED: true
+          JWT_SECRET: test-secret-key-minimum-32-characters-required-for-testing
 
       - name: Upload coverage reports
         uses: codecov/codecov-action@v3

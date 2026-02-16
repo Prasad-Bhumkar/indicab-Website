@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { logoutUser } from '../features/auth/authSlice';
 import { selectCurrentUser } from '../features/auth/authSelectors';
+import './Header.css';
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -25,6 +26,21 @@ const Header = () => {
 
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      const userDropdown = document.querySelector('.user-dropdown-menu');
+      const dropdownBtn = e.target.closest('.dropdown-toggle');
+
+      if (userDropdown && !dropdownBtn && e.target.closest('.user-dropdown-menu') === null) {
+        userDropdown.classList.remove('show');
+      }
+    };
+
+    document.addEventListener('click', handleClickOutside);
+    return () => document.removeEventListener('click', handleClickOutside);
   }, []);
 
   useEffect(() => {
@@ -53,14 +69,7 @@ const Header = () => {
   };
 
   return (
-    <nav
-      className="navbar navbar-expand-lg navbar-dark position-fixed w-100"
-      style={{
-        zIndex: 1000,
-        top: 0,
-        background: 'linear-gradient(135deg, var(--primary-green) 0%, var(--secondary-green) 100%)',
-      }}
-    >
+    <nav className="navbar navbar-expand-lg navbar-dark position-fixed w-100 navbar-gradient">
       <div className="container">
         <Link className="navbar-brand d-flex align-items-center" to="/" onClick={closeMenu}>
           <i className="bi bi-car-front-fill me-2"></i>
@@ -115,32 +124,74 @@ const Header = () => {
             {user && (
               <>
                 {/* Show dashboard links based on role */}
-                {user.role === 'admin' && (
+                {user.role === 'ADMIN' && (
                   <li className="nav-item">
                     <Link className="nav-link text-white" to="/admin" onClick={closeMenu}>
+                      <i className="bi bi-speedometer2 me-1"></i>
                       Admin Dashboard
                     </Link>
                   </li>
                 )}
-                {user.role === 'driver' && (
+                {user.role === 'DRIVER' && (
                   <li className="nav-item">
                     <Link className="nav-link text-white" to="/driver/dashboard" onClick={closeMenu}>
+                      <i className="bi bi-person-check me-1"></i>
                       Driver Dashboard
                     </Link>
                   </li>
                 )}
-                <li className="nav-item">
-                  <span className="nav-link text-white">Welcome, {user.name}</span>
-                </li>
-                  <li className="nav-item">
-                    <Link className="nav-link text-white" to="/profile" onClick={closeMenu}>
-                      Profile
-                    </Link>
-                  </li>
-                <li className="nav-item">
-                  <button className="nav-link text-white btn btn-link" style={{textDecoration: 'none'}} onClick={handleLogout}>
-                    Logout
+
+                {/* User Menu Dropdown */}
+                <li className="nav-item dropdown">
+                  <button
+                    className="nav-link text-white dropdown-toggle btn btn-link user-dropdown-toggle"
+                    onClick={() => {
+                      const menu = document.querySelector('.user-dropdown-menu');
+                      if (menu) {
+                        menu.classList.toggle('show');
+                      }
+                    }}
+                  >
+                    <i className="bi bi-person-circle me-1"></i>
+                    {user.name || user.email}
                   </button>
+                  <ul className="user-dropdown-menu dropdown-menu dropdown-menu-end">
+                    <li>
+                      <div className="dropdown-header">
+                        <small className="text-muted">Logged in as:</small>
+                        <div className="fw-bold">{user.email}</div>
+                      </div>
+                    </li>
+                    <li><hr className="dropdown-divider" /></li>
+                    <li>
+                      <Link className="dropdown-item" to="/profile" onClick={closeMenu}>
+                        <i className="bi bi-person me-2"></i>
+                        My Profile
+                      </Link>
+                    </li>
+                    <li>
+                      <Link className="dropdown-item" to="/history" onClick={closeMenu}>
+                        <i className="bi bi-clock-history me-2"></i>
+                        Booking History
+                      </Link>
+                    </li>
+                    <li>
+                      <Link className="dropdown-item" to="/ride-tracker" onClick={closeMenu}>
+                        <i className="bi bi-geo-alt me-2"></i>
+                        Track Ride
+                      </Link>
+                    </li>
+                    <li><hr className="dropdown-divider" /></li>
+                    <li>
+                      <button
+                        className="dropdown-item text-danger logout-btn"
+                        onClick={handleLogout}
+                      >
+                        <i className="bi bi-box-arrow-right me-2"></i>
+                        Logout
+                      </button>
+                    </li>
+                  </ul>
                 </li>
               </>
             )}

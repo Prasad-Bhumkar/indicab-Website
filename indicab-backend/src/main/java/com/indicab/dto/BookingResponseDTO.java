@@ -12,15 +12,14 @@ public class BookingResponseDTO {
     private Double amount;
     private String fullName;
     private String license;
-    private String paymentMethod;
     private String phoneNumber;
     private String pickupAddress;
     private String status;
 
     public BookingResponseDTO() {}
 
-    public BookingResponseDTO(Long id, String from, String to, String date, String vehicle, 
-                            Double amount, String fullName, String license, String paymentMethod, 
+    public BookingResponseDTO(Long id, String from, String to, String date, String vehicle,
+                            Double amount, String fullName, String license,
                             String phoneNumber, String pickupAddress, String status) {
         this.id = id;
         this.from = from;
@@ -30,7 +29,6 @@ public class BookingResponseDTO {
         this.amount = amount;
         this.fullName = fullName;
         this.license = license;
-        this.paymentMethod = paymentMethod;
         this.phoneNumber = phoneNumber;
         this.pickupAddress = pickupAddress;
         this.status = status;
@@ -59,9 +57,6 @@ public class BookingResponseDTO {
 
     public String getLicense() { return license; }
     public void setLicense(String license) { this.license = license; }
-
-    public String getPaymentMethod() { return paymentMethod; }
-    public void setPaymentMethod(String paymentMethod) { this.paymentMethod = paymentMethod; }
 
     public String getPhoneNumber() { return phoneNumber; }
     public void setPhoneNumber(String phoneNumber) { this.phoneNumber = phoneNumber; }

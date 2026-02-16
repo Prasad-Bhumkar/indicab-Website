@@ -54,16 +54,19 @@ class BookingControllerIntegrationTest {
         bookingRequestDTO.setVehicle("Sedan");
         bookingRequestDTO.setAmount(500.0);
         bookingRequestDTO.setFullName("Test User");
+        bookingRequestDTO.setEmail("test@example.com");
         bookingRequestDTO.setLicense("DL01AB1234");
-        bookingRequestDTO.setPaymentMethod("Card");
         bookingRequestDTO.setPhoneNumber("9876543210");
         bookingRequestDTO.setPickupAddress("123 Main St");
+        bookingRequestDTO.setDropoffAddress("456 End Ave");
+        bookingRequestDTO.setPassengerCount(1);
+        bookingRequestDTO.setContactPreference("call");
         bookingRequestDTO.setStatus("PENDING");
 
         testBooking = new Booking(
             "Bangalore", "Mysore", "2026-02-15", "Sedan", 500.0,
-            "Test User", "DL01AB1234", "Card", "9876543210",
-            "123 Main St", "PENDING"
+            "Test User", "test@example.com", "9876543210", "DL01AB1234",
+            "123 Main St", "456 End Ave", 1, null, "call", "PENDING"
         );
     }
 

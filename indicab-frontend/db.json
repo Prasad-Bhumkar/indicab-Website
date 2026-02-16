@@ -1,0 +1,565 @@
+{
+  "auth-login": {
+    "token": "mock-jwt-token-123",
+    "refreshToken": "mock-refresh-token-123",
+    "expiresIn": 900,
+    "user": {
+      "id": 1,
+      "name": "John Doe",
+      "email": "john.doe@example.com"
+    }
+  },
+  "auth-register": {
+    "token": "mock-jwt-token-new",
+    "refreshToken": "mock-refresh-token-new",
+    "user": {
+      "id": 3,
+      "name": "New User",
+      "email": "newuser@example.com"
+    }
+  },
+  "auth-logout": {
+    "success": true,
+    "message": "Logout successful"
+  },
+  "profile": {
+    "id": 1,
+    "name": "John Doe",
+    "email": "john.doe@example.com",
+    "phone": "+91-9876543210",
+    "address": "123, Main Street, Mumbai",
+    "avatar": "https://via.placeholder.com/150",
+    "createdAt": "2025-01-15T10:00:00Z",
+    "updatedAt": "2025-01-15T10:00:00Z"
+  },
+  "driver-register": {
+    "id": 3,
+    "message": "Driver application submitted successfully",
+    "status": "PENDING"
+  },
+  "driver-apply": {
+    "id": 3,
+    "message": "Driver application submitted successfully",
+    "status": "PENDING"
+  },
+  "driver-pending": [
+    {
+      "id": 2,
+      "name": "Amit Patel",
+      "email": "amit.patel@example.com",
+      "phone": "+91-9876543212",
+      "licenseNumber": "GJ02CD5678",
+      "licenseExpiry": "2026-08-15",
+      "vehicle": "SUV",
+      "vehicleNumber": "GJ01CD5678",
+      "status": "PENDING",
+      "rating": 0,
+      "totalTrips": 0,
+      "joinedAt": "2025-01-10",
+      "createdAt": "2025-01-10T14:30:00Z",
+      "updatedAt": "2025-01-10T14:30:00Z"
+    }
+  ],
+  "driver-approved": [
+    {
+      "id": 1,
+      "name": "Rajesh Kumar",
+      "email": "rajesh.kumar@example.com",
+      "phone": "+91-9876543211",
+      "licenseNumber": "DL01AB0001",
+      "licenseExpiry": "2026-12-31",
+      "vehicle": "Sedan",
+      "vehicleNumber": "MH01AB1234",
+      "status": "APPROVED",
+      "rating": 4.8,
+      "totalTrips": 245,
+      "joinedAt": "2024-06-15",
+      "createdAt": "2024-06-15T10:00:00Z",
+      "updatedAt": "2025-01-20T10:00:00Z"
+    }
+  ],
+  "driver-all": [
+    {
+      "id": 1,
+      "name": "Rajesh Kumar",
+      "email": "rajesh.kumar@example.com",
+      "phone": "+91-9876543211",
+      "licenseNumber": "DL01AB0001",
+      "licenseExpiry": "2026-12-31",
+      "vehicle": "Sedan",
+      "vehicleNumber": "MH01AB1234",
+      "status": "APPROVED",
+      "rating": 4.8,
+      "totalTrips": 245,
+      "joinedAt": "2024-06-15",
+      "createdAt": "2024-06-15T10:00:00Z",
+      "updatedAt": "2025-01-20T10:00:00Z"
+    },
+    {
+      "id": 2,
+      "name": "Amit Patel",
+      "email": "amit.patel@example.com",
+      "phone": "+91-9876543212",
+      "licenseNumber": "GJ02CD5678",
+      "licenseExpiry": "2026-08-15",
+      "vehicle": "SUV",
+      "vehicleNumber": "GJ01CD5678",
+      "status": "PENDING",
+      "rating": 0,
+      "totalTrips": 0,
+      "joinedAt": "2025-01-10",
+      "createdAt": "2025-01-10T14:30:00Z",
+      "updatedAt": "2025-01-10T14:30:00Z"
+    }
+  ],
+  "driver-rides": [
+    {
+      "id": 1,
+      "driverId": 1,
+      "from": "Mumbai",
+      "to": "Pune",
+      "departTime": "2025-02-20T10:00:00Z",
+      "arrivalTime": "2025-02-20T13:00:00Z",
+      "passengerCount": 2,
+      "status": "COMPLETED",
+      "earning": 1505.00
+    }
+  ],
+  "driver-review-application": {
+    "success": true,
+    "message": "Application reviewed successfully",
+    "status": "APPROVED"
+  },
+  "admin-dashboard": {
+    "totalUsers": 1250,
+    "totalDrivers": 324,
+    "totalBookings": 5432,
+    "totalRevenue": 8542500.00,
+    "recentActivity": [
+      {
+        "id": 1,
+        "type": "booking",
+        "user": "John Doe",
+        "action": "Created new booking",
+        "date": "2025-01-20T14:30:00Z"
+      },
+      {
+        "id": 2,
+        "type": "driver",
+        "user": "Amit Patel",
+        "action": "Applied for driver approval",
+        "date": "2025-01-10T14:30:00Z"
+      },
+      {
+        "id": 3,
+        "type": "payment",
+        "user": "System",
+        "action": "Payment processed",
+        "date": "2025-01-20T14:35:00Z"
+      }
+    ]
+  },
+  "admin-users": [
+    {
+      "id": 1,
+      "name": "John Doe",
+      "email": "john.doe@example.com",
+      "phone": "+91-9876543210",
+      "address": "123, Main Street, Mumbai",
+      "avatar": "https://via.placeholder.com/150",
+      "createdAt": "2025-01-15T10:00:00Z",
+      "updatedAt": "2025-01-15T10:00:00Z"
+    },
+    {
+      "id": 2,
+      "name": "Priya Singh",
+      "email": "priya.singh@example.com",
+      "phone": "+91-9123456789",
+      "address": "456, Park Avenue, Bangalore",
+      "avatar": "https://via.placeholder.com/150",
+      "createdAt": "2025-01-10T10:00:00Z",
+      "updatedAt": "2025-01-15T10:00:00Z"
+    }
+  ],
+  "admin-drivers": [
+    {
+      "id": 1,
+      "name": "Rajesh Kumar",
+      "email": "rajesh.kumar@example.com",
+      "phone": "+91-9876543211",
+      "licenseNumber": "DL01AB0001",
+      "licenseExpiry": "2026-12-31",
+      "vehicle": "Sedan",
+      "vehicleNumber": "MH01AB1234",
+      "status": "APPROVED",
+      "rating": 4.8,
+      "totalTrips": 245,
+      "joinedAt": "2024-06-15",
+      "createdAt": "2024-06-15T10:00:00Z",
+      "updatedAt": "2025-01-20T10:00:00Z"
+    },
+    {
+      "id": 2,
+      "name": "Amit Patel",
+      "email": "amit.patel@example.com",
+      "phone": "+91-9876543212",
+      "licenseNumber": "GJ02CD5678",
+      "licenseExpiry": "2026-08-15",
+      "vehicle": "SUV",
+      "vehicleNumber": "GJ01CD5678",
+      "status": "PENDING",
+      "rating": 0,
+      "totalTrips": 0,
+      "joinedAt": "2025-01-10",
+      "createdAt": "2025-01-10T14:30:00Z",
+      "updatedAt": "2025-01-10T14:30:00Z"
+    }
+  ],
+  "admin-bookings": [
+    {
+      "id": 1,
+      "userId": 1,
+      "from": "Mumbai",
+      "to": "Pune",
+      "departDate": "2025-02-20",
+      "returnDate": null,
+      "tripType": "oneway",
+      "vehicle": "Sedan",
+      "vehicleId": 1,
+      "amount": 1505.00,
+      "status": "CONFIRMED",
+      "fullName": "John Doe",
+      "email": "john.doe@example.com",
+      "phoneNumber": "+91-9876543210",
+      "pickupAddress": "Mumbai Central Station",
+      "dropoffAddress": "Pune Railway Station",
+      "passengerCount": 2,
+      "paymentMethod": "UPI",
+      "specialRequirements": "Need child seat",
+      "contactPreference": "call",
+      "createdAt": "2025-01-20T14:30:00Z",
+      "updatedAt": "2025-01-20T14:30:00Z"
+    },
+    {
+      "id": 2,
+      "userId": 1,
+      "from": "Mumbai",
+      "to": "Nashik",
+      "departDate": "2025-02-15",
+      "returnDate": "2025-02-17",
+      "tripType": "roundtrip",
+      "vehicle": "SUV",
+      "vehicleId": 2,
+      "amount": 3600.00,
+      "status": "PENDING",
+      "fullName": "John Doe",
+      "email": "john.doe@example.com",
+      "phoneNumber": "+91-9876543210",
+      "pickupAddress": "Dadar, Mumbai",
+      "dropoffAddress": "Nashik City Center",
+      "passengerCount": 4,
+      "paymentMethod": "Card",
+      "specialRequirements": null,
+      "contactPreference": "email",
+      "createdAt": "2025-01-18T10:15:00Z",
+      "updatedAt": "2025-01-18T10:15:00Z"
+    },
+    {
+      "id": 3,
+      "userId": 2,
+      "from": "Bangalore",
+      "to": "Mysore",
+      "departDate": "2025-02-25",
+      "returnDate": null,
+      "tripType": "oneway",
+      "vehicle": "Luxury",
+      "vehicleId": 3,
+      "amount": 2400.00,
+      "status": "COMPLETED",
+      "fullName": "Priya Singh",
+      "email": "priya.singh@example.com",
+      "phoneNumber": "+91-9123456789",
+      "pickupAddress": "Bangalore Airport",
+      "dropoffAddress": "Mysore Palace",
+      "passengerCount": 3,
+      "paymentMethod": "UPI",
+      "specialRequirements": null,
+      "contactPreference": "call",
+      "createdAt": "2025-01-05T09:00:00Z",
+      "updatedAt": "2025-01-20T15:45:00Z"
+    }
+  ],
+  "bookings": [
+    {
+      "id": 1,
+      "userId": 1,
+      "from": "Mumbai",
+      "to": "Pune",
+      "departDate": "2025-02-20",
+      "returnDate": null,
+      "tripType": "oneway",
+      "vehicle": "Sedan",
+      "vehicleId": 1,
+      "amount": 1505.00,
+      "status": "CONFIRMED",
+      "fullName": "John Doe",
+      "email": "john.doe@example.com",
+      "phoneNumber": "+91-9876543210",
+      "pickupAddress": "Mumbai Central Station",
+      "dropoffAddress": "Pune Railway Station",
+      "passengerCount": 2,
+      "paymentMethod": "UPI",
+      "specialRequirements": "Need child seat",
+      "contactPreference": "call",
+      "createdAt": "2025-01-20T14:30:00Z",
+      "updatedAt": "2025-01-20T14:30:00Z"
+    },
+    {
+      "id": 2,
+      "userId": 1,
+      "from": "Mumbai",
+      "to": "Nashik",
+      "departDate": "2025-02-15",
+      "returnDate": "2025-02-17",
+      "tripType": "roundtrip",
+      "vehicle": "SUV",
+      "vehicleId": 2,
+      "amount": 3600.00,
+      "status": "PENDING",
+      "fullName": "John Doe",
+      "email": "john.doe@example.com",
+      "phoneNumber": "+91-9876543210",
+      "pickupAddress": "Dadar, Mumbai",
+      "dropoffAddress": "Nashik City Center",
+      "passengerCount": 4,
+      "paymentMethod": "Card",
+      "specialRequirements": null,
+      "contactPreference": "email",
+      "createdAt": "2025-01-18T10:15:00Z",
+      "updatedAt": "2025-01-18T10:15:00Z"
+    },
+    {
+      "id": 3,
+      "userId": 2,
+      "from": "Bangalore",
+      "to": "Mysore",
+      "departDate": "2025-02-25",
+      "returnDate": null,
+      "tripType": "oneway",
+      "vehicle": "Luxury",
+      "vehicleId": 3,
+      "amount": 2400.00,
+      "status": "COMPLETED",
+      "fullName": "Priya Singh",
+      "email": "priya.singh@example.com",
+      "phoneNumber": "+91-9123456789",
+      "pickupAddress": "Bangalore Airport",
+      "dropoffAddress": "Mysore Palace",
+      "passengerCount": 3,
+      "paymentMethod": "UPI",
+      "specialRequirements": null,
+      "contactPreference": "call",
+      "createdAt": "2025-01-05T09:00:00Z",
+      "updatedAt": "2025-01-20T15:45:00Z"
+    }
+  ],
+  "routes": [
+    {
+      "id": 1,
+      "from": "Mumbai",
+      "to": "Pune",
+      "distance": 150,
+      "duration": "3 hours",
+      "price": 1505.00,
+      "description": "Most frequented intercity route connecting two major metros via Mumbai-Pune Expressway"
+    },
+    {
+      "id": 2,
+      "from": "Mumbai",
+      "to": "Nashik",
+      "distance": 180,
+      "duration": "3.5 hours",
+      "price": 1800.00,
+      "description": "Popular weekend route from Mumbai to wine country Nashik"
+    },
+    {
+      "id": 3,
+      "from": "Delhi",
+      "to": "Agra",
+      "distance": 200,
+      "duration": "3.5 hours",
+      "price": 1200.00,
+      "description": "Historic route connecting Indian capital to Taj Mahal city"
+    },
+    {
+      "id": 4,
+      "from": "Bangalore",
+      "to": "Mysore",
+      "distance": 140,
+      "duration": "2.5 hours",
+      "price": 950.00,
+      "description": "Popular route connecting tech hub to royal palace city"
+    },
+    {
+      "id": 5,
+      "from": "Pune",
+      "to": "Aurangabad",
+      "distance": 240,
+      "duration": "4.5 hours",
+      "price": 2407.00,
+      "description": "Historical route connecting Maratha empire centers"
+    }
+  ],
+  "recommendations": [
+    {
+      "id": 1,
+      "title": "Marvel at the Ajanta Caves",
+      "location": "Aurangabad to Ajanta",
+      "price": 2499,
+      "rating": 4.9,
+      "reviews": 3100,
+      "image": "https://whc.unesco.org/uploads/thumbs/site_0243_0001-750-750-20151104152442.jpg"
+    },
+    {
+      "id": 2,
+      "title": "Explore the Ellora Caves",
+      "location": "Aurangabad to Ellora",
+      "price": 2299,
+      "rating": 4.8,
+      "reviews": 2700,
+      "image": "https://blog-content.ixigo.com/wp-content/uploads/2013/08/800px-AJANTA_CAVES_-_C.SHELARE_4.jpg"
+    },
+    {
+      "id": 3,
+      "title": "Hill retreat in Mahabaleshwar",
+      "location": "Pune to Mahabaleshwar",
+      "price": 1899,
+      "rating": 4.7,
+      "reviews": 2400,
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/34/Table_Land_2.jpg/250px-Table_Land_2.jpg"
+    },
+    {
+      "id": 4,
+      "title": "Scenic drive to Lonavala",
+      "location": "Mumbai to Lonavala",
+      "price": 1499,
+      "rating": 4.6,
+      "reviews": 2100,
+      "image": "https://www.pawnalakecamping.net/wp-content/uploads/2023/04/rajmachi.jpg"
+    },
+    {
+      "id": 5,
+      "title": "Relax at Ganpatipule Beach",
+      "location": "Ratnagiri to Ganpatipule",
+      "price": 1799,
+      "rating": 4.8,
+      "reviews": 1900,
+      "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSNhyO7uZ5Jk2L-Eu7hqtTa71vzEQU4yx9xBw&s"
+    }
+  ],
+  "cities": [
+    {
+      "id": 1,
+      "name": "Mumbai",
+      "state": "Maharashtra",
+      "latitude": 19.0760,
+      "longitude": 72.8777,
+      "image": "https://images.unsplash.com/photo-1571619911573-3d66274c3c2f?w=400"
+    },
+    {
+      "id": 2,
+      "name": "Pune",
+      "state": "Maharashtra",
+      "latitude": 18.5204,
+      "longitude": 73.8567,
+      "image": "https://images.unsplash.com/photo-1596521625318-6fce98ca8d34?w=400"
+    },
+    {
+      "id": 3,
+      "name": "Bangalore",
+      "state": "Karnataka",
+      "latitude": 12.9716,
+      "longitude": 77.5946,
+      "image": "https://images.unsplash.com/photo-1570168008234-17ca6d796e4b?w=400"
+    },
+    {
+      "id": 4,
+      "name": "Nashik",
+      "state": "Maharashtra",
+      "latitude": 19.9975,
+      "longitude": 73.7898,
+      "image": "https://images.unsplash.com/photo-1511379938547-c1f69b13d835?w=400"
+    },
+    {
+      "id": 5,
+      "name": "Delhi",
+      "state": "Delhi",
+      "latitude": 28.7041,
+      "longitude": 77.1025,
+      "image": "https://images.unsplash.com/photo-1505329007048-bc58266f4b0f?w=400"
+    }
+  ],
+  "drivers": [
+    {
+      "id": 1,
+      "name": "Rajesh Kumar",
+      "email": "rajesh.kumar@example.com",
+      "phone": "+91-9876543211",
+      "licenseNumber": "DL01AB0001",
+      "licenseExpiry": "2026-12-31",
+      "vehicle": "Sedan",
+      "vehicleNumber": "MH01AB1234",
+      "status": "APPROVED",
+      "rating": 4.8,
+      "totalTrips": 245,
+      "joinedAt": "2024-06-15",
+      "createdAt": "2024-06-15T10:00:00Z",
+      "updatedAt": "2025-01-20T10:00:00Z"
+    },
+    {
+      "id": 2,
+      "name": "Amit Patel",
+      "email": "amit.patel@example.com",
+      "phone": "+91-9876543212",
+      "licenseNumber": "GJ02CD5678",
+      "licenseExpiry": "2026-08-15",
+      "vehicle": "SUV",
+      "vehicleNumber": "GJ01CD5678",
+      "status": "PENDING",
+      "rating": 0,
+      "totalTrips": 0,
+      "joinedAt": "2025-01-10",
+      "createdAt": "2025-01-10T14:30:00Z",
+      "updatedAt": "2025-01-10T14:30:00Z"
+    }
+  ],
+  "users": [
+    {
+      "id": 1,
+      "name": "John Doe",
+      "email": "john.doe@example.com",
+      "phone": "+91-9876543210",
+      "address": "123, Main Street, Mumbai",
+      "avatar": "https://via.placeholder.com/150",
+      "token": "mock-jwt-token-123",
+      "createdAt": "2025-01-15T10:00:00Z",
+      "updatedAt": "2025-01-15T10:00:00Z"
+    },
+    {
+      "id": 2,
+      "name": "Priya Singh",
+      "email": "priya.singh@example.com",
+      "phone": "+91-9123456789",
+      "address": "456, Park Avenue, Bangalore",
+      "avatar": "https://via.placeholder.com/150",
+      "token": "mock-jwt-token-456",
+      "createdAt": "2025-01-10T10:00:00Z",
+      "updatedAt": "2025-01-15T10:00:00Z"
+    }
+  ],
+  "health": {
+    "status": "OK",
+    "timestamp": "2025-01-20T15:00:00Z",
+    "version": "1.0.0"
+  }
+}

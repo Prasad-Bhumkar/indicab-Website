@@ -1,5 +1,5 @@
-import axios from 'axios';
+import { apiClient } from '../../config/apiConfig';
 
-export const registerDriverApi = (driverData) => axios.post('http://localhost:8000/api/driver/register', driverData);
-export const fetchAllDriversApi = () => axios.get('http://localhost:8000/api/driver/all');
-export const fetchDriverRidesApi = () => axios.get('http://localhost:8000/api/driver/rides');
+export const registerDriverApi = (driverData) => apiClient.post('/driver/register', driverData);
+export const fetchAllDriversApi = () => apiClient.get('/driver/all');
+export const fetchDriverRidesApi = () => apiClient.get('/driver/rides');

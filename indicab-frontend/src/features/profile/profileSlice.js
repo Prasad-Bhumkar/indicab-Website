@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import axios from 'axios';
+import { apiClient } from '../../config/apiConfig';
 
 // Mock fallback profile data
 const mockProfile = {
@@ -11,15 +11,9 @@ const mockProfile = {
   avatar: 'https://via.placeholder.com/150',
 };
 
-export const fetchProfile = createAsyncThunk('profile/fetchProfile', async (_, { getState }) => {
-  const token = getState().auth.token;
-  const config = {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  };
+export const fetchProfile = createAsyncThunk('profile/fetchProfile', async () => {
   try {
-    const response = await axios.get('http://localhost:8000/api/profile', config);
+    const response = await apiClient.get('/v1/profile');
     if (!response.data) {
       // Use mock fallback if response is empty
       return mockProfile;
@@ -31,15 +25,9 @@ export const fetchProfile = createAsyncThunk('profile/fetchProfile', async (_, {
   }
 });
 
-export const updateProfile = createAsyncThunk('profile/updateProfile', async (profileData, { getState }) => {
-  const token = getState().auth.token;
-  const config = {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  };
+export const updateProfile = createAsyncThunk('profile/updateProfile', async (profileData) => {
   try {
-    const response = await axios.put('http://localhost:8000/api/profile', profileData, config);
+    const response = await apiClient.put('/v1/profile', profileData);
     if (!response.data) {
       return mockProfile;
     }

@@ -8,7 +8,7 @@ const ConnectionStatus = () => {
   useEffect(() => {
     const checkConnection = async () => {
       try {
-        await apiClient.get('/api/bookings', { timeout: 3000 });
+        await apiClient.get('/v1/bookings', { timeout: 3000 });
         if (!isOnline) {
           setIsOnline(true);
           setShowNotification(true);

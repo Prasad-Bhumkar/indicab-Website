@@ -1,50 +1,55 @@
 package com.indicab.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-
-import java.math.BigDecimal;
-
-import jakarta.persistence.Column;
+import jakarta.persistence.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+import java.time.LocalDateTime;
 
 @Entity
+@Table(name = "routes", indexes = {
+    @Index(name = "idx_from_to", columnList = "from_city,to_city"),
+    @Index(name = "idx_is_popular", columnList = "is_popular")
+})
 public class Route {
-
+    
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    @Column(name = "from_location", nullable = false)
-    private String fromLocation;
-
-    @Column(name = "to_location", nullable = false)
-    private String toLocation;
-
-    @Column(name = "distance_value", nullable = false)
+    
+    @Column(name = "from_city", nullable = false)
+    private String fromCity;
+    
+    @Column(name = "to_city", nullable = false)
+    private String toCity;
+    
+    @Column(nullable = false)
     private Double distance;
-
-    @Column(name = "price_value", nullable = false)
-    private BigDecimal price;
-
-    @Column(name = "image_url")
-    private String image;
-
-    @Column(name = "description", columnDefinition = "TEXT")
-    private String description;
-
+    
+    @Column(name = "fixed_price", nullable = false)
+    private Double fixedPrice;
+    
+    @Column(name = "is_popular", nullable = false)
+    private Boolean isPopular = false;
+    
+    @CreationTimestamp
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private LocalDateTime createdAt;
+    
+    @UpdateTimestamp
+    @Column(name = "updated_at", nullable = false)
+    private LocalDateTime updatedAt;
+    
     public Route() {}
-
-    public Route(String fromLocation, String toLocation, Double distance, BigDecimal price, String image, String description) {
-        this.fromLocation = fromLocation;
-        this.toLocation = toLocation;
+    
+    public Route(String fromCity, String toCity, Double distance, Double fixedPrice, Boolean isPopular) {
+        this.fromCity = fromCity;
+        this.toCity = toCity;
         this.distance = distance;
-        this.price = price;
-        this.image = image;
-        this.description = description;
+        this.fixedPrice = fixedPrice;
+        this.isPopular = isPopular;
     }
-
+    
+    // Getters and Setters
     public Long getId() {
         return id;
     }
@@ -53,51 +58,59 @@ public class Route {
         this.id = id;
     }
 
-    public String getFromLocation() {
-        return fromLocation;
+    public String getFromCity() {
+        return fromCity;
     }
-
-    public void setFromLocation(String fromLocation) {
-        this.fromLocation = fromLocation;
+    
+    public void setFromCity(String fromCity) {
+        this.fromCity = fromCity;
     }
-
-    public String getToLocation() {
-        return toLocation;
+    
+    public String getToCity() {
+        return toCity;
     }
-
-    public void setToLocation(String toLocation) {
-        this.toLocation = toLocation;
+    
+    public void setToCity(String toCity) {
+        this.toCity = toCity;
     }
-
+    
     public Double getDistance() {
         return distance;
     }
-
+    
     public void setDistance(Double distance) {
         this.distance = distance;
     }
-
-    public BigDecimal getPrice() {
-        return price;
+    
+    public Double getFixedPrice() {
+        return fixedPrice;
     }
-
-    public void setPrice(BigDecimal price) {
-        this.price = price;
+    
+    public void setFixedPrice(Double fixedPrice) {
+        this.fixedPrice = fixedPrice;
     }
-
-    public String getImage() {
-        return image;
+    
+    public Boolean getIsPopular() {
+        return isPopular;
     }
-
-    public void setImage(String image) {
-        this.image = image;
+    
+    public void setIsPopular(Boolean isPopular) {
+        this.isPopular = isPopular;
     }
-
-    public String getDescription() {
-        return description;
+    
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
     }
-
-    public void setDescription(String description) {
-        this.description = description;
+    
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+    
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+    
+    public void setUpdatedAt(LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
     }
 }

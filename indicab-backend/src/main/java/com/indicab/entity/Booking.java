@@ -36,17 +36,29 @@ public class Booking {
     @Column(name = "full_name", nullable = false)
     private String fullName;
 
-    @Column(nullable = false)
-    private String license;
-
-    @Column(name = "payment_method", nullable = false)
-    private String paymentMethod;
+    @Column(name = "email", nullable = false)
+    private String email;
 
     @Column(name = "phone_number", nullable = false)
     private String phoneNumber;
 
+    @Column(nullable = true)
+    private String license;
+
     @Column(name = "pickup_address", nullable = false)
     private String pickupAddress;
+
+    @Column(name = "dropoff_address", nullable = false)
+    private String dropoffAddress;
+
+    @Column(name = "passenger_count", nullable = false)
+    private Integer passengerCount = 1;
+
+    @Column(name = "special_requirements", columnDefinition = "TEXT")
+    private String specialRequirements;
+
+    @Column(name = "contact_preference", nullable = false)
+    private String contactPreference = "call";
 
     @Column(nullable = false)
     private String status;
@@ -65,22 +77,33 @@ public class Booking {
 
     public Booking() {}
 
-    public Booking(String from, String to, String date, String vehicle, Double amount, String fullName, String license, String paymentMethod, String phoneNumber, String pickupAddress, String status) {
+    public Booking(String from, String to, String date, String vehicle, Double amount, String fullName,
+                   String email, String phoneNumber, String license, String pickupAddress, String dropoffAddress,
+                   Integer passengerCount, String specialRequirements, String contactPreference,
+                   String status) {
         this.from = from;
         this.to = to;
         this.date = date;
         this.vehicle = vehicle;
         this.amount = amount;
         this.fullName = fullName;
-        this.license = license;
-        this.paymentMethod = paymentMethod;
+        this.email = email;
         this.phoneNumber = phoneNumber;
+        this.license = license;
         this.pickupAddress = pickupAddress;
+        this.dropoffAddress = dropoffAddress;
+        this.passengerCount = passengerCount;
+        this.specialRequirements = specialRequirements;
+        this.contactPreference = contactPreference;
         this.status = status;
     }
 
     public Long getId() {
         return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public String getFrom() {
@@ -131,20 +154,12 @@ public class Booking {
         this.fullName = fullName;
     }
 
-    public String getLicense() {
-        return license;
+    public String getEmail() {
+        return email;
     }
 
-    public void setLicense(String license) {
-        this.license = license;
-    }
-
-    public String getPaymentMethod() {
-        return paymentMethod;
-    }
-
-    public void setPaymentMethod(String paymentMethod) {
-        this.paymentMethod = paymentMethod;
+    public void setEmail(String email) {
+        this.email = email;
     }
 
     public String getPhoneNumber() {
@@ -155,12 +170,52 @@ public class Booking {
         this.phoneNumber = phoneNumber;
     }
 
+    public String getLicense() {
+        return license;
+    }
+
+    public void setLicense(String license) {
+        this.license = license;
+    }
+
     public String getPickupAddress() {
         return pickupAddress;
     }
 
     public void setPickupAddress(String pickupAddress) {
         this.pickupAddress = pickupAddress;
+    }
+
+    public String getDropoffAddress() {
+        return dropoffAddress;
+    }
+
+    public void setDropoffAddress(String dropoffAddress) {
+        this.dropoffAddress = dropoffAddress;
+    }
+
+    public Integer getPassengerCount() {
+        return passengerCount;
+    }
+
+    public void setPassengerCount(Integer passengerCount) {
+        this.passengerCount = passengerCount;
+    }
+
+    public String getSpecialRequirements() {
+        return specialRequirements;
+    }
+
+    public void setSpecialRequirements(String specialRequirements) {
+        this.specialRequirements = specialRequirements;
+    }
+
+    public String getContactPreference() {
+        return contactPreference;
+    }
+
+    public void setContactPreference(String contactPreference) {
+        this.contactPreference = contactPreference;
     }
 
     public String getStatus() {

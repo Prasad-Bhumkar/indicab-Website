@@ -29,7 +29,7 @@ import java.time.LocalDateTime;
  * Authentication controller handling login, registration, and token refresh
  */
 @RestController
-@RequestMapping("/api/auth")
+@RequestMapping("/api/v1/auth")
 @Tag(name = "Authentication", description = "User authentication endpoints")
 public class AuthController {
 
@@ -49,13 +49,13 @@ public class AuthController {
     private RefreshTokenService refreshTokenService;
 
     @PostMapping("/login")
-    @Operation(summary = "User login", description = "Authenticate user with email and password, returns access and refresh tokens")
+    @Operation(summary = "User login", description = "Authenticate user with email and password, returns access token, refresh token, and user details")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Login successful"),
         @ApiResponse(responseCode = "401", description = "Invalid credentials"),
         @ApiResponse(responseCode = "400", description = "Validation failed")
     })
-    public ResponseEntity<RefreshTokenResponseDTO> login(@Valid @RequestBody LoginRequestDTO loginRequest) {
+    public ResponseEntity<AuthResponseDTO> login(@Valid @RequestBody LoginRequestDTO loginRequest) {
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword()));
 
@@ -69,11 +69,21 @@ public class AuthController {
         // Generate refresh token
         RefreshToken refreshToken = refreshTokenService.createRefreshToken(user.getId());
 
-        return ResponseEntity.ok(new RefreshTokenResponseDTO(accessToken, refreshToken.getToken()));
+        // Build user response DTO
+        UserResponseDTO userResponse = new UserResponseDTO(
+                user.getId(),
+                user.getName(),
+                user.getEmail(),
+                user.getPhone(),
+                user.getAddress(),
+                user.getRole()
+        );
+
+        return ResponseEntity.ok(new AuthResponseDTO(accessToken, refreshToken.getToken(), userResponse));
     }
 
     @PostMapping("/register")
-    @Operation(summary = "User registration", description = "Register a new user account and auto-login")
+    @Operation(summary = "User registration", description = "Register a new user account and auto-login with user details")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "201", description = "Registration successful"),
         @ApiResponse(responseCode = "409", description = "Email already exists"),
@@ -89,8 +99,18 @@ public class AuthController {
             final String accessToken = jwtUtil.generateToken(userDetails);
             RefreshToken refreshToken = refreshTokenService.createRefreshToken(savedUser.getId());
 
+            // Build user response DTO
+            UserResponseDTO userResponse = new UserResponseDTO(
+                    savedUser.getId(),
+                    savedUser.getName(),
+                    savedUser.getEmail(),
+                    savedUser.getPhone(),
+                    savedUser.getAddress(),
+                    savedUser.getRole()
+            );
+
             return ResponseEntity.status(HttpStatus.CREATED)
-                    .body(new RefreshTokenResponseDTO(accessToken, refreshToken.getToken()));
+                    .body(new AuthResponseDTO(accessToken, refreshToken.getToken(), userResponse));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.CONFLICT)
                     .body(e.getMessage());
@@ -98,7 +118,7 @@ public class AuthController {
     }
 
     @PostMapping("/refresh-token")
-    @Operation(summary = "Refresh access token", description = "Use refresh token to get a new access token")
+    @Operation(summary = "Refresh access token", description = "Use refresh token to get a new access token with user details")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Token refreshed successfully"),
         @ApiResponse(responseCode = "401", description = "Invalid or expired refresh token"),
@@ -113,10 +133,21 @@ public class AuthController {
                     User user = rt.getUser();
                     UserDetails userDetails = userDetailsService.loadUserByUsername(user.getEmail());
                     String newAccessToken = jwtUtil.generateToken(userDetails);
-                    return ResponseEntity.ok(new RefreshTokenResponseDTO(newAccessToken, refreshToken));
+
+                    // Build user response DTO
+                    UserResponseDTO userResponse = new UserResponseDTO(
+                            user.getId(),
+                            user.getName(),
+                            user.getEmail(),
+                            user.getPhone(),
+                            user.getAddress(),
+                            user.getRole()
+                    );
+
+                    return ResponseEntity.ok(new AuthResponseDTO(newAccessToken, refreshToken, userResponse));
                 })
                 .orElseGet(() -> ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                        .body(new RefreshTokenResponseDTO(null, null)));
+                        .body(new AuthResponseDTO(null, null, null)));
     }
 
     @PostMapping("/logout")

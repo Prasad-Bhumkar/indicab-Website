@@ -1,0 +1,8 @@
+[     101ms] [WARNING] Sentry is disabled. Install @sentry/react and @sentry/tracing to enable error tracking. @ http://localhost/assets/index-Xc_AaVol.js:75
+[   28315ms] [ERROR] Failed to load resource: the server responded with a status of 500 () @ http://localhost:8000/api/routes:0
+[   28318ms] [ERROR] [2026-02-15T10:15:15.915Z] [ERROR] [API] ERROR API_RESPONSE - Status: 500 AxiosError: Request failed with status code 500
+    at qx (http://localhost/assets/index-Xc_AaVol.js:61:1087)
+    at XMLHttpRequest.P (http://localhost/assets/index-Xc_AaVol.js:61:5927) @ http://localhost/assets/index-Xc_AaVol.js:63
+[   28319ms] [ERROR] [2026-02-15T10:15:15.916Z] [ERROR] [API_RESPONSE] An internal server error occurred AxiosError: Request failed with status code 500
+    at qx (http://localhost/assets/index-Xc_AaVol.js:61:1087)
+    at XMLHttpRequest.P (http://localhost/assets/index-Xc_AaVol.js:61:5927) @ http://localhost/assets/index-Xc_AaVol.js:63

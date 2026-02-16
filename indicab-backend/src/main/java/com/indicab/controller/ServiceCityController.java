@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/api/service-cities")
+@RequestMapping("/api/v1/service-cities")
 @CrossOrigin(origins = "http://localhost:5173")
 public class ServiceCityController {
 

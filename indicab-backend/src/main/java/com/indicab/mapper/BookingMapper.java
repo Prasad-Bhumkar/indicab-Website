@@ -28,7 +28,6 @@ public class BookingMapper {
             booking.getAmount(),
             booking.getFullName(),
             booking.getLicense(),
-            booking.getPaymentMethod(),
             booking.getPhoneNumber(),
             booking.getPickupAddress(),
             booking.getStatus()

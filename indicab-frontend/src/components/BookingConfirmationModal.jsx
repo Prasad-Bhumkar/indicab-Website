@@ -26,8 +26,10 @@ const BookingConfirmationModal = ({ onClose }) => {
     passengerEmail,
     passengerPhone,
     selectedVehicle,
-    paymentMethod,
     calculatedFare,
+    bookingId,
+    bookingReference,
+    isOffline,
   } = bookingDetails;
 
   return (
@@ -44,9 +46,26 @@ const BookingConfirmationModal = ({ onClose }) => {
         </div>
         <div className="modal-body">
           <div className="text-center mb-4">
-            <i className="bi bi-check-circle-fill" style={{ fontSize: '4rem', color: 'var(--custom-accent)' }}></i>
-            <h4 className="mt-3" style={{ color: 'var(--custom-dark)' }}>Thank You for Your Booking!</h4>
-            <p>Your trip is scheduled. Please find the details below.</p>
+            <i className="bi bi-check-circle-fill" style={{ fontSize: '4rem', color: isOffline ? '#fbbf24' : 'var(--custom-accent)' }}></i>
+            <h4 className="mt-3" style={{ color: 'var(--custom-dark)' }}>
+              {isOffline ? 'Booking Saved Offline' : 'Thank You for Your Booking!'}
+            </h4>
+            <p>
+              {isOffline
+                ? 'Your booking has been saved offline. It will be submitted automatically when your connection is restored.'
+                : 'Your trip is scheduled. Please find the details below.'}
+            </p>
+            {isOffline && (
+              <div style={{ backgroundColor: '#fef3c7', color: '#92400e', padding: '1rem', borderRadius: '6px', marginTop: '1rem', marginBottom: '1rem', border: '1px solid #fcd34d' }}>
+                <p style={{ margin: '0', fontSize: '0.9rem' }}>⚠️ <strong>You are offline.</strong> Your booking details are saved locally and will be submitted when you reconnect to the internet.</p>
+              </div>
+            )}
+            {(bookingId || bookingReference) && (
+              <div style={{ backgroundColor: isOffline ? '#fbbf24' : 'var(--custom-accent)', color: 'var(--custom-dark)', padding: '0.75rem', borderRadius: '6px', marginTop: '1rem', marginBottom: '1rem' }}>
+                {bookingReference && <p style={{ margin: '0.25rem 0', fontSize: '0.9rem' }}>Reference: <strong>{bookingReference}</strong></p>}
+                {bookingId && <p style={{ margin: '0.25rem 0', fontSize: '0.9rem' }}>ID: <strong>{bookingId}</strong></p>}
+              </div>
+            )}
           </div>
           <div className="booking-summary" style={{ backgroundColor: 'rgba(255, 255, 255, 0.5)', padding: '1rem', borderRadius: '8px' }}>
             <p><strong>Trip Type:</strong> <span className="badge" style={{ backgroundColor: 'var(--custom-accent)', color: 'var(--custom-dark)' }}>{tripType.toUpperCase()}</span></p>
@@ -67,7 +86,6 @@ const BookingConfirmationModal = ({ onClose }) => {
             <p><strong>Phone:</strong> {passengerPhone}</p>
             <hr style={{ borderColor: 'var(--custom-accent)' }} />
             <p><strong>Vehicle:</strong> {selectedVehicle?.type}</p>
-            <p><strong>Payment Method:</strong> {paymentMethod}</p>
             <h5 className="mt-3">
               <strong style={{ color: 'var(--custom-dark)' }}>Estimated Fare:</strong> ₹{calculatedFare.toFixed(2)}
             </h5>

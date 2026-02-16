@@ -5,7 +5,7 @@ export const applyAsDriver = createAsyncThunk(
   'driver/applyAsDriver',
   async (registrationData, { rejectWithValue }) => {
     try {
-      const response = await apiClient.post('/driver/apply', registrationData);
+      const response = await apiClient.post('/v1/driver/apply', registrationData);
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || 'Failed to apply as driver');
@@ -17,7 +17,7 @@ export const fetchPendingApplications = createAsyncThunk(
   'driver/fetchPendingApplications',
   async (_, { rejectWithValue }) => {
     try {
-      const response = await apiClient.get('/driver/pending');
+      const response = await apiClient.get('/v1/driver/pending');
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || 'Failed to fetch pending applications');
@@ -29,7 +29,7 @@ export const fetchApprovedDrivers = createAsyncThunk(
   'driver/fetchApprovedDrivers',
   async (_, { rejectWithValue }) => {
     try {
-      const response = await apiClient.get('/driver/approved');
+      const response = await apiClient.get('/v1/driver/approved');
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || 'Failed to fetch approved drivers');
@@ -41,7 +41,7 @@ export const fetchAllDrivers = createAsyncThunk(
   'driver/fetchAllDrivers',
   async (_, { rejectWithValue }) => {
     try {
-      const response = await apiClient.get('/driver/all');
+      const response = await apiClient.get('/v1/driver/all');
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || 'Failed to fetch drivers');
@@ -53,7 +53,7 @@ export const fetchDriverById = createAsyncThunk(
   'driver/fetchDriverById',
   async (driverId, { rejectWithValue }) => {
     try {
-      const response = await apiClient.get(`/driver/${driverId}`);
+      const response = await apiClient.get(`/v1/driver/${driverId}`);
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || 'Failed to fetch driver');
@@ -65,10 +65,22 @@ export const reviewDriverApplication = createAsyncThunk(
   'driver/reviewDriverApplication',
   async (approvalData, { rejectWithValue }) => {
     try {
-      const response = await apiClient.post('/driver/review-application', approvalData);
+      const response = await apiClient.post('/v1/driver/review-application', approvalData);
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || 'Failed to review application');
+    }
+  }
+);
+
+export const fetchDriverRides = createAsyncThunk(
+  'driver/fetchDriverRides',
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await apiClient.get('/v1/driver/rides');
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || 'Failed to fetch driver rides');
     }
   }
 );
@@ -78,6 +90,7 @@ const initialState = {
   pendingApplications: [],
   approvedDrivers: [],
   currentDriver: null,
+  rides: [],
   loading: false,
   error: null,
   successMessage: null,
@@ -189,6 +202,21 @@ const driverSlice = createSlice({
         }
       })
       .addCase(reviewDriverApplication.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      });
+
+    // Fetch Driver Rides
+    builder
+      .addCase(fetchDriverRides.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchDriverRides.fulfilled, (state, action) => {
+        state.loading = false;
+        state.rides = action.payload;
+      })
+      .addCase(fetchDriverRides.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       });

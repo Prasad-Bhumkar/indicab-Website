@@ -1,0 +1,11 @@
+[     156ms] [WARNING] Sentry is disabled. Install @sentry/react and @sentry/tracing to enable error tracking. @ http://localhost/assets/index-Xc_AaVol.js:75
+[   30429ms] [ERROR] Failed to load resource: the server responded with a status of 401 () @ http://localhost:8000/api/auth/login:0
+[   30450ms] [WARNING] [2026-02-15T10:14:35.077Z] [WARN] [API_RESPONSE] Unauthorized - clearing token and redirecting to login @ http://localhost/assets/index-Xc_AaVol.js:63
+[   30454ms] [ERROR] [2026-02-15T10:14:35.081Z] [ERROR] [API] ERROR API_RESPONSE - Status: 401 AxiosError: Request failed with status code 401
+    at qx (http://localhost/assets/index-Xc_AaVol.js:61:1087)
+    at XMLHttpRequest.P (http://localhost/assets/index-Xc_AaVol.js:61:5927) @ http://localhost/assets/index-Xc_AaVol.js:63
+[   30455ms] [ERROR] [2026-02-15T10:14:35.082Z] [ERROR] [API_RESPONSE] Invalid email or password AxiosError: Request failed with status code 401
+    at qx (http://localhost/assets/index-Xc_AaVol.js:61:1087)
+    at XMLHttpRequest.P (http://localhost/assets/index-Xc_AaVol.js:61:5927) @ http://localhost/assets/index-Xc_AaVol.js:63
+[   30460ms] [ERROR] Login failed: {status: 401, message: Invalid email or password, errors: null, timestamp: 2026-02-15T10:14:34.955790663} @ http://localhost/assets/index-Xc_AaVol.js:66
+[   30572ms] [WARNING] Sentry is disabled. Install @sentry/react and @sentry/tracing to enable error tracking. @ http://localhost/assets/index-Xc_AaVol.js:75

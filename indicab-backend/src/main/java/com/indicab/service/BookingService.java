@@ -2,6 +2,8 @@ package com.indicab.service;
 
 import com.indicab.dto.BookingRequestDTO;
 import com.indicab.entity.Booking;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 import java.util.Optional;
@@ -10,37 +12,42 @@ import java.util.Optional;
  * Service interface for booking-related operations
  */
 public interface BookingService {
-    
+
     /**
      * Create a new booking
      */
     Booking createBooking(BookingRequestDTO bookingDTO);
-    
+
     /**
      * Get booking by ID
      */
     Optional<Booking> getBookingById(Long id);
-    
+
     /**
      * Get all bookings
      */
     List<Booking> getAllBookings();
-    
+
+    /**
+     * Get all bookings with pagination
+     */
+    Page<Booking> getAllBookingsPaged(Pageable pageable);
+
     /**
      * Update existing booking
      */
     Booking updateBooking(Long id, BookingRequestDTO bookingDTO);
-    
+
     /**
      * Delete booking
      */
     void deleteBooking(Long id);
-    
+
     /**
      * Check if booking exists
      */
     boolean bookingExists(Long id);
-    
+
     /**
      * Get booking or throw exception
      */

@@ -8,18 +8,29 @@ import { Provider } from 'react-redux'
 import { setCredentials } from './features/auth/authSlice'
 import { initSentry } from './config/sentry'
 
-// Initialize Sentry for error tracking
-initSentry()
+// Initialize Sentry for error tracking (async but non-blocking)
+initSentry().catch((e) => {
+  console.warn('Sentry initialization skipped:', e.message)
+})
 
-const token = localStorage.getItem('token')
-if (token) {
-  store.dispatch(setCredentials({ token, user: null }))
+try {
+  const token = localStorage.getItem('token')
+  if (token) {
+    store.dispatch(setCredentials({ token, user: null }))
+  }
+} catch (e) {
+  console.error('Token init error:', e)
 }
 
-ReactDOM.createRoot(document.getElementById('root')).render(
-  <ErrorBoundary>
-    <Provider store={store}>
-      <App />
-    </Provider>
-  </ErrorBoundary>
-)
+try {
+  ReactDOM.createRoot(document.getElementById('root')).render(
+    <ErrorBoundary>
+      <Provider store={store}>
+        <App />
+      </Provider>
+    </ErrorBoundary>
+  )
+} catch (e) {
+  console.error('React render error:', e)
+  document.getElementById('root').innerHTML = '<div style="color: white; padding: 20px;">Error rendering app: ' + e.message + '</div>'
+}

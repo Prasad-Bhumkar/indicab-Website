@@ -1,0 +1,3 @@
+[     468ms] [WARNING] Sentry is disabled. Install @sentry/react and @sentry/tracing to enable error tracking. @ http://localhost/assets/index-CC-r_ZUl.js:75
+[     477ms] [WARNING] <Router basename="/indicab-Website"> is not able to match the URL "/" because it does not start with the basename, so the <Router> won't render anything. @ http://localhost/assets/index-CC-r_ZUl.js:48
+[     488ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost/vite.svg:0

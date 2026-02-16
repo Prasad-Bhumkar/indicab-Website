@@ -1,6 +1,6 @@
-import axios from 'axios';
+import { apiClient } from '../../config/apiConfig';
 
-export const loginApi = (credentials) => axios.post('/api/auth/login', credentials);
-export const registerApi = (userData) => axios.post('/api/auth/register', userData);
-export const fetchProfileApi = () => axios.get('/api/profile');
-export const updateProfileApi = (profileData) => axios.put('/api/profile', profileData);
+export const loginApi = (credentials) => apiClient.post('/v1/auth/login', credentials);
+export const registerApi = (userData) => apiClient.post('/v1/auth/register', userData);
+export const fetchProfileApi = () => apiClient.get('/v1/profile');
+export const updateProfileApi = (profileData) => apiClient.put('/v1/profile', profileData);
