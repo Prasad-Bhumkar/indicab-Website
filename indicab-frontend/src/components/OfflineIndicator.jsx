@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { offlineQueue } from '../config/apiConfig';
 
 const OfflineIndicator = () => {

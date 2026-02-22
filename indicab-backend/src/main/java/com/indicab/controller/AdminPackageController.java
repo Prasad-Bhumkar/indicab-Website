@@ -9,97 +9,65 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
 import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/admin/packages")
 @Tag(name = "Admin Package Management", description = "APIs for managing travel packages")
 @SecurityRequirement(name = "Bearer Token")
+@PreAuthorize("hasRole('ADMIN')")  // All endpoints require ADMIN role
 public class AdminPackageController {
     
     @Autowired
     private PackageService packageService;
     
     /**
-     * Get all packages with pagination
+     * Get all packages with pagination and sorting
      */
     @GetMapping
-    @Operation(summary = "Get all packages", description = "Retrieve all packages with pagination")
-    public ResponseEntity<?> getAllPackages(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
+    @Operation(summary = "Get all packages", description = "Retrieve all packages with pagination and sorting")
+    public ResponseEntity<Page<Package>> getAllPackages(Pageable pageable) {
         try {
-            Pageable pageable = PageRequest.of(page, size);
             Page<Package> packages = packageService.getAllPackages(pageable);
-            
-            Map<String, Object> response = new HashMap<>();
-            response.put("content", packages.getContent());
-            response.put("totalElements", packages.getTotalElements());
-            response.put("totalPages", packages.getTotalPages());
-            response.put("currentPage", page);
-            response.put("pageSize", size);
-            
-            return ResponseEntity.ok(response);
+            return ResponseEntity.ok(packages);
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(Map.of("message", "Error fetching packages: " + e.getMessage()));
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
-    
+
     /**
-     * Get active packages with pagination
+     * Get active packages with pagination and sorting
      */
     @GetMapping("/active")
-    @Operation(summary = "Get active packages", description = "Retrieve only active packages")
-    public ResponseEntity<?> getActivePackages(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
+    @Operation(summary = "Get active packages", description = "Retrieve only active packages with pagination and sorting")
+    public ResponseEntity<Page<Package>> getActivePackages(Pageable pageable) {
         try {
-            Pageable pageable = PageRequest.of(page, size);
             Page<Package> packages = packageService.getActivePackages(pageable);
-            
-            Map<String, Object> response = new HashMap<>();
-            response.put("content", packages.getContent());
-            response.put("totalElements", packages.getTotalElements());
-            response.put("totalPages", packages.getTotalPages());
-            
-            return ResponseEntity.ok(response);
+            return ResponseEntity.ok(packages);
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(Map.of("message", "Error fetching active packages: " + e.getMessage()));
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
-    
+
     /**
-     * Get packages by type
+     * Get packages by type with pagination and sorting
      */
     @GetMapping("/type/{type}")
-    @Operation(summary = "Get packages by type", description = "Retrieve packages filtered by type")
-    public ResponseEntity<?> getPackagesByType(
+    @Operation(summary = "Get packages by type", description = "Retrieve packages filtered by type with pagination and sorting")
+    public ResponseEntity<Page<Package>> getPackagesByType(
             @PathVariable String type,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
+            Pageable pageable) {
         try {
-            Pageable pageable = PageRequest.of(page, size);
             Page<Package> packages = packageService.getPackagesByType(type, pageable);
-            
-            Map<String, Object> response = new HashMap<>();
-            response.put("content", packages.getContent());
-            response.put("totalElements", packages.getTotalElements());
-            response.put("totalPages", packages.getTotalPages());
-            response.put("type", type);
-            
-            return ResponseEntity.ok(response);
+            return ResponseEntity.ok(packages);
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(Map.of("message", "Error fetching packages by type: " + e.getMessage()));
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
     
@@ -174,6 +142,38 @@ public class AdminPackageController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Map.of("message", "Error deleting package: " + e.getMessage()));
+        }
+    }
+
+    /**
+     * Delete multiple packages
+     */
+    @DeleteMapping("/bulk")
+    @Operation(summary = "Bulk delete packages", description = "Delete multiple packages at once (ADMIN only)")
+    public ResponseEntity<?> bulkDeletePackages(@RequestBody java.util.List<Long> ids) {
+        try {
+            packageService.bulkDeletePackages(ids);
+            return ResponseEntity.ok(Map.of("message", "Packages deleted successfully", "count", ids.size()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("message", "Error deleting packages: " + e.getMessage()));
+        }
+    }
+
+    /**
+     * Bulk update packages status
+     */
+    @PutMapping("/bulk/status")
+    @Operation(summary = "Bulk update package status", description = "Update status for multiple packages at once (ADMIN only)")
+    public ResponseEntity<?> bulkUpdatePackagesStatus(
+            @RequestBody java.util.List<Long> ids,
+            @RequestParam String status) {
+        try {
+            packageService.bulkUpdatePackagesStatus(ids, status);
+            return ResponseEntity.ok(Map.of("message", "Packages updated successfully", "count", ids.size()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("message", "Error updating packages: " + e.getMessage()));
         }
     }
 }

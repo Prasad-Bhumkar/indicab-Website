@@ -111,11 +111,14 @@ const Header = () => {
                 Blog
               </Link>
             </li>
-            <li className="nav-item">
-              <Link className="nav-link text-white" to="/history" onClick={closeMenu}>
-                Booking History
-              </Link>
-            </li>
+            {/* Booking History - only for regular users, not admins */}
+            {!user || user.role !== 'ADMIN' ? (
+              <li className="nav-item">
+                <Link className="nav-link text-white" to="/history" onClick={closeMenu}>
+                  Booking History
+                </Link>
+              </li>
+            ) : null}
             <li className="nav-item">
               <Link className="nav-link text-white" to="/contact" onClick={closeMenu}>
                 Contact Us
@@ -163,32 +166,89 @@ const Header = () => {
                       </div>
                     </li>
                     <li><hr className="dropdown-divider" /></li>
-                    <li>
-                      <Link className="dropdown-item" to="/profile" onClick={closeMenu}>
-                        <i className="bi bi-person me-2"></i>
-                        My Profile
-                      </Link>
-                    </li>
-                    <li>
-                      <Link className="dropdown-item" to="/history" onClick={closeMenu}>
-                        <i className="bi bi-clock-history me-2"></i>
-                        Booking History
-                      </Link>
-                    </li>
-                    <li>
-                      <Link className="dropdown-item" to="/ride-tracker" onClick={closeMenu}>
-                        <i className="bi bi-geo-alt me-2"></i>
-                        Track Ride
-                      </Link>
-                    </li>
-                    <li><hr className="dropdown-divider" /></li>
+
+                    {/* User Menu Items (hidden for admins) */}
+                    {user.role !== 'ADMIN' && (
+                      <>
+                        <li>
+                          <Link className="dropdown-item" to="/profile" onClick={closeMenu}>
+                            <i className="bi bi-person me-2"></i>
+                            My Profile
+                          </Link>
+                        </li>
+                        <li>
+                          <Link className="dropdown-item" to="/history" onClick={closeMenu}>
+                            <i className="bi bi-clock-history me-2"></i>
+                            Booking History
+                          </Link>
+                        </li>
+                        <li>
+                          <Link className="dropdown-item" to="/ride-tracker" onClick={closeMenu}>
+                            <i className="bi bi-geo-alt me-2"></i>
+                            Track Ride
+                          </Link>
+                        </li>
+                        <li><hr className="dropdown-divider" /></li>
+                      </>
+                    )}
+
+                    {/* Admin Menu Items */}
+                    {user.role === 'ADMIN' && (
+                      <>
+                        <li>
+                          <Link className="dropdown-item" to="/admin/dashboard" onClick={closeMenu}>
+                            <i className="bi bi-speedometer2 me-2"></i>
+                            Dashboard
+                          </Link>
+                        </li>
+                        <li>
+                          <Link className="dropdown-item" to="/admin/users" onClick={closeMenu}>
+                            <i className="bi bi-people me-2"></i>
+                            Users
+                          </Link>
+                        </li>
+                        <li>
+                          <Link className="dropdown-item" to="/admin/drivers" onClick={closeMenu}>
+                            <i className="bi bi-person-badge me-2"></i>
+                            Drivers
+                          </Link>
+                        </li>
+                        <li>
+                          <Link className="dropdown-item" to="/admin/bookings" onClick={closeMenu}>
+                            <i className="bi bi-calendar-check me-2"></i>
+                            Bookings
+                          </Link>
+                        </li>
+                        <li>
+                          <Link className="dropdown-item" to="/admin/blogs" onClick={closeMenu}>
+                            <i className="bi bi-newspaper me-2"></i>
+                            Blogs
+                          </Link>
+                        </li>
+                        <li>
+                          <Link className="dropdown-item" to="/admin/packages" onClick={closeMenu}>
+                            <i className="bi bi-box me-2"></i>
+                            Packages
+                          </Link>
+                        </li>
+                        <li>
+                          <Link className="dropdown-item" to="/admin/vehicles" onClick={closeMenu}>
+                            <i className="bi bi-car-front-fill me-2"></i>
+                            Vehicles
+                          </Link>
+                        </li>
+                        <li><hr className="dropdown-divider" /></li>
+                      </>
+                    )}
+
+                    {/* Logout Button */}
                     <li>
                       <button
                         className="dropdown-item text-danger logout-btn"
                         onClick={handleLogout}
                       >
                         <i className="bi bi-box-arrow-right me-2"></i>
-                        Logout
+                        {user.role === 'ADMIN' ? 'Admin Logout' : 'Logout'}
                       </button>
                     </li>
                   </ul>

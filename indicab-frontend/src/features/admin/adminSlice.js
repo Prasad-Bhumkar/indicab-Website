@@ -31,11 +31,17 @@ const mockBookings = [
 ];
 
 const mockBlogs = [
-  { id: 1, title: 'Top 10 Must-Visit Destinations', category: 'Travel Guide', preview: 'Discover amazing places...', date: '2025-07-15', views: 1200, image: 'https://example.com/blog1.jpg', content: 'Full content here' },
+  { id: 1, title: 'Top 10 Must-Visit Destinations', category: 'Travel Guide', preview: 'Discover amazing places across India...', date: '2025-07-15', views: 1200, image: 'https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=500&h=300&fit=crop', content: 'Full content here', status: 'published' },
+  { id: 2, title: 'Budget Travel Tips for 2025', category: 'Tips & Tricks', preview: 'Save money while traveling smart...', date: '2025-07-10', views: 890, image: 'https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=500&h=300&fit=crop', content: 'Full content here', status: 'published' },
+  { id: 3, title: 'Hidden Gems of Mumbai', category: 'Destination Guide', preview: 'Explore the lesser-known attractions...', date: '2025-07-05', views: 650, image: 'https://images.unsplash.com/photo-1493246507139-91e8fad9978e?w=500&h=300&fit=crop', content: 'Full content here', status: 'published' },
 ];
 
 const mockPackages = [
-  { id: 1, name: '4 Hours Rental', type: 'hourly', baseFare: 1299, duration: '4 Hours', validity: '1 Day', discountPercentage: 10, description: 'Quick city trips', features: ['AC Sedan', 'Professional Chauffeur'] },
+  { id: 1, name: '4 Hours Rental', type: 'hourly', baseFare: 1299, duration: '4 Hours', validity: '1 Day', discountPercentage: 10, description: 'Perfect for quick city trips and meetings', features: ['AC Sedan', 'Professional Chauffeur', '40 km included'], image: 'https://images.unsplash.com/photo-1464207687429-7505649dae38?w=500&h=300&fit=crop', isActive: true },
+  { id: 2, name: '8 Hours Rental', type: 'hourly', baseFare: 2499, duration: '8 Hours', validity: '1 Day', discountPercentage: 15, description: 'Full day city exploration', features: ['AC SUV', 'Professional Chauffeur', '80 km included'], image: 'https://images.unsplash.com/photo-1464207687429-7505649dae38?w=500&h=300&fit=crop', isActive: true },
+  { id: 3, name: 'Weekend Getaway', type: 'regional', baseFare: 3999, duration: '2 Days', validity: '7 Days', discountPercentage: 20, description: 'Explore nearby cities', features: ['Premium AC Car', 'Experienced Driver', 'Fuel & Tolls'], image: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=500&h=300&fit=crop', isActive: true },
+  { id: 4, name: 'National Tour', type: 'national', baseFare: 12999, duration: '7 Days', validity: '30 Days', discountPercentage: 25, description: 'Cross-country adventure', features: ['Luxury SUV', 'Expert Guide', 'All Inclusive'], image: 'https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=500&h=300&fit=crop', isActive: true },
+  { id: 5, name: 'Corporate Fleet', type: 'corporate', baseFare: 5000, duration: '1 Day', validity: '30 Days', discountPercentage: 30, description: 'Corporate transport solution', features: ['Executive Cars', 'Professional Drivers', 'Billing Support'], image: 'https://images.unsplash.com/photo-1464207687429-7505649dae38?w=500&h=300&fit=crop', isActive: true },
 ];
 
 const mockVehicles = [
@@ -54,9 +60,9 @@ export const fetchAdminDashboard = createAsyncThunk('admin/fetchAdminDashboard',
 });
 
 // User management thunks
-export const fetchUsers = createAsyncThunk('admin/fetchUsers', async () => {
+export const fetchUsers = createAsyncThunk('admin/fetchUsers', async (params = {}) => {
   try {
-    const response = await adminApi.fetchUsersApi();
+    const response = await adminApi.fetchUsersApi(params);
     return response.data || (isDevelopment ? mockUsers : null);
   } catch (error) {
     console.warn('Failed to fetch users:', error.message);
@@ -92,9 +98,9 @@ export const deleteUser = createAsyncThunk('admin/deleteUser', async (userId) =>
 });
 
 // Driver management thunks
-export const fetchDrivers = createAsyncThunk('admin/fetchDrivers', async () => {
+export const fetchDrivers = createAsyncThunk('admin/fetchDrivers', async (params = {}) => {
   try {
-    const response = await adminApi.fetchDriversApi();
+    const response = await adminApi.fetchDriversApi(params);
     return response.data || (isDevelopment ? mockDrivers : null);
   } catch (error) {
     console.warn('Failed to fetch drivers:', error.message);
@@ -148,9 +154,9 @@ export const rejectDriver = createAsyncThunk('admin/rejectDriver', async (driver
 });
 
 // Booking management thunks
-export const fetchBookings = createAsyncThunk('admin/fetchBookings', async () => {
+export const fetchBookings = createAsyncThunk('admin/fetchBookings', async (params = {}) => {
   try {
-    const response = await adminApi.fetchBookingsApi();
+    const response = await adminApi.fetchBookingsApi(params);
     return response.data || (isDevelopment ? mockBookings : null);
   } catch (error) {
     console.warn('Failed to fetch bookings:', error.message);
@@ -198,9 +204,9 @@ export const fetchRevenue = createAsyncThunk('admin/fetchRevenue', async (period
 });
 
 // Blog management thunks
-export const fetchBlogs = createAsyncThunk('admin/fetchBlogs', async () => {
+export const fetchBlogs = createAsyncThunk('admin/fetchBlogs', async (params = {}) => {
   try {
-    const response = await adminApi.fetchBlogsApi();
+    const response = await adminApi.fetchBlogsApi(params);
     return response.data || (isDevelopment ? mockBlogs : null);
   } catch (error) {
     console.warn('Failed to fetch blogs:', error.message);
@@ -236,9 +242,9 @@ export const deleteBlog = createAsyncThunk('admin/deleteBlog', async (id) => {
 });
 
 // Package management thunks
-export const fetchPackages = createAsyncThunk('admin/fetchPackages', async () => {
+export const fetchPackages = createAsyncThunk('admin/fetchPackages', async (params = {}) => {
   try {
-    const response = await adminApi.fetchPackagesApi();
+    const response = await adminApi.fetchPackagesApi(params);
     return response.data || (isDevelopment ? mockPackages : null);
   } catch (error) {
     console.warn('Failed to fetch packages:', error.message);
@@ -274,9 +280,9 @@ export const deletePackage = createAsyncThunk('admin/deletePackage', async (id) 
 });
 
 // Vehicle management thunks
-export const fetchVehicles = createAsyncThunk('admin/fetchVehicles', async () => {
+export const fetchVehicles = createAsyncThunk('admin/fetchVehicles', async (params = {}) => {
   try {
-    const response = await adminApi.fetchVehiclesApi();
+    const response = await adminApi.fetchVehiclesApi(params);
     return response.data || (isDevelopment ? mockVehicles : null);
   } catch (error) {
     console.warn('Failed to fetch vehicles:', error.message);
@@ -311,6 +317,155 @@ export const deleteVehicle = createAsyncThunk('admin/deleteVehicle', async (id) 
   }
 });
 
+// Bulk operation thunks
+export const bulkDeleteUsers = createAsyncThunk('admin/bulkDeleteUsers', async (ids) => {
+  try {
+    await adminApi.bulkDeleteUsersApi(ids);
+    return ids;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || 'Failed to delete users');
+  }
+});
+
+export const bulkDeleteDrivers = createAsyncThunk('admin/bulkDeleteDrivers', async (ids) => {
+  try {
+    await adminApi.bulkDeleteDriversApi(ids);
+    return ids;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || 'Failed to delete drivers');
+  }
+});
+
+export const bulkDeleteBookings = createAsyncThunk('admin/bulkDeleteBookings', async (ids) => {
+  try {
+    await adminApi.bulkDeleteBookingsApi(ids);
+    return ids;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || 'Failed to delete bookings');
+  }
+});
+
+export const bulkDeleteBlogs = createAsyncThunk('admin/bulkDeleteBlogs', async (ids) => {
+  try {
+    await adminApi.bulkDeleteBlogsApi(ids);
+    return ids;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || 'Failed to delete blogs');
+  }
+});
+
+export const bulkDeletePackages = createAsyncThunk('admin/bulkDeletePackages', async (ids) => {
+  try {
+    await adminApi.bulkDeleteApi('packages', ids);
+    return ids;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || 'Failed to delete packages');
+  }
+});
+
+export const bulkDeleteVehicles = createAsyncThunk('admin/bulkDeleteVehicles', async (ids) => {
+  try {
+    await adminApi.bulkDeleteApi('vehicles', ids);
+    return ids;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || 'Failed to delete vehicles');
+  }
+});
+
+export const bulkUpdateStatus = createAsyncThunk('admin/bulkUpdateStatus', async ({ entityType, ids, status }) => {
+  try {
+    let response;
+    if (entityType === 'bookings') {
+      response = await adminApi.bulkUpdateBookingsStatusApi(ids, status);
+    } else if (entityType === 'blogs') {
+      response = await adminApi.bulkUpdateBlogsStatusApi(ids, status);
+    } else {
+      response = await adminApi.bulkUpdateStatusApi(entityType, ids, status);
+    }
+    return { entityType, ids, status, updatedCount: response.data?.updatedCount || ids.length };
+  } catch (error) {
+    throw new Error(error.response?.data?.message || 'Failed to update status');
+  }
+});
+
+export const bulkUpdateUsersRole = createAsyncThunk('admin/bulkUpdateUsersRole', async ({ ids, role }) => {
+  try {
+    await adminApi.bulkUpdateUsersRoleApi(ids, role);
+    return { ids, role };
+  } catch (error) {
+    throw new Error(error.response?.data?.message || 'Failed to update users role');
+  }
+});
+
+// Audit logs thunk
+export const fetchAuditLogs = createAsyncThunk('admin/fetchAuditLogs', async (params = {}) => {
+  try {
+    const response = await adminApi.fetchAuditLogsApi(params);
+    return response.data || { content: [], totalElements: 0, totalPages: 0 };
+  } catch (error) {
+    console.warn('Failed to fetch audit logs:', error.message);
+    return { content: [], totalElements: 0, totalPages: 0 };
+  }
+});
+
+// Bulk export thunk - exports selected items to specified format
+export const bulkExport = createAsyncThunk(
+  'admin/bulkExport',
+  async ({ entityType, items, format = 'csv', filename = 'export' }, { rejectWithValue }) => {
+    try {
+      // Import export utilities dynamically to avoid circular dependencies
+      const { exportToCSV, exportToExcel, exportToPDF, getExportColumns } = await import('../../utils/exportUtils');
+
+      if (!items || items.length === 0) {
+        return rejectWithValue('No items selected for export');
+      }
+
+      const columns = getExportColumns(entityType);
+
+      if (!columns || columns.length === 0) {
+        return rejectWithValue(`Export not supported for entity type: ${entityType}`);
+      }
+
+      // Perform export based on format
+      switch (format.toLowerCase()) {
+        case 'csv':
+          exportToCSV(items, filename, columns);
+          break;
+        case 'excel':
+        case 'xlsx':
+          exportToExcel(items, filename, columns);
+          break;
+        case 'pdf':
+          exportToPDF(items, filename, columns, { title: `${entityType} Report` });
+          break;
+        default:
+          return rejectWithValue(`Unknown export format: ${format}`);
+      }
+
+      return {
+        entityType,
+        format,
+        count: items.length,
+        filename,
+        success: true,
+      };
+    } catch (error) {
+      console.error('Bulk export error:', error);
+      return rejectWithValue(error.message || 'Failed to export items');
+    }
+  }
+);
+
+export const fetchAuditLogStatistics = createAsyncThunk('admin/fetchAuditLogStatistics', async () => {
+  try {
+    const response = await adminApi.fetchAuditLogStatisticsApi();
+    return response.data;
+  } catch (error) {
+    console.warn('Failed to fetch audit log statistics:', error.message);
+    return null;
+  }
+});
+
 const initialState = {
   dashboard: null,
   users: [],
@@ -319,11 +474,22 @@ const initialState = {
   blogs: [],
   packages: [],
   vehicles: [],
+  auditLogs: [],
+  auditLogStatistics: null,
   stats: null,
   revenue: null,
   loading: false,
   error: null,
   successMessage: null,
+  pagination: {
+    users: { page: 0, size: 10, totalPages: 0, totalElements: 0 },
+    drivers: { page: 0, size: 10, totalPages: 0, totalElements: 0 },
+    bookings: { page: 0, size: 10, totalPages: 0, totalElements: 0 },
+    blogs: { page: 0, size: 10, totalPages: 0, totalElements: 0 },
+    packages: { page: 0, size: 10, totalPages: 0, totalElements: 0 },
+    vehicles: { page: 0, size: 10, totalPages: 0, totalElements: 0 },
+    auditLogs: { page: 0, size: 10, totalPages: 0, totalElements: 0 },
+  },
 };
 
 const adminSlice = createSlice({
@@ -336,6 +502,25 @@ const adminSlice = createSlice({
     clearSuccessMessage: (state) => {
       state.successMessage = null;
     },
+    updateDashboardStats: (state, action) => {
+      state.dashboard = { ...state.dashboard, ...action.payload };
+    },
+    addRealTimeBooking: (state, action) => {
+      state.bookings = [action.payload, ...state.bookings];
+    },
+    updateRealTimeBookingStatus: (state, action) => {
+      const { bookingId, status } = action.payload;
+      const index = state.bookings.findIndex(b => b.id === bookingId);
+      if (index !== -1) {
+        state.bookings[index] = { ...state.bookings[index], status };
+      }
+    },
+    addRealTimeUser: (state, action) => {
+      state.users = [action.payload, ...state.users];
+    },
+    addRealTimeAuditLog: (state, action) => {
+      state.auditLogs = [action.payload, ...state.auditLogs];
+    }
   },
   extraReducers: (builder) => {
     // Dashboard
@@ -361,7 +546,20 @@ const adminSlice = createSlice({
       })
       .addCase(fetchUsers.fulfilled, (state, action) => {
         state.loading = false;
-        state.users = action.payload;
+        // Handle both array response and paginated response object
+        if (Array.isArray(action.payload)) {
+          state.users = action.payload;
+        } else if (action.payload && action.payload.content) {
+          state.users = action.payload.content;
+          state.pagination.users = {
+            page: action.payload.currentPage || action.payload.pageable?.pageNumber || 0,
+            size: action.payload.size || 10,
+            totalPages: action.payload.totalPages || 1,
+            totalElements: action.payload.totalElements || action.payload.content.length,
+          };
+        } else {
+          state.users = action.payload || [];
+        }
       })
       .addCase(fetchUsers.rejected, (state, action) => {
         state.loading = false;
@@ -390,6 +588,16 @@ const adminSlice = createSlice({
       })
       .addCase(deleteUser.rejected, (state, action) => {
         state.error = action.error.message;
+      })
+      .addCase(bulkDeleteUsers.fulfilled, (state, action) => {
+        state.users = state.users.filter(u => !action.payload.includes(u.id));
+        state.successMessage = `Successfully deleted ${action.payload.length} users`;
+      })
+      .addCase(bulkUpdateUsersRole.fulfilled, (state, action) => {
+        state.users = state.users.map(u =>
+          action.payload.ids.includes(u.id) ? { ...u, role: action.payload.role } : u
+        );
+        state.successMessage = `Successfully updated role for ${action.payload.ids.length} users`;
       });
 
     // Drivers
@@ -400,7 +608,20 @@ const adminSlice = createSlice({
       })
       .addCase(fetchDrivers.fulfilled, (state, action) => {
         state.loading = false;
-        state.drivers = action.payload;
+        // Handle both array response and paginated response object
+        if (Array.isArray(action.payload)) {
+          state.drivers = action.payload;
+        } else if (action.payload && action.payload.content) {
+          state.drivers = action.payload.content;
+          state.pagination.drivers = {
+            page: action.payload.currentPage || action.payload.pageable?.pageNumber || 0,
+            size: action.payload.size || 10,
+            totalPages: action.payload.totalPages || 1,
+            totalElements: action.payload.totalElements || action.payload.content.length,
+          };
+        } else {
+          state.drivers = action.payload || [];
+        }
       })
       .addCase(fetchDrivers.rejected, (state, action) => {
         state.loading = false;
@@ -459,7 +680,20 @@ const adminSlice = createSlice({
       })
       .addCase(fetchBookings.fulfilled, (state, action) => {
         state.loading = false;
-        state.bookings = action.payload;
+        // Handle both array response and paginated response object
+        if (Array.isArray(action.payload)) {
+          state.bookings = action.payload;
+        } else if (action.payload && action.payload.content) {
+          state.bookings = action.payload.content;
+          state.pagination.bookings = {
+            page: action.payload.currentPage || action.payload.pageable?.pageNumber || 0,
+            size: action.payload.size || 10,
+            totalPages: action.payload.totalPages || 1,
+            totalElements: action.payload.totalElements || action.payload.content.length,
+          };
+        } else {
+          state.bookings = action.payload || [];
+        }
       })
       .addCase(fetchBookings.rejected, (state, action) => {
         state.loading = false;
@@ -484,6 +718,27 @@ const adminSlice = createSlice({
       })
       .addCase(cancelBooking.rejected, (state, action) => {
         state.error = action.error.message;
+      })
+      .addCase(bulkDeleteBookings.fulfilled, (state, action) => {
+        state.bookings = state.bookings.filter(b => !action.payload.includes(b.id));
+        state.successMessage = `Successfully deleted ${action.payload.length} bookings`;
+      })
+      .addCase(bulkUpdateStatus.fulfilled, (state, action) => {
+        const { entityType, ids, status } = action.payload;
+        if (entityType === 'bookings') {
+          state.bookings = state.bookings.map(b =>
+            ids.includes(b.id) ? { ...b, status } : b
+          );
+        } else if (entityType === 'blogs') {
+          state.blogs = state.blogs.map(b =>
+            ids.includes(b.id) ? { ...b, status } : b
+          );
+        } else if (entityType === 'drivers') {
+          state.drivers = state.drivers.map(d =>
+            ids.includes(d.id) ? { ...d, status } : d
+          );
+        }
+        state.successMessage = `Successfully updated ${ids.length} items to ${status}`;
       });
 
     // Statistics
@@ -503,7 +758,20 @@ const adminSlice = createSlice({
       })
       .addCase(fetchBlogs.fulfilled, (state, action) => {
         state.loading = false;
-        state.blogs = action.payload;
+        // Handle both array response and paginated response object
+        if (Array.isArray(action.payload)) {
+          state.blogs = action.payload;
+        } else if (action.payload && action.payload.content) {
+          state.blogs = action.payload.content;
+          state.pagination.blogs = {
+            page: action.payload.currentPage || action.payload.pageable?.pageNumber || 0,
+            size: action.payload.size || 10,
+            totalPages: action.payload.totalPages || 1,
+            totalElements: action.payload.totalElements || action.payload.content.length,
+          };
+        } else {
+          state.blogs = action.payload || [];
+        }
       })
       .addCase(fetchBlogs.rejected, (state, action) => {
         state.loading = false;
@@ -532,6 +800,10 @@ const adminSlice = createSlice({
       })
       .addCase(deleteBlog.rejected, (state, action) => {
         state.error = action.error.message;
+      })
+      .addCase(bulkDeleteBlogs.fulfilled, (state, action) => {
+        state.blogs = state.blogs.filter(b => !action.payload.includes(b.id));
+        state.successMessage = `Successfully deleted ${action.payload.length} blogs`;
       });
 
     // Packages
@@ -542,7 +814,20 @@ const adminSlice = createSlice({
       })
       .addCase(fetchPackages.fulfilled, (state, action) => {
         state.loading = false;
-        state.packages = action.payload;
+        // Handle both array response and paginated response object
+        if (Array.isArray(action.payload)) {
+          state.packages = action.payload;
+        } else if (action.payload && action.payload.content) {
+          state.packages = action.payload.content;
+          state.pagination.packages = {
+            page: action.payload.currentPage || action.payload.pageable?.pageNumber || 0,
+            size: action.payload.size || 10,
+            totalPages: action.payload.totalPages || 1,
+            totalElements: action.payload.totalElements || action.payload.content.length,
+          };
+        } else {
+          state.packages = action.payload || [];
+        }
       })
       .addCase(fetchPackages.rejected, (state, action) => {
         state.loading = false;
@@ -581,7 +866,20 @@ const adminSlice = createSlice({
       })
       .addCase(fetchVehicles.fulfilled, (state, action) => {
         state.loading = false;
-        state.vehicles = action.payload;
+        // Handle both array response and paginated response object
+        if (Array.isArray(action.payload)) {
+          state.vehicles = action.payload;
+        } else if (action.payload && action.payload.content) {
+          state.vehicles = action.payload.content;
+          state.pagination.vehicles = {
+            page: action.payload.currentPage || action.payload.pageable?.pageNumber || 0,
+            size: action.payload.size || 10,
+            totalPages: action.payload.totalPages || 1,
+            totalElements: action.payload.totalElements || action.payload.content.length,
+          };
+        } else {
+          state.vehicles = action.payload || [];
+        }
       })
       .addCase(fetchVehicles.rejected, (state, action) => {
         state.loading = false;
@@ -611,9 +909,66 @@ const adminSlice = createSlice({
       .addCase(deleteVehicle.rejected, (state, action) => {
         state.error = action.error.message;
       });
+
+    // Audit Logs
+    builder
+      .addCase(fetchAuditLogs.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchAuditLogs.fulfilled, (state, action) => {
+        state.loading = false;
+        // Handle both array response and paginated response object
+        if (Array.isArray(action.payload)) {
+          state.auditLogs = action.payload;
+        } else if (action.payload && action.payload.content) {
+          state.auditLogs = action.payload.content;
+          state.pagination.auditLogs = {
+            page: action.payload.pageNumber || 0,
+            size: action.payload.pageSize || 10,
+            totalPages: action.payload.totalPages || 1,
+            totalElements: action.payload.totalElements || action.payload.content.length,
+          };
+        } else {
+          state.auditLogs = action.payload || [];
+        }
+      })
+      .addCase(fetchAuditLogs.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error.message;
+      })
+      .addCase(fetchAuditLogStatistics.fulfilled, (state, action) => {
+        state.auditLogStatistics = action.payload;
+      })
+      .addCase(fetchAuditLogStatistics.rejected, (state, action) => {
+        state.error = action.error.message;
+      });
+
+    // Bulk Export
+    builder
+      .addCase(bulkExport.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(bulkExport.fulfilled, (state, action) => {
+        state.loading = false;
+        state.successMessage = `Successfully exported ${action.payload.count} ${action.payload.entityType}s as ${action.payload.format.toUpperCase()}`;
+      })
+      .addCase(bulkExport.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload || 'Failed to export items';
+      });
   },
 });
 
-export const { clearError, clearSuccessMessage } = adminSlice.actions;
+export const {
+  clearError,
+  clearSuccessMessage,
+  updateDashboardStats,
+  addRealTimeBooking,
+  updateRealTimeBookingStatus,
+  addRealTimeUser,
+  addRealTimeAuditLog
+} = adminSlice.actions;
 
 export default adminSlice.reducer;

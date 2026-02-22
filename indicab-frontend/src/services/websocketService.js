@@ -87,7 +87,6 @@ class WebSocketService {
     this.reconnectDelay = 2000;
 
     logger.info('WEBSOCKET', 'Connected to WebSocket server');
-    console.log('✓ WebSocket connected:', frame.version);
 
     if (resolve) {
       resolve();

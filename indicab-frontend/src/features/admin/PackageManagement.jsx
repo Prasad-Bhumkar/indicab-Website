@@ -5,15 +5,32 @@ import {
   createPackage,
   updatePackage,
   deletePackage,
+  bulkDeletePackages,
+  clearSuccessMessage,
+  clearError,
 } from './adminSlice';
 import { FiEdit2, FiTrash2, FiPlus } from 'react-icons/fi';
+import { HeaderCheckbox, RowCheckbox } from '../../components/CheckboxColumn';
+import BulkActionBar from '../../components/BulkActionBar';
+import ExportModal from '../../components/ExportModal';
+import {
+  toggleItemSelection,
+  selectAllItems,
+  clearSelection,
+  isItemSelected,
+  getSelectionStats,
+  getBulkActionConfirmMessage,
+  formatSelectedIdsForAPI,
+} from './bulkActionsUtils';
 import './ManagementPages.css';
 
 const PackageManagement = () => {
   const dispatch = useDispatch();
-  const { packages, loading, error } = useSelector((state) => state.admin);
+  const { packages, loading, error, successMessage } = useSelector((state) => state.admin);
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState(null);
+  const [showExportModal, setShowExportModal] = useState(false);
+  const [selectedPackages, setSelectedPackages] = useState(new Set());
   const [formData, setFormData] = useState({
     name: '',
     type: 'hourly',
@@ -88,12 +105,21 @@ const PackageManagement = () => {
     <div className="management-page">
       <div className="page-header">
         <h2>Package Management</h2>
-        <button
-          className="btn btn-primary"
-          onClick={() => setShowForm(!showForm)}
-        >
-          <FiPlus /> {showForm ? 'Cancel' : 'Add New Package'}
-        </button>
+        <div className="header-actions">
+          <button
+            className="add-btn export-btn"
+            onClick={() => setShowExportModal(true)}
+            title="Export packages"
+          >
+            📥 Export
+          </button>
+          <button
+            className="btn btn-primary"
+            onClick={() => setShowForm(!showForm)}
+          >
+            <FiPlus /> {showForm ? 'Cancel' : 'Add New Package'}
+          </button>
+        </div>
       </div>
 
       {error && <div className="alert alert-danger">{error}</div>}
@@ -259,6 +285,14 @@ const PackageManagement = () => {
           <p>No packages found. Create your first package!</p>
         )}
       </div>
+
+      <ExportModal
+        show={showExportModal}
+        onHide={() => setShowExportModal(false)}
+        data={packages}
+        entityType="package"
+        filename="packages"
+      />
     </div>
   );
 };

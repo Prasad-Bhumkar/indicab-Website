@@ -1,22 +1,29 @@
 import React, { useState } from 'react';
+import React, { useState } from 'react';
 import { Outlet, useNavigate, Link } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+import { logout } from '../features/auth/authSlice';
 import './AdminLayout.css';
 
 export default function AdminLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const handleLogout = () => {
-    localStorage.removeItem('token');
-    navigate('/login');
+    dispatch(logout());
+    navigate('/admin-login', { replace: true });
   };
 
   const menuItems = [
     { label: 'Dashboard', icon: '📊', path: '/admin' },
+    { label: 'Analytics', icon: '📈', path: '/admin/analytics' },
+    { label: 'Audit Logs', icon: '📋', path: '/admin/audit-logs' },
+    { label: 'Users', icon: '👥', path: '/admin/users' },
+    { label: 'Drivers', icon: '🚕', path: '/admin/drivers' },
     { label: 'Bookings', icon: '🚗', path: '/admin/bookings' },
-    { label: 'Cities', icon: '🏙️', path: '/admin/cities' },
     { label: 'Vehicles', icon: '🚙', path: '/admin/vehicles' },
-    { label: 'Routes', icon: '🛣️', path: '/admin/routes' },
+    { label: 'Packages', icon: '📦', path: '/admin/packages' },
     { label: 'Blogs', icon: '📝', path: '/admin/blogs' },
   ];
 

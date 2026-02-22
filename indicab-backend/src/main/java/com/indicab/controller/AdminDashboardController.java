@@ -1,6 +1,5 @@
 package com.indicab.controller;
 
-import com.indicab.dto.PagedResponseDTO;
 import com.indicab.entity.AuditLog;
 import com.indicab.entity.Booking;
 import com.indicab.entity.User;
@@ -16,9 +15,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -29,11 +28,13 @@ import java.util.Map;
 /**
  * Admin dashboard controller for monitoring and managing the platform
  * Provides statistics, user management, booking management, and audit logs
+ * All endpoints require ADMIN role authorization
  */
 @RestController
 @RequestMapping("/api/v1/admin/dashboard")
 @Tag(name = "Admin Dashboard", description = "Admin dashboard and monitoring endpoints")
 @SecurityRequirement(name = "Bearer Token")
+@PreAuthorize("hasRole('ADMIN')")  // All endpoints require ADMIN role
 public class AdminDashboardController {
 
     private static final Logger logger = LoggerFactory.getLogger(AdminDashboardController.class);
@@ -117,58 +118,34 @@ public class AdminDashboardController {
     }
 
     /**
-     * Get users management page
+     * Get users management page with pagination and sorting
      */
     @GetMapping("/users")
-    @Operation(summary = "Get users list", description = "Get paginated list of all users")
-    public ResponseEntity<?> getUsers(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size) {
-        logger.debug("Fetching users list - Page: {}, Size: {}", page, size);
+    @Operation(summary = "Get users list", description = "Get paginated and sorted list of all users")
+    public ResponseEntity<Page<User>> getUsers(Pageable pageable) {
+        logger.debug("Fetching users list - Page: {}, Size: {}", pageable.getPageNumber(), pageable.getPageSize());
 
         try {
-            Pageable pageable = PageRequest.of(page, size);
             Page<User> usersPage = userRepository.findAll(pageable);
-
-            PagedResponseDTO<Map<String, Object>> response = new PagedResponseDTO<>(
-                    usersPage.getContent().stream()
-                            .map(user -> {
-                                Map<String, Object> userMap = new HashMap<>();
-                                userMap.put("id", user.getId());
-                                userMap.put("name", user.getName());
-                                userMap.put("email", user.getEmail());
-                                userMap.put("phone", user.getPhone());
-                                userMap.put("role", user.getRole());
-                                userMap.put("createdAt", user.getCreatedAt());
-                                return userMap;
-                            })
-                            .toList(),
-                    page,
-                    size,
-                    usersPage.getTotalElements(),
-                    usersPage.getTotalPages()
-            );
-
-            return ResponseEntity.ok(response);
+            return ResponseEntity.ok(usersPage);
         } catch (Exception e) {
             logger.error("Error fetching users: {}", e.getMessage());
-            return ResponseEntity.status(500).body(new ErrorResponse("Failed to fetch users"));
+            return ResponseEntity.status(500).build();
         }
     }
 
     /**
-     * Get bookings management page
+     * Get bookings management page with pagination, sorting, and optional filtering
      */
     @GetMapping("/bookings")
-    @Operation(summary = "Get bookings list", description = "Get paginated list of all bookings with filters")
-    public ResponseEntity<?> getBookings(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size,
+    @Operation(summary = "Get bookings list", description = "Get paginated and sorted list of all bookings with optional status filter")
+    public ResponseEntity<Page<Booking>> getBookings(
+            Pageable pageable,
             @RequestParam(required = false) String status) {
-        logger.debug("Fetching bookings list - Page: {}, Size: {}, Status: {}", page, size, status);
+        logger.debug("Fetching bookings list - Page: {}, Size: {}, Status: {}",
+                   pageable.getPageNumber(), pageable.getPageSize(), status);
 
         try {
-            Pageable pageable = PageRequest.of(page, size);
             Page<Booking> bookingsPage;
 
             if (status != null && !status.isEmpty()) {
@@ -176,81 +153,38 @@ public class AdminDashboardController {
                                                                 .stream()
                                                                 .filter(b -> status.equals(b.getStatus()))
                                                                 .toList();
-                
+
                 // Manually apply pagination to the filtered list
                 int start = (int) pageable.getOffset();
                 int end = Math.min((start + pageable.getPageSize()), filteredBookings.size());
-                
+
                 List<Booking> pagedList = filteredBookings.subList(start, end);
                 bookingsPage = new PageImpl<>(pagedList, pageable, filteredBookings.size());
             } else {
                 bookingsPage = bookingRepository.findAll(pageable);
             }
 
-            PagedResponseDTO<Map<String, Object>> response = new PagedResponseDTO<>(
-                    bookingsPage.getContent().stream()
-                            .map(booking -> {
-                                Map<String, Object> bookingMap = new HashMap<>();
-                                bookingMap.put("id", booking.getId());
-                                bookingMap.put("from", booking.getFrom());
-                                bookingMap.put("to", booking.getTo());
-                                bookingMap.put("amount", booking.getAmount());
-                                bookingMap.put("status", booking.getStatus());
-                                bookingMap.put("createdAt", booking.getCreatedAt());
-                                return bookingMap;
-                            })
-                            .toList(),
-                    page,
-                    size,
-                    bookingsPage.getTotalElements(),
-                    bookingsPage.getTotalPages()
-            );
-
-            return ResponseEntity.ok(response);
+            return ResponseEntity.ok(bookingsPage);
         } catch (Exception e) {
             logger.error("Error fetching bookings: {}", e.getMessage());
-            return ResponseEntity.status(500).body(new ErrorResponse("Failed to fetch bookings"));
+            return ResponseEntity.status(500).build();
         }
     }
 
     /**
-     * Get audit logs
+     * Get audit logs with pagination and sorting
      */
     @GetMapping("/audit-logs")
-    @Operation(summary = "Get audit logs", description = "Get paginated list of audit logs")
-    public ResponseEntity<?> getAuditLogs(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size) {
-        logger.debug("Fetching audit logs - Page: {}, Size: {}", page, size);
+    @Operation(summary = "Get audit logs", description = "Get paginated and sorted list of audit logs")
+    public ResponseEntity<Page<AuditLog>> getAuditLogs(Pageable pageable) {
+        logger.debug("Fetching audit logs - Page: {}, Size: {}", pageable.getPageNumber(), pageable.getPageSize());
 
         try {
-            Pageable pageable = PageRequest.of(page, size);
             Page<AuditLog> auditLogsPage = auditLogRepository.findAll(pageable);
-
-            PagedResponseDTO<Map<String, Object>> response = new PagedResponseDTO<>(
-                    auditLogsPage.getContent().stream()
-                            .map(log -> {
-                                Map<String, Object> logMap = new HashMap<>();
-                                logMap.put("id", log.getId());
-                                logMap.put("userId", log.getUserId());
-                                logMap.put("operation", log.getOperation());
-                                logMap.put("resourceType", log.getResourceType());
-                                logMap.put("status", log.getStatus());
-                                logMap.put("ipAddress", log.getIpAddress());
-                                logMap.put("createdAt", log.getCreatedAt());
-                                return logMap;
-                            })
-                            .toList(),
-                    page,
-                    size,
-                    auditLogsPage.getTotalElements(),
-                    auditLogsPage.getTotalPages()
-            );
-
-            return ResponseEntity.ok(response);
+            return ResponseEntity.ok(auditLogsPage);
         } catch (Exception e) {
             logger.error("Error fetching audit logs: {}", e.getMessage());
-            return ResponseEntity.status(500).body(new ErrorResponse("Failed to fetch audit logs"));
+            return ResponseEntity.status(500).build();
         }
     }
 

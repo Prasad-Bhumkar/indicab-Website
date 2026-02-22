@@ -14,9 +14,11 @@ import java.util.Optional;
 public interface BookingService {
 
     /**
-     * Create a new booking
+     * Create a new booking.
+     * @param bookingDTO booking data
+     * @param currentUserId ID of the authenticated user making the booking, or null for guest
      */
-    Booking createBooking(BookingRequestDTO bookingDTO);
+    Booking createBooking(BookingRequestDTO bookingDTO, Long currentUserId);
 
     /**
      * Get booking by ID
@@ -52,4 +54,24 @@ public interface BookingService {
      * Get booking or throw exception
      */
     Booking getBookingOrThrow(Long id);
+
+    /**
+     * Get all bookings for a specific user with pagination
+     */
+    Page<Booking> getBookingsByUserId(Long userId, Pageable pageable);
+
+    /**
+     * Get all bookings for a specific user
+     */
+    List<Booking> getBookingsByUserId(Long userId);
+
+    /**
+     * Delete multiple bookings
+     */
+    void bulkDeleteBookings(List<Long> ids);
+
+    /**
+     * Update status of multiple bookings
+     */
+    void bulkUpdateBookingsStatus(List<Long> ids, String status);
 }

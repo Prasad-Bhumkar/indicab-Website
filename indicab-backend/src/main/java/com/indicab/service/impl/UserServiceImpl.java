@@ -1,5 +1,6 @@
 package com.indicab.service.impl;
 
+import com.indicab.controller.AdminWebSocketController;
 import com.indicab.dto.UserProfileDTO;
 import com.indicab.dto.UserRegistrationDTO;
 import com.indicab.entity.User;
@@ -27,6 +28,9 @@ public class UserServiceImpl implements UserService {
     private UserRepository userRepository;
 
     @Autowired
+    private AdminWebSocketController adminWebSocketController;
+
+    @Autowired
     private PasswordEncoder passwordEncoder;
 
     @Override
@@ -48,6 +52,10 @@ public class UserServiceImpl implements UserService {
 
         User savedUser = userRepository.save(newUser);
         logger.info("User registered successfully with ID: {}", savedUser.getId());
+
+        // Notify admin via WebSocket
+        adminWebSocketController.broadcastNewUser(savedUser);
+
         return savedUser;
     }
 
@@ -99,5 +107,33 @@ public class UserServiceImpl implements UserService {
                     logger.error("User not found with ID: {}", id);
                     return new IllegalArgumentException("User not found with ID: " + id);
                 });
+    }
+
+    @Override
+    public void bulkDeleteUsers(List<Long> ids) {
+        logger.info("Bulk deleting {} users", ids.size());
+        try {
+            userRepository.deleteAllById(ids);
+            logger.info("Bulk deletion completed for {} users", ids.size());
+        } catch (Exception e) {
+            logger.error("Failed to perform bulk deletion for users", e);
+            throw new RuntimeException("Failed to delete multiple users");
+        }
+    }
+
+    @Override
+    public void bulkUpdateUsersRole(List<Long> ids, String role) {
+        logger.info("Bulk updating role to {} for {} users", role, ids.size());
+        try {
+            List<User> users = userRepository.findAllById(ids);
+            for (User user : users) {
+                user.setRole(role);
+            }
+            userRepository.saveAll(users);
+            logger.info("Bulk role update completed for {} users", ids.size());
+        } catch (Exception e) {
+            logger.error("Failed to perform bulk role update", e);
+            throw new RuntimeException("Failed to update role for multiple users");
+        }
     }
 }

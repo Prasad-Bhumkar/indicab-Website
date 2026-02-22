@@ -1,0 +1,66 @@
+.checkbox-column-header {
+  width: 50px;
+  padding: 12px !important;
+  text-align: center;
+  background-color: #f8f9fa;
+  border-right: 1px solid #dee2e6;
+}
+
+.checkbox-column-cell {
+  width: 50px;
+  padding: 12px !important;
+  text-align: center;
+  border-right: 1px solid #dee2e6;
+}
+
+.checkbox-input {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  accent-color: #0d6efd;
+  border-radius: 3px;
+  transition: all 0.2s ease;
+}
+
+.checkbox-input:hover:not(:disabled) {
+  transform: scale(1.1);
+  box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.1);
+}
+
+.checkbox-input:checked {
+  background-color: #0d6efd;
+  border-color: #0d6efd;
+}
+
+.checkbox-input:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.checkbox-input.indeterminate {
+  background-color: #0d6efd;
+  border-color: #0d6efd;
+}
+
+/* Row highlight when selected */
+tbody tr:has(.checkbox-input:checked) {
+  background-color: #e7f1ff;
+}
+
+tbody tr:has(.checkbox-input:checked) td {
+  background-color: #e7f1ff;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .checkbox-column-header,
+  .checkbox-column-cell {
+    width: 40px;
+    padding: 8px !important;
+  }
+
+  .checkbox-input {
+    width: 16px;
+    height: 16px;
+  }
+}

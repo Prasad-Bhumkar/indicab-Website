@@ -1,13 +1,27 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchBookings, updateBookingStatus, cancelBooking, clearSuccessMessage, clearError } from './adminSlice';
+import { fetchBookings, updateBookingStatus, cancelBooking, bulkDeleteBookings, bulkUpdateStatus, clearSuccessMessage, clearError } from './adminSlice';
+import ExportModal from '../../components/ExportModal';
+import { HeaderCheckbox, RowCheckbox } from '../../components/CheckboxColumn';
+import BulkActionBar from '../../components/BulkActionBar';
+import {
+  toggleItemSelection,
+  selectAllItems,
+  clearSelection,
+  isItemSelected,
+  getSelectionStats,
+  getBulkActionConfirmMessage,
+  formatSelectedIdsForAPI,
+} from './bulkActionsUtils';
 import './ManagementPages.css';
 
 const BookingManagement = () => {
   const dispatch = useDispatch();
   const { bookings, loading, error, successMessage } = useSelector((state) => state.admin);
-  
+
   const [filterStatus, setFilterStatus] = useState('all');
+  const [showExportModal, setShowExportModal] = useState(false);
+  const [selectedBookings, setSelectedBookings] = useState(new Set());
 
   useEffect(() => {
     dispatch(fetchBookings());
@@ -37,19 +51,72 @@ const BookingManagement = () => {
     return `status-badge status-${status?.toLowerCase() || 'pending'}`;
   };
 
-  const filteredBookings = filterStatus === 'all' 
-    ? bookings 
+  const filteredBookings = filterStatus === 'all'
+    ? bookings
     : bookings.filter(b => b.status?.toLowerCase() === filterStatus.toLowerCase());
+
+  // Bulk selection handlers
+  const handleRowCheckboxChange = (bookingId) => {
+    setSelectedBookings(toggleItemSelection(selectedBookings, bookingId));
+  };
+
+  const handleSelectAllChange = () => {
+    const stats = getSelectionStats(selectedBookings, filteredBookings);
+    if (stats.isAllSelected) {
+      setSelectedBookings(clearSelection());
+    } else {
+      setSelectedBookings(selectAllItems(filteredBookings));
+    }
+  };
+
+  const handleBulkDelete = () => {
+    const stats = getSelectionStats(selectedBookings, filteredBookings);
+    const confirmMsg = getBulkActionConfirmMessage('delete', stats.totalSelected, 'booking');
+
+    if (window.confirm(confirmMsg)) {
+      const ids = formatSelectedIdsForAPI(selectedBookings);
+      dispatch(bulkDeleteBookings(ids)).then(() => {
+        setSelectedBookings(clearSelection());
+      });
+    }
+  };
+
+  const handleBulkStatusChange = (status) => {
+    const stats = getSelectionStats(selectedBookings, filteredBookings);
+    const confirmMsg = getBulkActionConfirmMessage(`update status to ${status}`, stats.totalSelected, 'booking');
+
+    if (window.confirm(confirmMsg)) {
+      const ids = formatSelectedIdsForAPI(selectedBookings);
+      dispatch(bulkUpdateStatus({ entityType: 'bookings', ids, status })).then(() => {
+        setSelectedBookings(clearSelection());
+      });
+    }
+  };
+
+  const handleClearSelection = () => {
+    setSelectedBookings(clearSelection());
+  };
 
   return (
     <div className="management-container">
       <div className="management-header">
         <h3 className="management-title">Booking Management</h3>
-        <div className="filter-group">
-          <select 
-            className="form-select" 
-            value={filterStatus} 
-            onChange={(e) => setFilterStatus(e.target.value)}
+        <div className="header-actions">
+          <button
+            className="add-btn export-btn"
+            onClick={() => setShowExportModal(true)}
+            title="Export bookings"
+          >
+            📥 Export
+          </button>
+          <div className="filter-group">
+          <select
+            className="form-select"
+            value={filterStatus}
+            onChange={(e) => {
+              setFilterStatus(e.target.value);
+              setSelectedBookings(clearSelection());
+            }}
             style={{width: 'auto'}}
           >
             <option value="all">All Status</option>
@@ -58,6 +125,7 @@ const BookingManagement = () => {
             <option value="completed">Completed</option>
             <option value="cancelled">Cancelled</option>
           </select>
+        </div>
         </div>
       </div>
 
@@ -75,6 +143,24 @@ const BookingManagement = () => {
         </div>
       )}
 
+      <BulkActionBar
+        selectedCount={selectedBookings.size}
+        totalCount={filteredBookings.length}
+        isAllSelected={selectedBookings.size === filteredBookings.length && filteredBookings.length > 0}
+        entityType="booking"
+        onDelete={handleBulkDelete}
+        onChangeStatus={handleBulkStatusChange}
+        onClearSelection={handleClearSelection}
+        onSelectAll={() => setSelectedBookings(selectAllItems(filteredBookings))}
+        statusOptions={[
+          { value: 'pending', label: 'Pending' },
+          { value: 'ongoing', label: 'Ongoing' },
+          { value: 'completed', label: 'Completed' },
+          { value: 'cancelled', label: 'Cancelled' },
+        ]}
+        loading={loading}
+      />
+
       {loading && !bookings.length ? (
         <div className="loading-spinner">Loading bookings...</div>
       ) : (
@@ -82,6 +168,13 @@ const BookingManagement = () => {
           <table className="management-table">
             <thead>
               <tr>
+                <HeaderCheckbox
+                  isAllSelected={selectedBookings.size === filteredBookings.length && filteredBookings.length > 0}
+                  isIndeterminate={selectedBookings.size > 0 && selectedBookings.size < filteredBookings.length}
+                  onChange={handleSelectAllChange}
+                  disabled={loading || filteredBookings.length === 0}
+                  title="Select all bookings"
+                />
                 <th>Booking ID</th>
                 <th>User</th>
                 <th>Route</th>
@@ -94,6 +187,12 @@ const BookingManagement = () => {
               {filteredBookings.length > 0 ? (
                 filteredBookings.map((booking) => (
                   <tr key={booking.id}>
+                    <RowCheckbox
+                      isSelected={isItemSelected(selectedBookings, booking.id)}
+                      onChange={() => handleRowCheckboxChange(booking.id)}
+                      disabled={loading}
+                      rowId={booking.id}
+                    />
                     <td>#{booking.id}</td>
                     <td>{booking.user}</td>
                     <td>
@@ -123,12 +222,22 @@ const BookingManagement = () => {
                   </tr>
                 ))
               ) : (
-                <tr><td colSpan="6" style={{textAlign: 'center', padding: '2rem'}}>No bookings found.</td></tr>
+                <tr><td colSpan="7" style={{textAlign: 'center', padding: '2rem'}}>No bookings found.</td></tr>
               )}
             </tbody>
           </table>
         </div>
       )}
+
+      <ExportModal
+        show={showExportModal}
+        onHide={() => setShowExportModal(false)}
+        data={selectedBookings.size > 0 ? filteredBookings.filter(b => selectedBookings.has(b.id)) : filteredBookings}
+        entityType="booking"
+        filename="bookings"
+        selectedOnly={selectedBookings.size > 0}
+        selectedCount={selectedBookings.size}
+      />
     </div>
   );
 };

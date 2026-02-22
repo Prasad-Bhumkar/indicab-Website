@@ -4,14 +4,19 @@ import com.indicab.dto.BookingRequestDTO;
 import com.indicab.entity.Booking;
 import com.indicab.repository.BookingRepository;
 import com.indicab.service.BookingService;
+import com.indicab.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -27,10 +32,16 @@ public class BookingServiceImpl implements BookingService {
     private BookingRepository bookingRepository;
 
     @Autowired(required = false)
+    private SimpMessagingTemplate messagingTemplate;
+
+    @Autowired(required = false)
+    private UserService userService;
+
+    @Autowired(required = false)
     private EmailService emailService;
 
     @Override
-    public Booking createBooking(BookingRequestDTO bookingDTO) {
+    public Booking createBooking(BookingRequestDTO bookingDTO, Long currentUserId) {
         logger.info("Creating new booking from {} to {} for {}",
             bookingDTO.getFrom(), bookingDTO.getTo(), bookingDTO.getFullName());
 
@@ -52,15 +63,46 @@ public class BookingServiceImpl implements BookingService {
             bookingDTO.getStatus() != null ? bookingDTO.getStatus() : "PENDING"
         );
 
+        if (currentUserId != null && userService != null) {
+            userService.findById(currentUserId).ifPresent(booking::setUser);
+        }
+
         Booking savedBooking = bookingRepository.save(booking);
         logger.info("Booking created successfully with ID: {} - Amount: ${}", savedBooking.getId(), savedBooking.getAmount());
 
-        // Send notification email to admin
+        broadcastNewBooking(savedBooking);
         if (emailService != null) {
             emailService.sendBookingNotificationToAdmin(savedBooking);
         }
 
         return savedBooking;
+    }
+
+    private void broadcastNewBooking(Booking booking) {
+        if (messagingTemplate == null) return;
+        try {
+            Map<String, Object> payload = new HashMap<>();
+            payload.put("type", "NEW_BOOKING");
+            payload.put("data", booking);
+            payload.put("timestamp", LocalDateTime.now());
+            messagingTemplate.convertAndSend("/topic/admin/bookings", payload);
+        } catch (Exception e) {
+            logger.warn("Failed to broadcast new booking: {}", e.getMessage());
+        }
+    }
+
+    private void broadcastBookingStatusUpdate(Long bookingId, String status) {
+        if (messagingTemplate == null) return;
+        try {
+            Map<String, Object> payload = new HashMap<>();
+            payload.put("type", "BOOKING_STATUS_UPDATE");
+            payload.put("bookingId", bookingId);
+            payload.put("status", status);
+            payload.put("timestamp", LocalDateTime.now());
+            messagingTemplate.convertAndSend("/topic/admin/bookings", payload);
+        } catch (Exception e) {
+            logger.warn("Failed to broadcast booking status update: {}", e.getMessage());
+        }
     }
 
     /**
@@ -72,6 +114,8 @@ public class BookingServiceImpl implements BookingService {
 
         booking.setStatus("CONFIRMED");
         Booking confirmedBooking = bookingRepository.save(booking);
+
+        broadcastBookingStatusUpdate(bookingId, "CONFIRMED");
 
         // Send confirmation email to customer
         if (emailService != null) {
@@ -91,6 +135,8 @@ public class BookingServiceImpl implements BookingService {
 
         booking.setStatus("CANCELLED");
         Booking cancelledBooking = bookingRepository.save(booking);
+
+        broadcastBookingStatusUpdate(bookingId, "CANCELLED");
 
         // Send cancellation email to customer
         if (emailService != null) {
@@ -174,5 +220,45 @@ public class BookingServiceImpl implements BookingService {
                     logger.error("Booking not found with ID: {}", id);
                     return new IllegalArgumentException("Booking not found with ID: " + id);
                 });
+    }
+
+    @Override
+    public Page<Booking> getBookingsByUserId(Long userId, Pageable pageable) {
+        logger.info("Fetching bookings for user ID: {} with pagination", userId);
+        return bookingRepository.findByUserId(userId, pageable);
+    }
+
+    @Override
+    public List<Booking> getBookingsByUserId(Long userId) {
+        logger.info("Fetching all bookings for user ID: {}", userId);
+        return bookingRepository.findByUserId(userId);
+    }
+
+    @Override
+    public void bulkDeleteBookings(List<Long> ids) {
+        logger.info("Bulk deleting {} bookings", ids.size());
+        try {
+            bookingRepository.deleteAllById(ids);
+            logger.info("Bulk deletion completed for {} records", ids.size());
+        } catch (Exception e) {
+            logger.error("Failed to perform bulk deletion", e);
+            throw new RuntimeException("Failed to delete multiple bookings");
+        }
+    }
+
+    @Override
+    public void bulkUpdateBookingsStatus(List<Long> ids, String status) {
+        logger.info("Bulk updating status for {} bookings to {}", ids.size(), status);
+        try {
+            List<Booking> bookings = bookingRepository.findAllById(ids);
+            for (Booking booking : bookings) {
+                booking.setStatus(status);
+            }
+            bookingRepository.saveAll(bookings);
+            logger.info("Bulk status update completed for {} records", ids.size());
+        } catch (Exception e) {
+            logger.error("Failed to perform bulk status update", e);
+            throw new RuntimeException("Failed to update status for multiple bookings");
+        }
     }
 }

@@ -65,7 +65,7 @@
 }
 
 .metric-trend.positive {
-  color: #10b981;
+  color: var(--success-green);
 }
 
 .metric-trend.negative {
@@ -213,7 +213,7 @@
 
 .amount {
   font-weight: 600;
-  color: #059669;
+  color: var(--primary-green);
 }
 
 .time-cell {

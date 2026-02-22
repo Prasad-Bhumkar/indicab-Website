@@ -150,6 +150,51 @@ public class AuthController {
                         .body(new AuthResponseDTO(null, null, null)));
     }
 
+    @PostMapping("/admin-login")
+    @Operation(summary = "Admin login", description = "Authenticate admin with email and password, returns access token and admin details")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Admin login successful"),
+        @ApiResponse(responseCode = "401", description = "Invalid credentials or not an admin"),
+        @ApiResponse(responseCode = "400", description = "Validation failed")
+    })
+    public ResponseEntity<AuthResponseDTO> adminLogin(@Valid @RequestBody LoginRequestDTO loginRequest) {
+        // Attempt authentication
+        try {
+            authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword()));
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Invalid email or password");
+        }
+
+        User user = userService.findByEmail(loginRequest.getEmail())
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        // Validate that user has ADMIN role
+        if (user.getRole() == null || !user.getRole().equals("ADMIN")) {
+            throw new IllegalArgumentException("User does not have admin privileges");
+        }
+
+        final UserDetails userDetails = userDetailsService.loadUserByUsername(loginRequest.getEmail());
+
+        // Generate access token with ADMIN role claim
+        final String accessToken = jwtUtil.generateToken(userDetails);
+
+        // Generate refresh token
+        RefreshToken refreshToken = refreshTokenService.createRefreshToken(user.getId());
+
+        // Build user response DTO
+        UserResponseDTO userResponse = new UserResponseDTO(
+                user.getId(),
+                user.getName(),
+                user.getEmail(),
+                user.getPhone(),
+                user.getAddress(),
+                user.getRole()  // Will be "ADMIN"
+        );
+
+        return ResponseEntity.ok(new AuthResponseDTO(accessToken, refreshToken.getToken(), userResponse));
+    }
+
     @PostMapping("/logout")
     @Operation(summary = "User logout", description = "Logout the current user by revoking their refresh tokens")
     @ApiResponses(value = {

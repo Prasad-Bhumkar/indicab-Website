@@ -64,4 +64,16 @@ public interface AuditLoggingService {
      * Get statistics for audit logging
      */
     String getAuditStatistics();
+
+    /**
+     * Log a bulk operation
+     */
+    void logBulkOperation(Long userId, String operation, String resourceType,
+                         List<Long> resourceIds, String ipAddress, String details);
+
+    /**
+     * Log a failed bulk operation
+     */
+    void logFailedBulkOperation(Long userId, String operation, String resourceType,
+                               List<Long> resourceIds, String ipAddress, String failureReason);
 }

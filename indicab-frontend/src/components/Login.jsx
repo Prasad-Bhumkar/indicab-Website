@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate, Link } from 'react-router-dom';
 import { loginUser } from '../features/auth/authSlice';
@@ -69,7 +70,6 @@ function Login() {
       // Redirect is handled by useEffect watching user state
     } catch (err) {
       // Error is handled by Redux state
-      console.error('Login failed:', err);
     }
   };
 

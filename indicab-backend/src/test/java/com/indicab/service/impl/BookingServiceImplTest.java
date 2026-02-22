@@ -70,7 +70,7 @@ class BookingServiceImplTest {
         when(bookingRepository.save(any(Booking.class))).thenReturn(testBooking);
 
         // Act
-        Booking result = bookingService.createBooking(bookingRequestDTO);
+        Booking result = bookingService.createBooking(bookingRequestDTO, null);
 
         // Assert
         assertThat(result).isNotNull();
@@ -90,7 +90,7 @@ class BookingServiceImplTest {
         when(bookingRepository.save(any(Booking.class))).thenReturn(expectedBooking);
 
         // Act
-        Booking result = bookingService.createBooking(bookingRequestDTO);
+        Booking result = bookingService.createBooking(bookingRequestDTO, null);
 
         // Assert
         assertThat(result.getStatus()).isEqualTo("PENDING");

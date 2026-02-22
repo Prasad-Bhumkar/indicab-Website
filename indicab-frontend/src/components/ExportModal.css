@@ -1,0 +1,44 @@
+.export-format-group {
+  margin-bottom: 1rem;
+}
+
+.export-format-label {
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+  display: block;
+  color: #333;
+}
+
+.export-options {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.export-option {
+  padding: 0.5rem;
+  cursor: pointer;
+}
+
+.export-option input[type="radio"] {
+  cursor: pointer;
+  margin-right: 0.5rem;
+}
+
+.export-option label {
+  cursor: pointer;
+  margin-bottom: 0;
+  font-weight: 500;
+}
+
+.export-info {
+  padding: 0.75rem;
+  background-color: #f8f9fa;
+  border-radius: 0.375rem;
+  margin-top: 1rem;
+}
+
+.export-info small {
+  display: block;
+  text-align: center;
+}

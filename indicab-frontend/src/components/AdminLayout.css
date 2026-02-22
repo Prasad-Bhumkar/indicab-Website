@@ -65,9 +65,9 @@
 }
 
 .nav-item:hover {
-  background-color: #34495e;
-  border-left-color: #3498db;
-  color: #3498db;
+  background-color: transparent;
+  border-left-color: var(--accent-orange);
+  color: var(--accent-orange);
 }
 
 .nav-item.active {

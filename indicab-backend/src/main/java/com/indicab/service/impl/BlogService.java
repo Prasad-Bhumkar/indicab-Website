@@ -161,4 +161,41 @@ public class BlogService {
     public boolean blogExists(Long id) {
         return blogRepository.existsById(id);
     }
+
+    /**
+     * Delete multiple blogs
+     */
+    public void bulkDeleteBlogs(java.util.List<Long> ids) {
+        logger.info("Bulk deleting {} blogs", ids.size());
+        try {
+            blogRepository.deleteAllById(ids);
+            logger.info("Bulk deletion completed for {} blogs", ids.size());
+        } catch (Exception e) {
+            logger.error("Failed to perform bulk deletion for blogs", e);
+            throw new RuntimeException("Failed to delete multiple blogs");
+        }
+    }
+
+    /**
+     * Update status for multiple blogs
+     */
+    public void bulkUpdateBlogsStatus(java.util.List<Long> ids, String status) {
+        logger.info("Bulk updating status to {} for {} blogs", status, ids.size());
+        try {
+            java.util.List<Blog> blogs = blogRepository.findAllById(ids);
+            for (Blog blog : blogs) {
+                blog.setStatus(status);
+                if ("PUBLISHED".equals(status)) {
+                    blog.setPublishedAt(LocalDateTime.now());
+                } else {
+                    blog.setPublishedAt(null);
+                }
+            }
+            blogRepository.saveAll(blogs);
+            logger.info("Bulk status update completed for {} blogs", ids.size());
+        } catch (Exception e) {
+            logger.error("Failed to perform bulk status update for blogs", e);
+            throw new RuntimeException("Failed to update status for multiple blogs");
+        }
+    }
 }

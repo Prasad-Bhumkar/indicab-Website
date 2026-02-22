@@ -1,6 +1,16 @@
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchAdminDashboard, fetchUsers, fetchDrivers, fetchBookings } from './adminSlice';
+import {
+  fetchAdminDashboard,
+  fetchUsers,
+  fetchDrivers,
+  fetchBookings,
+  addRealTimeBooking,
+  updateRealTimeBookingStatus,
+  addRealTimeUser,
+  updateDashboardStats
+} from './adminSlice';
+import { adminWebsocketService } from '../../services/adminWebsocketService';
 import Skeleton, { SkeletonTable } from '../../components/Skeleton';
 import './AdminDashboard.css';
 
@@ -13,6 +23,40 @@ const AdminDashboard = () => {
     dispatch(fetchUsers());
     dispatch(fetchDrivers());
     dispatch(fetchBookings());
+
+    // Connect and subscribe to WebSocket updates
+    adminWebsocketService.connect().then(() => {
+      // Dashboard updates
+      const unsubDashboard = adminWebsocketService.subscribeToDashboardUpdates((data) => {
+        dispatch(updateDashboardStats(data));
+      });
+
+      // Booking updates
+      const unsubBookings = adminWebsocketService.subscribeToBookingUpdates((payload) => {
+        if (payload.type === 'NEW_BOOKING') {
+          dispatch(addRealTimeBooking(payload.data));
+        } else if (payload.type === 'BOOKING_STATUS_UPDATE') {
+          dispatch(updateRealTimeBookingStatus(payload));
+        }
+      });
+
+      // User updates
+      const unsubUsers = adminWebsocketService.subscribeToUserUpdates((payload) => {
+        if (payload.type === 'NEW_USER') {
+          dispatch(addRealTimeUser(payload.data));
+        }
+      });
+
+      return () => {
+        unsubDashboard();
+        unsubBookings();
+        unsubUsers();
+      };
+    });
+
+    return () => {
+      adminWebsocketService.disconnect();
+    };
   }, [dispatch]);
 
   const getStatusBadgeClass = (status) => {

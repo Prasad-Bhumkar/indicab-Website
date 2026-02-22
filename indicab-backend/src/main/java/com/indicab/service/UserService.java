@@ -46,4 +46,14 @@ public interface UserService {
      * Get user by ID (throws exception if not found)
      */
     User getUserOrThrow(Long id);
+
+    /**
+     * Delete multiple users
+     */
+    void bulkDeleteUsers(List<Long> ids);
+
+    /**
+     * Update roles for multiple users
+     */
+    void bulkUpdateUsersRole(List<Long> ids, String role);
 }

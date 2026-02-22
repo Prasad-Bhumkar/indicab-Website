@@ -42,5 +42,10 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
         registry.addEndpoint("/ws/ride")
                 .setAllowedOrigins("*")  // Update with specific origins in production
                 .withSockJS();  // Enable SockJS fallback for browsers that don't support WebSocket
+
+        // Admin WebSocket endpoint
+        registry.addEndpoint("/api/ws/admin")
+                .setAllowedOrigins("*")
+                .withSockJS();
     }
 }

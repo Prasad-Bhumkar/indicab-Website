@@ -12,18 +12,22 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
  * Admin controller for managing bookings
+ * All endpoints require ADMIN role authorization
  */
 @RestController
 @RequestMapping("/api/v1/admin/bookings")
 @Tag(name = "Admin - Bookings", description = "Admin booking management endpoints")
 @SecurityRequirement(name = "Bearer Token")
+@PreAuthorize("hasRole('ADMIN')")  // All endpoints require ADMIN role
 public class AdminBookingController {
     
     private static final Logger logger = LoggerFactory.getLogger(AdminBookingController.class);
@@ -119,6 +123,33 @@ public class AdminBookingController {
         }
     }
     
+    /**
+     * Delete multiple bookings
+     */
+    @DeleteMapping("/bulk")
+    @Operation(summary = "Bulk delete bookings", description = "Delete multiple bookings records at once")
+    @ApiResponse(responseCode = "204", description = "Bookings deleted successfully")
+    public ResponseEntity<Void> bulkDeleteBookings(@RequestBody List<Long> ids) {
+        logger.info("Admin performing bulk delete on bookings. Count: {}", ids.size());
+        bookingService.bulkDeleteBookings(ids);
+        return ResponseEntity.noContent().build();
+    }
+
+    /**
+     * Bulk update bookings status
+     */
+    @PutMapping("/bulk/status")
+    @Operation(summary = "Bulk update booking status", description = "Update status for multiple bookings at once")
+    @ApiResponse(responseCode = "200", description = "Bookings updated successfully")
+    public ResponseEntity<Void> bulkUpdateBookingsStatus(
+            @RequestBody List<Long> ids,
+            @RequestParam String status) {
+
+        logger.info("Admin performing bulk status update to: {} for {} bookings", status, ids.size());
+        bookingService.bulkUpdateBookingsStatus(ids, status);
+        return ResponseEntity.ok().build();
+    }
+
     /**
      * Get booking statistics
      */

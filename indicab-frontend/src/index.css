@@ -1,37 +1,44 @@
 /* CSS Variables - Complete Color Palette */
 :root {
   /* Primary Colors */
-  --primary-green: #059669;
-  --primary-green-dark: #047857;
-  --primary-green-light: #10b981;
-  --secondary-green: #0d9488;
+  --primary-green: #005f02;
+  --primary-green-dark: #004d01;
+  --primary-green-light: #427a43;
+  --secondary-green: #427a43;
 
   /* Accent Colors */
-  --accent-orange: #f59e0b;
-  --accent-orange-dark: #d97706;
-  --accent-orange-light: #fbbf24;
+  --accent-orange: #c0b87a;
+  --accent-orange-dark: #a89860;
+  --accent-orange-light: #d4cfa3;
 
   /* Dark Palette */
-  --dark-green: #064e3b;
+  --dark-green: #005f02;
   --dark-gray: #111827;
   --gray-text: #212529;
 
   /* Light Palette */
-  --light-green: #ecfdf5;
+  --light-green: #f2e3bb;
   --white: #ffffff;
-  --light-gray: #f8f9fa;
+  --light-gray: #faf8f3;
 
   /* Status Colors */
-  --success-green: #10b981;
-  --warning-yellow: #fbbf24;
+  --success-green: #427a43;
+  --warning-yellow: #c0b87a;
   --danger-red: #ef4444;
   --info-blue: #3b82f6;
 
   /* Custom Palette */
-  --custom-bg: #dfd9ec;
-  --custom-text: #3d3c4f;
-  --custom-accent: #e6a5b8;
-  --custom-dark: #4b2e36;
+  --custom-bg: #f2e3bb;
+  --custom-text: #427a43;
+  --custom-accent: #c0b87a;
+  --custom-dark: #005f02;
+
+  /* Accessibility/Contrast Colors */
+  --placeholder-text: #7b8793;
+  --muted-text: #596274;
+  --muted-text-light: #6b7280;
+  --input-border: #cbd5e1;
+  --input-focus: #3b82f6;
 
   /* Transitions & Shadows */
   --transition: all 0.3s ease;
@@ -93,7 +100,7 @@ a {
   left: 0;
   right: 0;
   height: 200px;
-  background: url("image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 120'%3E%3Cpath d='M0,60 C300,120 900,0 1200,60 L1200,120 L0,120 Z' fill='%2365a30d'/%3E%3C/svg%3E") no-repeat center bottom;
+  background: url("image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 120'%3E%3Cpath d='M0,60 C300,120 900,0 1200,60 L1200,120 L0,120 Z' fill='%23005f02'/%3E%3C/svg%3E") no-repeat center bottom;
   background-size: cover;
   z-index: 1;
 }
@@ -333,10 +340,9 @@ a {
 }
 
 .navbar-nav .nav-link:hover {
-  color: var(--accent-orange) !important;
-  background-color: rgba(255, 255, 255, 0.1);
+  color: white !important;
+  background-color: rgba(255, 255, 255, 0.15);
   transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 .navbar-nav .nav-link:hover::before {
@@ -801,7 +807,7 @@ a {
 }
 
 .terms-checkbox a:hover {
-  color: #059669;
+  color: #427a43;
 }
 
 /* Booking Footer */
@@ -1414,7 +1420,7 @@ a {
 }
 
 .text-muted {
-  color: #6c757d;
+  color: var(--muted-text);
 }
 
 .fw-semibold {
@@ -2158,7 +2164,7 @@ a {
 }
 
 .text-gradient {
-  background: linear-gradient(45deg, var(--accent-orange), #fbbf24);
+  background: linear-gradient(45deg, var(--accent-orange), var(--accent-orange-light));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -2313,7 +2319,7 @@ a {
   top: -10px;
   left: 50%;
   transform: translateX(-50%);
-  background: linear-gradient(135deg, var(--accent-orange), #f59e0b);
+  background: linear-gradient(135deg, var(--accent-orange), var(--accent-orange-dark));
   color: white;
   padding: 0.5rem 1.5rem;
   border-radius: 20px;
@@ -3222,8 +3228,8 @@ img {
 
 /* Better contrast for placeholders */
 ::placeholder {
-  color: #6b7280;
-  opacity: 0.7;
+  color: var(--placeholder-text);
+  opacity: 1;
 }
 
 /* Improved link colors */

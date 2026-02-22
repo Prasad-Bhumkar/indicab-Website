@@ -5,15 +5,32 @@ import {
   createVehicle,
   updateVehicle,
   deleteVehicle,
+  bulkDeleteVehicles,
+  clearSuccessMessage,
+  clearError,
 } from './adminSlice';
 import { FiEdit2, FiTrash2, FiPlus } from 'react-icons/fi';
+import { HeaderCheckbox, RowCheckbox } from '../../components/CheckboxColumn';
+import BulkActionBar from '../../components/BulkActionBar';
+import ExportModal from '../../components/ExportModal';
+import {
+  toggleItemSelection,
+  selectAllItems,
+  clearSelection,
+  isItemSelected,
+  getSelectionStats,
+  getBulkActionConfirmMessage,
+  formatSelectedIdsForAPI,
+} from './bulkActionsUtils';
 import './ManagementPages.css';
 
 const VehicleManagement = () => {
   const dispatch = useDispatch();
-  const { vehicles, loading, error } = useSelector((state) => state.admin);
+  const { vehicles, loading, error, successMessage } = useSelector((state) => state.admin);
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState(null);
+  const [showExportModal, setShowExportModal] = useState(false);
+  const [selectedVehicles, setSelectedVehicles] = useState(new Set());
   const [formData, setFormData] = useState({
     type: '',
     baseFare: '',
@@ -27,6 +44,15 @@ const VehicleManagement = () => {
   useEffect(() => {
     dispatch(fetchVehicles());
   }, [dispatch]);
+
+  useEffect(() => {
+    if (successMessage) {
+      const timer = setTimeout(() => {
+        dispatch(clearSuccessMessage());
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [successMessage, dispatch]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -80,19 +106,81 @@ const VehicleManagement = () => {
     }
   };
 
+  // Bulk selection handlers
+  const handleRowCheckboxChange = (vehicleId) => {
+    setSelectedVehicles(toggleItemSelection(selectedVehicles, vehicleId));
+  };
+
+  const handleSelectAllChange = () => {
+    const stats = getSelectionStats(selectedVehicles, vehicles);
+    if (stats.isAllSelected) {
+      setSelectedVehicles(clearSelection());
+    } else {
+      setSelectedVehicles(selectAllItems(vehicles));
+    }
+  };
+
+  const handleBulkDelete = () => {
+    const stats = getSelectionStats(selectedVehicles, vehicles);
+    const confirmMsg = getBulkActionConfirmMessage('delete', stats.totalSelected, 'vehicle');
+
+    if (window.confirm(confirmMsg)) {
+      const ids = formatSelectedIdsForAPI(selectedVehicles);
+      dispatch(bulkDeleteVehicles(ids)).then(() => {
+        setSelectedVehicles(clearSelection());
+      });
+    }
+  };
+
+  const handleClearSelection = () => {
+    setSelectedVehicles(clearSelection());
+  };
+
   return (
     <div className="management-page">
       <div className="page-header">
         <h2>Vehicle Management</h2>
-        <button
-          className="btn btn-primary"
-          onClick={() => setShowForm(!showForm)}
-        >
-          <FiPlus /> {showForm ? 'Cancel' : 'Add New Vehicle'}
-        </button>
+        <div className="header-actions">
+          <button
+            className="add-btn export-btn"
+            onClick={() => setShowExportModal(true)}
+            title="Export vehicles"
+          >
+            📥 Export
+          </button>
+          <button
+            className="btn btn-primary"
+            onClick={() => setShowForm(!showForm)}
+          >
+            <FiPlus /> {showForm ? 'Cancel' : 'Add New Vehicle'}
+          </button>
+        </div>
       </div>
 
-      {error && <div className="alert alert-danger">{error}</div>}
+      {error && (
+        <div className="alert alert-danger">
+          <span>{error}</span>
+          <button className="close-alert" onClick={() => dispatch(clearError())}>×</button>
+        </div>
+      )}
+
+      {successMessage && (
+        <div className="alert alert-success">
+          <span>{successMessage}</span>
+          <button className="close-alert" onClick={() => dispatch(clearSuccessMessage())}>×</button>
+        </div>
+      )}
+
+      <BulkActionBar
+        selectedCount={selectedVehicles.size}
+        totalCount={vehicles?.length || 0}
+        isAllSelected={selectedVehicles.size === vehicles?.length && vehicles?.length > 0}
+        entityType="vehicle"
+        onDelete={handleBulkDelete}
+        onClearSelection={handleClearSelection}
+        onSelectAll={() => setSelectedVehicles(selectAllItems(vehicles))}
+        loading={loading}
+      />
 
       {showForm && (
         <div className="form-container">
@@ -204,6 +292,13 @@ const VehicleManagement = () => {
           <table className="table">
             <thead>
               <tr>
+                <HeaderCheckbox
+                  isAllSelected={selectedVehicles.size === vehicles.length && vehicles.length > 0}
+                  isIndeterminate={selectedVehicles.size > 0 && selectedVehicles.size < vehicles.length}
+                  onChange={handleSelectAllChange}
+                  disabled={loading || vehicles.length === 0}
+                  title="Select all vehicles"
+                />
                 <th>Type</th>
                 <th>Capacity</th>
                 <th>Base Fare</th>
@@ -216,6 +311,12 @@ const VehicleManagement = () => {
             <tbody>
               {vehicles.map((vehicle) => (
                 <tr key={vehicle.id}>
+                  <RowCheckbox
+                    isSelected={isItemSelected(selectedVehicles, vehicle.id)}
+                    onChange={() => handleRowCheckboxChange(vehicle.id)}
+                    disabled={loading}
+                    rowId={vehicle.id}
+                  />
                   <td>{vehicle.type}</td>
                   <td>{vehicle.capacity}</td>
                   <td>₹{vehicle.baseFare}</td>
@@ -244,6 +345,14 @@ const VehicleManagement = () => {
           <p>No vehicles found. Create your first vehicle!</p>
         )}
       </div>
+
+      <ExportModal
+        show={showExportModal}
+        onHide={() => setShowExportModal(false)}
+        data={vehicles}
+        entityType="vehicle"
+        filename="vehicles"
+      />
     </div>
   );
 };

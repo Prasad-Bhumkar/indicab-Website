@@ -15,16 +15,18 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 /**
  * Admin controller for managing blogs
- * All endpoints require authentication and admin privileges
+ * All endpoints require ADMIN role authorization
  */
 @RestController
 @RequestMapping("/api/v1/admin/blogs")
 @Tag(name = "Admin - Blogs", description = "Admin blog management endpoints")
 @SecurityRequirement(name = "Bearer Token")
+@PreAuthorize("hasRole('ADMIN')")  // All endpoints require ADMIN role
 public class AdminBlogController {
     
     private static final Logger logger = LoggerFactory.getLogger(AdminBlogController.class);
@@ -159,7 +161,7 @@ public class AdminBlogController {
     @ApiResponse(responseCode = "404", description = "Blog not found")
     public ResponseEntity<Blog> unpublishBlog(@PathVariable Long id) {
         logger.info("Unpublishing blog with ID: {}", id);
-        
+
         try {
             Blog blog = blogService.unpublishBlog(id);
             return ResponseEntity.ok(blog);
@@ -167,5 +169,32 @@ public class AdminBlogController {
             logger.error("Error unpublishing blog: {}", e.getMessage());
             return ResponseEntity.notFound().build();
         }
+    }
+
+    /**
+     * Delete multiple blogs
+     */
+    @DeleteMapping("/bulk")
+    @Operation(summary = "Bulk delete blogs", description = "Delete multiple blog posts at once")
+    @ApiResponse(responseCode = "204", description = "Blogs deleted successfully")
+    public ResponseEntity<Void> bulkDeleteBlogs(@RequestBody java.util.List<Long> ids) {
+        logger.info("Admin performing bulk delete on blogs. Count: {}", ids.size());
+        blogService.bulkDeleteBlogs(ids);
+        return ResponseEntity.noContent().build();
+    }
+
+    /**
+     * Bulk update blogs status
+     */
+    @PutMapping("/bulk/status")
+    @Operation(summary = "Bulk update blogs status", description = "Update status for multiple blog posts at once")
+    @ApiResponse(responseCode = "200", description = "Blogs updated successfully")
+    public ResponseEntity<Void> bulkUpdateBlogsStatus(
+            @RequestBody java.util.List<Long> ids,
+            @RequestParam String status) {
+
+        logger.info("Admin performing bulk status update to: {} for {} blogs", status, ids.size());
+        blogService.bulkUpdateBlogsStatus(ids, status);
+        return ResponseEntity.ok().build();
     }
 }

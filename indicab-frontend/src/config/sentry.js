@@ -43,14 +43,12 @@ export const initSentry = async () => {
       });
 
       sentryInitialized = true;
-      console.log(`Sentry initialized for ${environment} environment`);
     } catch (error) {
       // Sentry packages not available or initialization failed
-      console.warn('Sentry packages not available. Install @sentry/react and @sentry/tracing to enable error tracking.');
       sentryInitialized = true; // Mark as initialized to avoid repeated attempts
     }
   } else {
-    console.info('VITE_SENTRY_DSN not configured. Sentry error tracking is disabled.');
+    // VITE_SENTRY_DSN not configured - Sentry error tracking is disabled
     sentryInitialized = true;
   }
 };
@@ -68,9 +66,8 @@ export const getSentry = () => {
 export const captureException = (error, context = {}) => {
   if (Sentry) {
     Sentry.captureException(error, { contexts: context });
-  } else {
-    console.error('Error:', error, 'Context:', context);
   }
+  // Error not sent if Sentry is not initialized
 };
 
 /**
@@ -79,9 +76,8 @@ export const captureException = (error, context = {}) => {
 export const captureMessage = (message, level = 'info') => {
   if (Sentry) {
     Sentry.captureMessage(message, level);
-  } else {
-    console.log(`[${level}] ${message}`);
   }
+  // Message not sent if Sentry is not initialized
 };
 
 export default {

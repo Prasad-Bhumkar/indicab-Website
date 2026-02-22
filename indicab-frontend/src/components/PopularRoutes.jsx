@@ -17,14 +17,11 @@ const PopularRoutes = () => {
   const [editingRoute, setEditingRoute] = useState(null)
 
   useEffect(() => {
-    console.log('PopularRoutes component mounted, fetching routes...')
     dispatch(fetchPopularRoutes())
   }, [dispatch])
 
   useEffect(() => {
-    console.log('Routes updated:', routes)
-    console.log('Loading:', loading)
-    console.log('Error:', error)
+    // Routes updated - effect runs when these dependencies change
   }, [routes, loading, error])
 
   const handleAddRoute = (e) => {
@@ -71,7 +68,6 @@ const PopularRoutes = () => {
   }
 
   if (!routes || routes.length === 0) {
-    console.log('No routes available to render')
     return <div className="text-center py-5">No routes available</div>
   }
 
@@ -116,9 +112,7 @@ const PopularRoutes = () => {
 
         <div className="row">
           {routes && routes.length > 0 ? (
-            routes.map((route, index) => {
-              console.log('Rendering route:', index, route)
-              return (
+            routes.map((route, index) => (
             <div key={route.id} className="col-lg-4 col-md-6 mb-4">
               <div className="route-card-wrapper">
                 <div className="route-card">
@@ -146,8 +140,7 @@ const PopularRoutes = () => {
                 </div>
               </div>
             </div>
-              )
-            })
+            ))
           ) : (
             <div className="col-12 text-center py-5">
               <p>No routes available</p>

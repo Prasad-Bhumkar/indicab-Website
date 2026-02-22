@@ -40,4 +40,10 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
      */
     @Query("SELECT COUNT(b) FROM Booking b WHERE b.status = :status")
     Long countByStatus(@Param("status") String status);
+
+    /**
+     * Find all bookings for a user without pagination
+     */
+    @Query("SELECT b FROM Booking b WHERE b.user.id = :userId ORDER BY b.createdAt DESC")
+    java.util.List<Booking> findByUserId(@Param("userId") Long userId);
 }

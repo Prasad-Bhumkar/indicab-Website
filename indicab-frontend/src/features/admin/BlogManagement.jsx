@@ -5,15 +5,33 @@ import {
   createBlog,
   updateBlog,
   deleteBlog,
+  bulkDeleteBlogs,
+  bulkUpdateStatus,
+  clearSuccessMessage,
+  clearError,
 } from './adminSlice';
 import { FiEdit2, FiTrash2, FiPlus } from 'react-icons/fi';
+import ExportModal from '../../components/ExportModal';
+import { HeaderCheckbox, RowCheckbox } from '../../components/CheckboxColumn';
+import BulkActionBar from '../../components/BulkActionBar';
+import {
+  toggleItemSelection,
+  selectAllItems,
+  clearSelection,
+  isItemSelected,
+  getSelectionStats,
+  getBulkActionConfirmMessage,
+  formatSelectedIdsForAPI,
+} from './bulkActionsUtils';
 import './ManagementPages.css';
 
 const BlogManagement = () => {
   const dispatch = useDispatch();
-  const { blogs, loading, error } = useSelector((state) => state.admin);
+  const { blogs, loading, error, successMessage } = useSelector((state) => state.admin);
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState(null);
+  const [showExportModal, setShowExportModal] = useState(false);
+  const [selectedBlogs, setSelectedBlogs] = useState(new Set());
   const [formData, setFormData] = useState({
     title: '',
     content: '',
@@ -22,11 +40,21 @@ const BlogManagement = () => {
     image: '',
     date: new Date().toISOString().split('T')[0],
     views: 0,
+    status: 'draft'
   });
 
   useEffect(() => {
     dispatch(fetchBlogs());
   }, [dispatch]);
+
+  useEffect(() => {
+    if (successMessage) {
+      const timer = setTimeout(() => {
+        dispatch(clearSuccessMessage());
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [successMessage, dispatch]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -55,6 +83,7 @@ const BlogManagement = () => {
       image: '',
       date: new Date().toISOString().split('T')[0],
       views: 0,
+      status: 'draft'
     });
     setEditingId(null);
     setShowForm(false);
@@ -72,70 +101,179 @@ const BlogManagement = () => {
     }
   };
 
+  // Bulk selection handlers
+  const handleRowCheckboxChange = (blogId) => {
+    setSelectedBlogs(toggleItemSelection(selectedBlogs, blogId));
+  };
+
+  const handleSelectAllChange = () => {
+    const stats = getSelectionStats(selectedBlogs, blogs);
+    if (stats.isAllSelected) {
+      setSelectedBlogs(clearSelection());
+    } else {
+      setSelectedBlogs(selectAllItems(blogs));
+    }
+  };
+
+  const handleBulkDelete = () => {
+    const stats = getSelectionStats(selectedBlogs, blogs);
+    const confirmMsg = getBulkActionConfirmMessage('delete', stats.totalSelected, 'blog');
+
+    if (window.confirm(confirmMsg)) {
+      const ids = formatSelectedIdsForAPI(selectedBlogs);
+      dispatch(bulkDeleteBlogs(ids)).then(() => {
+        setSelectedBlogs(clearSelection());
+      });
+    }
+  };
+
+  const handleBulkStatusChange = (status) => {
+    const stats = getSelectionStats(selectedBlogs, blogs);
+    const confirmMsg = getBulkActionConfirmMessage(`update status to ${status}`, stats.totalSelected, 'blog');
+
+    if (window.confirm(confirmMsg)) {
+      const ids = formatSelectedIdsForAPI(selectedBlogs);
+      dispatch(bulkUpdateStatus({ entityType: 'blogs', ids, status })).then(() => {
+        setSelectedBlogs(clearSelection());
+      });
+    }
+  };
+
+  const handleClearSelection = () => {
+    setSelectedBlogs(clearSelection());
+  };
+
+  const getStatusClass = (status) => {
+    return `status-badge status-${status?.toLowerCase() || 'draft'}`;
+  };
+
   return (
     <div className="management-page">
       <div className="page-header">
         <h2>Blog Management</h2>
-        <button
-          className="btn btn-primary"
-          onClick={() => setShowForm(!showForm)}
-        >
-          <FiPlus /> {showForm ? 'Cancel' : 'Add New Blog'}
-        </button>
+        <div className="header-actions">
+          <button
+            className="add-btn export-btn"
+            onClick={() => setShowExportModal(true)}
+            title="Export blogs"
+          >
+            📥 Export
+          </button>
+          <button
+            className="btn btn-primary"
+            onClick={() => setShowForm(!showForm)}
+          >
+            <FiPlus /> {showForm ? 'Cancel' : 'Add New Blog'}
+          </button>
+        </div>
       </div>
 
-      {error && <div className="alert alert-danger">{error}</div>}
+      {error && (
+        <div className="alert alert-danger">
+          <span>{error}</span>
+          <button className="close-alert" onClick={() => dispatch(clearError())}>×</button>
+        </div>
+      )}
+
+      {successMessage && (
+        <div className="alert alert-success">
+          <span>{successMessage}</span>
+          <button className="close-alert" onClick={() => dispatch(clearSuccessMessage())}>×</button>
+        </div>
+      )}
+
+      <BulkActionBar
+        selectedCount={selectedBlogs.size}
+        totalCount={blogs.length}
+        isAllSelected={selectedBlogs.size === blogs.length && blogs.length > 0}
+        entityType="blog"
+        onDelete={handleBulkDelete}
+        onChangeStatus={handleBulkStatusChange}
+        onClearSelection={handleClearSelection}
+        onSelectAll={() => setSelectedBlogs(selectAllItems(blogs))}
+        statusOptions={[
+          { value: 'draft', label: 'Draft' },
+          { value: 'published', label: 'Published' },
+        ]}
+        loading={loading}
+      />
 
       {showForm && (
         <div className="form-container">
           <h3>{editingId ? 'Edit Blog' : 'Create New Blog'}</h3>
           <form onSubmit={handleSubmit}>
-            <div className="form-group">
-              <label>Title</label>
-              <input
-                type="text"
-                name="title"
-                value={formData.title}
-                onChange={handleInputChange}
-                required
-                className="form-control"
-              />
+            <div className="form-grid">
+              <div className="form-group">
+                <label>Title</label>
+                <input
+                  type="text"
+                  name="title"
+                  value={formData.title}
+                  onChange={handleInputChange}
+                  required
+                  className="form-control"
+                />
+              </div>
+
+              <div className="form-group">
+                <label>Category</label>
+                <input
+                  type="text"
+                  name="category"
+                  value={formData.category}
+                  onChange={handleInputChange}
+                  className="form-control"
+                />
+              </div>
+
+              <div className="form-group">
+                <label>Status</label>
+                <select
+                  name="status"
+                  className="form-control"
+                  value={formData.status}
+                  onChange={handleInputChange}
+                >
+                  <option value="draft">Draft</option>
+                  <option value="published">Published</option>
+                </select>
+              </div>
+
+              <div className="form-group">
+                <label>Date</label>
+                <input
+                  type="date"
+                  name="date"
+                  value={formData.date}
+                  onChange={handleInputChange}
+                  className="form-control"
+                />
+              </div>
             </div>
 
-            <div className="form-group">
-              <label>Category</label>
-              <input
-                type="text"
-                name="category"
-                value={formData.category}
-                onChange={handleInputChange}
-                className="form-control"
-              />
-            </div>
-
-            <div className="form-group">
+            <div className="form-group mt-3">
               <label>Preview</label>
               <textarea
                 name="preview"
                 value={formData.preview}
                 onChange={handleInputChange}
                 className="form-control"
-                rows="3"
+                rows="2"
               ></textarea>
             </div>
 
-            <div className="form-group">
+            <div className="form-group mt-3">
               <label>Content</label>
               <textarea
                 name="content"
                 value={formData.content}
                 onChange={handleInputChange}
                 className="form-control"
-                rows="5"
+                rows="4"
               ></textarea>
             </div>
 
-            <div className="form-group">
+            <div className="form-group mt-3">
               <label>Image URL</label>
               <input
                 type="url"
@@ -146,67 +284,93 @@ const BlogManagement = () => {
               />
             </div>
 
-            <div className="form-group">
-              <label>Date</label>
-              <input
-                type="date"
-                name="date"
-                value={formData.date}
-                onChange={handleInputChange}
-                className="form-control"
-              />
+            <div className="form-actions mt-3">
+              <button type="submit" className="btn btn-success">
+                {editingId ? 'Update Blog' : 'Create Blog'}
+              </button>
             </div>
-
-            <button type="submit" className="btn btn-success">
-              {editingId ? 'Update Blog' : 'Create Blog'}
-            </button>
           </form>
         </div>
       )}
 
       <div className="table-container">
-        {loading ? (
+        {loading && !blogs.length ? (
           <p>Loading blogs...</p>
-        ) : blogs && blogs.length > 0 ? (
-          <table className="table">
-            <thead>
-              <tr>
-                <th>Title</th>
-                <th>Category</th>
-                <th>Date</th>
-                <th>Views</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {blogs.map((blog) => (
-                <tr key={blog.id}>
-                  <td>{blog.title}</td>
-                  <td>{blog.category}</td>
-                  <td>{blog.date}</td>
-                  <td>{blog.views || 0}</td>
-                  <td>
-                    <button
-                      className="btn btn-sm btn-warning me-2"
-                      onClick={() => handleEdit(blog)}
-                    >
-                      <FiEdit2 />
-                    </button>
-                    <button
-                      className="btn btn-sm btn-danger"
-                      onClick={() => handleDelete(blog.id)}
-                    >
-                      <FiTrash2 />
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
         ) : (
-          <p>No blogs found. Create your first blog!</p>
+          <div className="table-responsive">
+            <table className="management-table">
+              <thead>
+                <tr>
+                  <HeaderCheckbox
+                    isAllSelected={selectedBlogs.size === blogs.length && blogs.length > 0}
+                    isIndeterminate={selectedBlogs.size > 0 && selectedBlogs.size < blogs.length}
+                    onChange={handleSelectAllChange}
+                    disabled={loading || blogs.length === 0}
+                    title="Select all blogs"
+                  />
+                  <th>Title</th>
+                  <th>Category</th>
+                  <th>Date</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {blogs && blogs.length > 0 ? (
+                  blogs.map((blog) => (
+                    <tr key={blog.id}>
+                      <RowCheckbox
+                        isSelected={isItemSelected(selectedBlogs, blog.id)}
+                        onChange={() => handleRowCheckboxChange(blog.id)}
+                        disabled={loading}
+                        rowId={blog.id}
+                      />
+                      <td>{blog.title}</td>
+                      <td>{blog.category}</td>
+                      <td>{blog.date}</td>
+                      <td>
+                        <span className={getStatusClass(blog.status)}>
+                          {blog.status}
+                        </span>
+                      </td>
+                      <td>
+                        <div className="action-buttons">
+                          <button
+                            className="btn-icon btn-edit"
+                            onClick={() => handleEdit(blog)}
+                            title="Edit"
+                          >
+                            ✏️
+                          </button>
+                          <button
+                            className="btn-icon btn-delete"
+                            onClick={() => handleDelete(blog.id)}
+                            title="Delete"
+                          >
+                            🗑️
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr><td colSpan="6" style={{textAlign: 'center', padding: '2rem'}}>No blogs found. Create your first blog!</td></tr>
+                )}
+              </tbody>
+            </table>
+          </div>
         )}
       </div>
+
+      <ExportModal
+        show={showExportModal}
+        onHide={() => setShowExportModal(false)}
+        data={selectedBlogs.size > 0 ? blogs.filter(b => selectedBlogs.has(b.id)) : blogs}
+        entityType="blog"
+        filename="blogs"
+        selectedOnly={selectedBlogs.size > 0}
+        selectedCount={selectedBlogs.size}
+      />
     </div>
   );
 };

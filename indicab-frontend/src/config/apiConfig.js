@@ -35,6 +35,14 @@ apiClient.interceptors.request.use(
   }
 );
 
+// Logout handler callback
+let logoutHandler = null;
+
+// Set the logout handler to be called when session expires
+export const setLogoutHandler = (handler) => {
+  logoutHandler = handler;
+};
+
 // Flag to prevent multiple refresh attempts
 let isRefreshing = false;
 let failedQueue = [];
@@ -89,6 +97,8 @@ apiClient.interceptors.response.use(
           localStorage.setItem('token', accessToken);
           if (user) {
             localStorage.setItem('user', JSON.stringify(user));
+            // Store user role for logout redirect logic
+            localStorage.setItem('userRole', user.role || 'USER');
           }
 
           // Update axios header
@@ -103,20 +113,37 @@ apiClient.interceptors.response.use(
           logger.error('API_RESPONSE', 'Token refresh failed', refreshError);
           processQueue(refreshError, null);
 
-          // Clear tokens and redirect to login
+          // Clear tokens and redirect to appropriate login page
+          const userRole = localStorage.getItem('userRole');
           localStorage.removeItem('token');
           localStorage.removeItem('refreshToken');
           localStorage.removeItem('user');
-          window.location.href = '/login';
+          localStorage.removeItem('userRole');
+
+          if (logoutHandler) {
+            logoutHandler();
+          } else {
+            // Redirect to admin login if user was admin, otherwise user login
+            const redirectUrl = userRole === 'ADMIN' ? '/admin-login' : '/login';
+            window.location.href = redirectUrl;
+          }
 
           return Promise.reject(refreshError);
         }
       } else {
         // No refresh token available, clear and redirect
         logger.warn('API_RESPONSE', 'No refresh token available, redirecting to login');
+        const userRole = localStorage.getItem('userRole');
         localStorage.removeItem('token');
         localStorage.removeItem('user');
-        window.location.href = '/login';
+        localStorage.removeItem('userRole');
+        if (logoutHandler) {
+          logoutHandler();
+        } else {
+          // Redirect to admin login if user was admin, otherwise user login
+          const redirectUrl = userRole === 'ADMIN' ? '/admin-login' : '/login';
+          window.location.href = redirectUrl;
+        }
         return Promise.reject(error);
       }
     }
@@ -125,16 +152,14 @@ apiClient.interceptors.response.use(
     // In production, only log critical errors (5xx)
     const isDevelopment = import.meta.env.DEV;
     const isNetworkError = !error.response || error.code === 'ECONNREFUSED' || error.code === 'ERR_NETWORK';
-    const isCriticalError = error.response?.status >= 500;
 
-    // Only log errors if in production OR if it's a critical error in development
+    // In development, suppress logging of backend errors since apiCall handles them with fallback
+    // In production, log all response errors
     if (!isDevelopment && !isNetworkError) {
       const errorInfo = handleApiError(error, 'API_RESPONSE');
       logger.error('API_RESPONSE', errorInfo.message, error);
-    } else if (isDevelopment && isCriticalError && error.response) {
-      // Log 5xx errors even in development for visibility
-      logger.warn('API_RESPONSE', `Server error: ${error.response.status} ${error.response.statusText}`);
     }
+    // Note: In development, backend errors are silently handled by apiCall with fallback data
 
     return Promise.reject(error);
   }
@@ -153,9 +178,8 @@ export const apiCall = async (apiFunction, fallbackData = null, componentName = 
                           error.message === 'Network Error' ||
                           !error.response;
 
-    const errorInfo = handleApiError(error, componentName);
-
-    logger.warn(componentName, `API call failed: ${errorInfo.message}. Using fallback data.`);
+    // Suppress logging in development since errors are handled gracefully with fallback
+    const errorInfo = handleApiError(error, componentName, null, true);
 
     return {
       data: fallbackData,
@@ -197,8 +221,6 @@ class OfflineQueueManager {
 
       queue.push(queueItem);
       localStorage.setItem(this.queueKey, JSON.stringify(queue));
-
-      console.log('Booking added to offline queue:', id);
       this.notifyListeners({ type: 'item_added', queue });
 
       // Try to sync immediately if online
@@ -208,7 +230,6 @@ class OfflineQueueManager {
 
       return id;
     } catch (error) {
-      console.error('Error adding to queue:', error);
       throw error;
     }
   }
@@ -219,7 +240,6 @@ class OfflineQueueManager {
       const queue = localStorage.getItem(this.queueKey);
       return queue ? JSON.parse(queue) : [];
     } catch (error) {
-      console.error('Error reading queue:', error);
       return [];
     }
   }
@@ -244,7 +264,6 @@ class OfflineQueueManager {
     const pendingItems = queue.filter(item => item.status === 'pending' || item.status === 'failed');
 
     if (pendingItems.length === 0) {
-      console.log('No pending items to sync');
       return { synced: 0, failed: 0 };
     }
 
@@ -269,8 +288,6 @@ class OfflineQueueManager {
           itemId: item.id,
           response: response.data
         });
-
-        console.log('Booking synced successfully:', item.id);
       } catch (error) {
         failed++;
         item.retries = (item.retries || 0) + 1;
@@ -333,7 +350,6 @@ class OfflineQueueManager {
 
   // Handle online event
   handleOnline() {
-    console.log('Backend connection restored');
     this.isOnline = true;
     this.notifyListeners({ type: 'online' });
     this.syncQueue();
@@ -341,7 +357,6 @@ class OfflineQueueManager {
 
   // Handle offline event
   handleOffline() {
-    console.log('Backend connection lost');
     this.isOnline = false;
     this.notifyListeners({ type: 'offline' });
   }
@@ -360,7 +375,7 @@ class OfflineQueueManager {
       try {
         listener(event);
       } catch (error) {
-        console.error('Error in queue listener:', error);
+        // Error in queue listener - silently ignore to prevent cascade failures
       }
     });
   }

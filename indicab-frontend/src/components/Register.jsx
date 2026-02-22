@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate, Link } from 'react-router-dom';
 import { registerUser } from '../features/auth/authSlice';
@@ -96,7 +97,6 @@ function Register() {
       // Redirect is handled by useEffect watching user state
     } catch (err) {
       // Error is handled by Redux state
-      console.error('Registration failed:', err);
     }
   };
 

@@ -12,6 +12,12 @@
   margin-bottom: 2rem;
 }
 
+.header-actions {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+}
+
 .management-title {
   font-size: 1.75rem;
   font-weight: 600;
@@ -35,6 +41,14 @@
 
 .add-btn:hover {
   background-color: #2563eb;
+}
+
+.export-btn {
+  background-color: var(--success-green);
+}
+
+.export-btn:hover {
+  background-color: var(--primary-green);
 }
 
 /* Form Styles */
@@ -178,7 +192,7 @@
 }
 
 .btn-approve {
-  color: #10b981;
+  color: var(--success-green);
 }
 
 .btn-approve:hover {
@@ -218,4 +232,23 @@
 
 .close-alert:hover {
   opacity: 1;
+}
+
+/* Validation Error Styles */
+.is-invalid {
+  border-color: #ef4444 !important;
+  background-color: #fef2f2;
+}
+
+.is-invalid:focus {
+  border-color: #ef4444 !important;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+}
+
+.form-error {
+  display: block;
+  color: #dc2626;
+  font-size: 0.8125rem;
+  margin-top: 0.25rem;
+  font-weight: 500;
 }

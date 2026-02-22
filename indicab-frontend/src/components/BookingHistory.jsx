@@ -4,6 +4,7 @@ import {
   fetchBookings,
   updateBooking,
 } from "../features/bookingHistory/bookingHistorySlice";
+import { selectCurrentUser } from "../features/auth/authSelectors";
 import RideTracker from "./RideTracker";
 
 const BookingHistory = () => {
@@ -12,6 +13,7 @@ const BookingHistory = () => {
   const loading = useSelector((state) => state.bookingHistory.loading);
   const error = useSelector((state) => state.bookingHistory.error);
   const isOffline = useSelector((state) => state.bookingHistory.isOffline);
+  const currentUser = useSelector(selectCurrentUser);
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -40,7 +42,19 @@ const BookingHistory = () => {
   // Safely ensure bookings is an array
   const bookingsArray = Array.isArray(bookings) ? bookings : [];
 
-  const filteredBookings = bookingsArray.filter((booking) => {
+  // Filter bookings by current user only
+  // Backend API (/v1/bookings) returns only authenticated user's bookings
+  // Frontend applies additional security filter to ensure no cross-user data leakage
+  const userBookings = bookingsArray.filter((booking) => {
+    // Ensure user is authenticated and has an ID
+    if (!currentUser || !currentUser.id) {
+      return false;
+    }
+    // Filter by current user - only show bookings created by the authenticated user
+    return booking.userId === currentUser.id;
+  });
+
+  const filteredBookings = userBookings.filter((booking) => {
     if (activeTab === "All") {
       return true;
     }
@@ -68,7 +82,12 @@ const BookingHistory = () => {
   return (
     <div className="container mt-5">
       <div className="d-flex justify-content-between align-items-center mb-4">
-        <h2 className="mb-0">Booking History</h2>
+        <h2 className="mb-0">
+          Your Bookings
+          {userBookings.length > 0 && (
+            <span className="badge bg-primary ms-2">{userBookings.length}</span>
+          )}
+        </h2>
         {isOffline && (
           <span className="badge bg-warning text-dark">
             <i className="bi bi-wifi-off me-1"></i>

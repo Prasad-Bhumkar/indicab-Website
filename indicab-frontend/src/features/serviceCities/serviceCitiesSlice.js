@@ -4,14 +4,27 @@ import { apiClient } from '../../config/apiConfig';
 export const fetchServiceCities = createAsyncThunk('serviceCities/fetchServiceCities', async () => {
   try {
     const response = await apiClient.get('/v1/service-cities');
-    
+
     // Return API response directly
     return {
       cities: Array.isArray(response.data) ? response.data : response.data.cities || [],
       stats: response.data.stats || {},
     };
   } catch (error) {
-    // Let the error bubble up to be handled by extraReducers
+    // Fallback to mock data in development when API is unavailable
+    const mockData = {
+      cities: ['Delhi', 'Mumbai', 'Bangalore', 'Hyderabad', 'Chennai', 'Kolkata', 'Pune', 'Ahmedabad'],
+      stats: {
+        citiesCovered: 8,
+        happyCustomers: '50K+',
+        trustedDrivers: '5K+',
+        support: '24/7'
+      }
+    };
+    if (import.meta.env.DEV) {
+      console.warn('Using fallback mock service cities - API unavailable');
+      return mockData;
+    }
     throw new Error(error.response?.data?.message || 'Failed to fetch service cities');
   }
 });

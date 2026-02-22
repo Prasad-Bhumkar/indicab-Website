@@ -1,5 +1,6 @@
 package com.indicab.service.impl;
 
+import com.indicab.controller.AdminWebSocketController;
 import com.indicab.entity.AuditLog;
 import com.indicab.repository.AuditLogRepository;
 import com.indicab.service.AuditLoggingService;
@@ -25,6 +26,9 @@ public class AuditLoggingServiceImpl implements AuditLoggingService {
 
     @Autowired
     private AuditLogRepository auditLogRepository;
+
+    @Autowired
+    private AdminWebSocketController adminWebSocketController;
 
     // Statistics tracking
     private final AtomicLong totalOperations = new AtomicLong(0);
@@ -58,6 +62,9 @@ public class AuditLoggingServiceImpl implements AuditLoggingService {
             auditLogRepository.save(auditLog);
             totalOperations.incrementAndGet();
 
+            // Notify admin via WebSocket
+            adminWebSocketController.broadcastNewAuditLog(auditLog);
+
             logger.info("Audit log recorded - User: {}, Operation: {}, Resource: {} (ID: {}), IP: {}",
                        userId, operation, resourceType, resourceId, ipAddress);
 
@@ -82,6 +89,9 @@ public class AuditLoggingServiceImpl implements AuditLoggingService {
             auditLogRepository.save(auditLog);
             totalOperations.incrementAndGet();
             failedOperations.incrementAndGet();
+
+            // Notify admin via WebSocket
+            adminWebSocketController.broadcastNewAuditLog(auditLog);
 
             logger.warn("Audit log recorded (FAILED) - User: {}, Operation: {}, Resource: {}, Reason: {}, IP: {}",
                        userId, operation, resourceType, failureReason, ipAddress);
@@ -138,6 +148,78 @@ public class AuditLoggingServiceImpl implements AuditLoggingService {
         totalOperations.set(0);
         failedOperations.set(0);
         logger.info("Audit statistics reset");
+    }
+
+    @Override
+    public void logBulkOperation(Long userId, String operation, String resourceType,
+                                List<Long> resourceIds, String ipAddress, String details) {
+        try {
+            String bulkDetails = String.format("Bulk %s - IDs: %s. %s",
+                                              operation, resourceIds, details);
+
+            AuditLog auditLog = new AuditLog();
+            auditLog.setUserId(userId);
+            auditLog.setOperation("BULK_" + operation);
+            auditLog.setResourceType(resourceType);
+            auditLog.setDetails(bulkDetails);
+            auditLog.setIpAddress(ipAddress);
+            auditLog.setStatus("SUCCESS");
+            auditLog.setCreatedAt(LocalDateTime.now());
+
+            auditLogRepository.save(auditLog);
+            totalOperations.incrementAndGet();
+
+            // Notify admin via WebSocket about bulk operation
+            if (adminWebSocketController != null) {
+                String operationName = operation.toUpperCase();
+                adminWebSocketController.broadcastBulkOperationComplete(
+                    resourceType, operationName, resourceIds.size(), true,
+                    "Successfully performed bulk " + operationName.toLowerCase()
+                );
+            }
+
+            logger.info("Bulk audit log recorded - User: {}, Operation: BULK_{}, Resource: {}, Count: {}, IP: {}",
+                       userId, operation, resourceType, resourceIds.size(), ipAddress);
+
+        } catch (Exception e) {
+            logger.error("Failed to log bulk operation: {}", operation, e);
+        }
+    }
+
+    @Override
+    public void logFailedBulkOperation(Long userId, String operation, String resourceType,
+                                       List<Long> resourceIds, String ipAddress, String failureReason) {
+        try {
+            String bulkDetails = String.format("Bulk %s - IDs: %s", operation, resourceIds);
+
+            AuditLog auditLog = new AuditLog();
+            auditLog.setUserId(userId);
+            auditLog.setOperation("BULK_" + operation);
+            auditLog.setResourceType(resourceType);
+            auditLog.setDetails(bulkDetails);
+            auditLog.setStatus("FAILED");
+            auditLog.setFailureReason(failureReason);
+            auditLog.setIpAddress(ipAddress);
+            auditLog.setCreatedAt(LocalDateTime.now());
+
+            auditLogRepository.save(auditLog);
+            totalOperations.incrementAndGet();
+            failedOperations.incrementAndGet();
+
+            // Notify admin via WebSocket about failed bulk operation
+            if (adminWebSocketController != null) {
+                String operationName = operation.toUpperCase();
+                adminWebSocketController.broadcastBulkOperationComplete(
+                    resourceType, operationName, resourceIds.size(), false, failureReason
+                );
+            }
+
+            logger.warn("Bulk audit log recorded (FAILED) - User: {}, Operation: BULK_{}, Resource: {}, Count: {}, Reason: {}, IP: {}",
+                       userId, operation, resourceType, resourceIds.size(), failureReason, ipAddress);
+
+        } catch (Exception e) {
+            logger.error("Failed to log failed bulk operation: {}", operation, e);
+        }
     }
 
     /**

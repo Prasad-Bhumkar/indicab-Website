@@ -97,19 +97,26 @@ const getStatusMessage = (status) => {
 
 /**
  * Handle API errors with logging and user-friendly messages
+ * @param {Error} error - The error object
+ * @param {string} component - The component name for logging
+ * @param {string} fallbackMessage - Fallback message to show user
+ * @param {boolean} suppressLogging - If true, don't log in development (fallback handled gracefully)
  */
-export const handleApiError = (error, component = 'API', fallbackMessage = null) => {
+export const handleApiError = (error, component = 'API', fallbackMessage = null, suppressLogging = false) => {
   const { message, status, data, isNetworkError } = parseErrorResponse(error);
 
-  // Log the error
-  if (isNetworkError) {
-    logger.error(component, message);
-  } else {
-    logger.logApiError('ERROR', component, status, error);
+  // Log the error only if not suppressed and not in development with expected fallback handling
+  if (!suppressLogging || !import.meta.env.DEV) {
+    if (isNetworkError) {
+      logger.error(component, message);
+    } else if (!import.meta.env.DEV) {
+      // In production, always log API errors
+      logger.logApiError('ERROR', component, status, error);
+    }
   }
 
-  // Send error to Sentry if critical (5xx errors or network errors)
-  if ((status && status >= 500) || isNetworkError) {
+  // Send error to Sentry if critical (5xx errors or network errors) - only in production
+  if (!import.meta.env.DEV && ((status && status >= 500) || isNetworkError)) {
     captureException(error, {
       component,
       status,

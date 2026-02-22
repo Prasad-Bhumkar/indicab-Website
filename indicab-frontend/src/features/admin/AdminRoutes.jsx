@@ -7,16 +7,20 @@ import BookingManagement from './BookingManagement';
 import BlogManagement from './BlogManagement';
 import PackageManagement from './PackageManagement';
 import VehicleManagement from './VehicleManagement';
+import AdminAnalytics from './AdminAnalytics';
+import AdminAuditLogs from './AdminAuditLogs';
 
 const AdminRoutes = () => (
   <Routes>
-    <Route path="/admin" element={<AdminDashboard />} />
-    <Route path="/admin/users" element={<UserManagement />} />
-    <Route path="/admin/drivers" element={<DriverManagement />} />
-    <Route path="/admin/bookings" element={<BookingManagement />} />
-    <Route path="/admin/blogs" element={<BlogManagement />} />
-    <Route path="/admin/packages" element={<PackageManagement />} />
-    <Route path="/admin/vehicles" element={<VehicleManagement />} />
+    <Route path="" element={<AdminDashboard />} />
+    <Route path="analytics" element={<AdminAnalytics />} />
+    <Route path="audit-logs" element={<AdminAuditLogs />} />
+    <Route path="users" element={<UserManagement />} />
+    <Route path="drivers" element={<DriverManagement />} />
+    <Route path="bookings" element={<BookingManagement />} />
+    <Route path="blogs" element={<BlogManagement />} />
+    <Route path="packages" element={<PackageManagement />} />
+    <Route path="vehicles" element={<VehicleManagement />} />
   </Routes>
 );
 

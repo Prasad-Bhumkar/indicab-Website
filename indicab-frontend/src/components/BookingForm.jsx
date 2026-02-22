@@ -114,7 +114,7 @@ const BookingForm = () => {
         setContactPreference(draft.contactPreference || 'call');
       }
     } catch (error) {
-      console.warn('Failed to load booking draft:', error);
+      // Silently ignore draft loading errors
     }
   }, []);
 
@@ -140,7 +140,7 @@ const BookingForm = () => {
     try {
       localStorage.setItem('bookingFormDraft', JSON.stringify(draft));
     } catch (error) {
-      console.warn('Failed to save booking draft:', error);
+      // Silently ignore draft saving errors
     }
   }, [tripType, fromCity, toCity, departDate, returnDate, selectedVehicle, passengerName, passengerEmail, passengerPhone, pickupAddress, dropoffAddress, licenseNumber, passengerCount, specialRequirements, contactPreference]);
 
@@ -358,7 +358,7 @@ const BookingForm = () => {
       } catch (error) {
         const errorMsg = getErrorMessage(error);
         setSubmitError(errorMsg);
-        console.error('Booking submission error:', error);
+        // Error message displayed to user via setSubmitError
       } finally {
         setIsSubmitting(false);
       }

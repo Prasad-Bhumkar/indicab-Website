@@ -120,7 +120,7 @@ public class VehicleController {
     @ApiResponse(responseCode = "404", description = "Vehicle not found")
     public ResponseEntity<Void> deleteVehicle(@PathVariable Long id) {
         logger.info("Deleting vehicle with ID: {}", id);
-        
+
         try {
             vehicleService.deleteVehicle(id);
             return ResponseEntity.noContent().build();
@@ -128,5 +128,32 @@ public class VehicleController {
             logger.error("Error deleting vehicle: {}", e.getMessage());
             return ResponseEntity.notFound().build();
         }
+    }
+
+    /**
+     * Delete multiple vehicles
+     */
+    @DeleteMapping("/bulk")
+    @Operation(summary = "Bulk delete vehicles", description = "Delete multiple vehicles at once (ADMIN only)")
+    @ApiResponse(responseCode = "204", description = "Vehicles deleted successfully")
+    public ResponseEntity<Void> bulkDeleteVehicles(@RequestBody java.util.List<Long> ids) {
+        logger.info("Admin performing bulk delete on vehicles. Count: {}", ids.size());
+        vehicleService.bulkDeleteVehicles(ids);
+        return ResponseEntity.noContent().build();
+    }
+
+    /**
+     * Bulk update vehicles status
+     */
+    @PutMapping("/bulk/status")
+    @Operation(summary = "Bulk update vehicle status", description = "Update status for multiple vehicles at once (ADMIN only)")
+    @ApiResponse(responseCode = "200", description = "Vehicles updated successfully")
+    public ResponseEntity<Void> bulkUpdateVehiclesStatus(
+            @RequestBody java.util.List<Long> ids,
+            @RequestParam String status) {
+
+        logger.info("Admin performing bulk status update to: {} for {} vehicles", status, ids.size());
+        vehicleService.bulkUpdateVehiclesStatus(ids, status);
+        return ResponseEntity.ok().build();
     }
 }

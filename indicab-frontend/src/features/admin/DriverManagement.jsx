@@ -1,15 +1,39 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchDrivers, createDriver, updateDriver, approveDriver, rejectDriver, deleteDriver, clearSuccessMessage, clearError } from './adminSlice';
+import { fetchDrivers, createDriver, updateDriver, approveDriver, rejectDriver, deleteDriver, bulkDeleteDrivers, clearSuccessMessage, clearError } from './adminSlice';
+import PaginationControls from '../../components/PaginationControls';
+import FilterBar from '../../components/FilterBar';
+import SortableHeader from '../../components/SortableHeader';
+import { HeaderCheckbox, RowCheckbox } from '../../components/CheckboxColumn';
+import BulkActionBar from '../../components/BulkActionBar';
+import ExportModal from '../../components/ExportModal';
+import { driverValidationSchema, validateFormData, hasFieldError, getFieldError } from './validationSchemas';
+import {
+  toggleItemSelection,
+  selectAllItems,
+  clearSelection,
+  isItemSelected,
+  getSelectionStats,
+  getBulkActionConfirmMessage,
+  formatSelectedIdsForAPI,
+} from './bulkActionsUtils';
 import './ManagementPages.css';
 
 const DriverManagement = () => {
   const dispatch = useDispatch();
-  const { drivers, loading, error, successMessage } = useSelector((state) => state.admin);
-  
+  const { drivers, loading, error, successMessage, pagination } = useSelector((state) => state.admin);
+
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingId, setEditingId] = useState(null);
-  
+  const [page, setPage] = useState(0);
+  const [pageSize, setPageSize] = useState(10);
+  const [sortColumn, setSortColumn] = useState('name');
+  const [sortDirection, setSortDirection] = useState('asc');
+  const [filters, setFilters] = useState({});
+  const [validationErrors, setValidationErrors] = useState({});
+  const [showExportModal, setShowExportModal] = useState(false);
+  const [selectedDrivers, setSelectedDrivers] = useState(new Set());
+
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -20,8 +44,14 @@ const DriverManagement = () => {
   });
 
   useEffect(() => {
-    dispatch(fetchDrivers());
-  }, [dispatch]);
+    const params = {
+      page,
+      size: pageSize,
+      sort: `${sortColumn},${sortDirection}`,
+      ...filters,
+    };
+    dispatch(fetchDrivers(params));
+  }, [dispatch, page, pageSize, sortColumn, sortDirection, filters]);
 
   useEffect(() => {
     if (successMessage) {
@@ -40,8 +70,16 @@ const DriverManagement = () => {
     }));
   };
 
-  const handleAddDriver = (e) => {
+  const handleAddDriver = async (e) => {
     e.preventDefault();
+    setValidationErrors({});
+
+    const validation = await validateFormData(driverValidationSchema, formData);
+    if (!validation.isValid) {
+      setValidationErrors(validation.errors);
+      return;
+    }
+
     dispatch(createDriver(formData));
     setShowAddForm(false);
     resetForm();
@@ -53,7 +91,15 @@ const DriverManagement = () => {
     setShowAddForm(false);
   };
 
-  const handleSaveEdit = (driverId) => {
+  const handleSaveEdit = async (driverId) => {
+    setValidationErrors({});
+
+    const validation = await validateFormData(driverValidationSchema, formData);
+    if (!validation.isValid) {
+      setValidationErrors(validation.errors);
+      return;
+    }
+
     dispatch(updateDriver({ driverId, driverData: formData }));
     setEditingId(null);
     resetForm();
@@ -91,20 +137,80 @@ const DriverManagement = () => {
     return `status-badge status-${status?.toLowerCase() || 'pending'}`;
   };
 
+  const handlePageChange = (newPage) => {
+    setPage(newPage);
+  };
+
+  const handlePageSizeChange = (newSize) => {
+    setPageSize(newSize);
+    setPage(0);
+  };
+
+  const handleSort = (column, direction) => {
+    setSortColumn(column);
+    setSortDirection(direction);
+    setPage(0);
+  };
+
+  const handleFilterChange = (newFilters) => {
+    setFilters(newFilters);
+    setPage(0);
+  };
+
+  // Bulk selection handlers
+  const handleRowCheckboxChange = (driverId) => {
+    setSelectedDrivers(toggleItemSelection(selectedDrivers, driverId));
+  };
+
+  const handleSelectAllChange = () => {
+    const stats = getSelectionStats(selectedDrivers, drivers);
+    if (stats.isAllSelected) {
+      setSelectedDrivers(clearSelection());
+    } else {
+      setSelectedDrivers(selectAllItems(drivers));
+    }
+  };
+
+  const handleBulkDelete = () => {
+    const stats = getSelectionStats(selectedDrivers, drivers);
+    const confirmMsg = getBulkActionConfirmMessage('delete', stats.totalSelected, 'driver');
+
+    if (window.confirm(confirmMsg)) {
+      const ids = formatSelectedIdsForAPI(selectedDrivers);
+      dispatch(bulkDeleteDrivers(ids)).then(() => {
+        setSelectedDrivers(clearSelection());
+        dispatch(fetchDrivers({ page, size: pageSize, sort: `${sortColumn},${sortDirection}`, ...filters }));
+      });
+    }
+  };
+
+  const handleClearSelection = () => {
+    setSelectedDrivers(clearSelection());
+  };
+
   return (
     <div className="management-container">
       <div className="management-header">
         <h3 className="management-title">Driver Management</h3>
-        <button 
-          className="add-btn"
-          onClick={() => {
-            setShowAddForm(!showAddForm);
-            setEditingId(null);
-            if (!showAddForm) resetForm();
-          }}
-        >
-          {showAddForm ? 'Cancel' : '+ Add Driver'}
-        </button>
+        <div className="header-actions">
+          <button
+            className="add-btn export-btn"
+            onClick={() => setShowExportModal(true)}
+            title="Export drivers"
+          >
+            📥 Export
+          </button>
+          <button
+            className="add-btn"
+            onClick={() => {
+              setShowAddForm(!showAddForm);
+              setEditingId(null);
+              if (!showAddForm) resetForm();
+            }}
+          >
+            {showAddForm ? 'Cancel' : '+ Add Driver'}
+          </button>
+        </div>
       </div>
 
       {error && (
@@ -121,6 +227,32 @@ const DriverManagement = () => {
         </div>
       )}
 
+      <FilterBar
+        onFilterChange={handleFilterChange}
+        filters={filters}
+        filterOptions={{
+          showSearch: true,
+          showStatus: true,
+          statusOptions: [
+            { value: 'pending', label: 'Pending' },
+            { value: 'approved', label: 'Approved' },
+            { value: 'rejected', label: 'Rejected' },
+          ],
+        }}
+        loading={loading}
+      />
+
+      <BulkActionBar
+        selectedCount={selectedDrivers.size}
+        totalCount={drivers.length}
+        isAllSelected={selectedDrivers.size === drivers.length && drivers.length > 0}
+        entityType="driver"
+        onDelete={handleBulkDelete}
+        onClearSelection={handleClearSelection}
+        onSelectAll={() => setSelectedDrivers(selectAllItems(drivers))}
+        loading={loading}
+      />
+
       {(showAddForm || editingId) && (
         <div className="form-card">
           <h4>{editingId ? 'Edit Driver' : 'Add New Driver'}</h4>
@@ -128,15 +260,24 @@ const DriverManagement = () => {
             <div className="form-grid">
               <div className="form-group">
                 <label className="form-label">Name</label>
-                <input type="text" name="name" className="form-input" value={formData.name} onChange={handleInputChange} required />
+                <input type="text" name="name" className={`form-input ${hasFieldError(validationErrors, 'name') ? 'is-invalid' : ''}`} value={formData.name} onChange={handleInputChange} required />
+                {hasFieldError(validationErrors, 'name') && (
+                  <small className="form-error">{getFieldError(validationErrors, 'name')}</small>
+                )}
               </div>
               <div className="form-group">
                 <label className="form-label">Email</label>
-                <input type="email" name="email" className="form-input" value={formData.email} onChange={handleInputChange} required />
+                <input type="email" name="email" className={`form-input ${hasFieldError(validationErrors, 'email') ? 'is-invalid' : ''}`} value={formData.email} onChange={handleInputChange} required />
+                {hasFieldError(validationErrors, 'email') && (
+                  <small className="form-error">{getFieldError(validationErrors, 'email')}</small>
+                )}
               </div>
               <div className="form-group">
                 <label className="form-label">Phone</label>
-                <input type="tel" name="phone" className="form-input" value={formData.phone} onChange={handleInputChange} required />
+                <input type="tel" name="phone" className={`form-input ${hasFieldError(validationErrors, 'phone') ? 'is-invalid' : ''}`} value={formData.phone} onChange={handleInputChange} required />
+                {hasFieldError(validationErrors, 'phone') && (
+                  <small className="form-error">{getFieldError(validationErrors, 'phone')}</small>
+                )}
               </div>
               <div className="form-group">
                 <label className="form-label">Vehicle Info</label>
@@ -144,7 +285,10 @@ const DriverManagement = () => {
               </div>
               <div className="form-group">
                 <label className="form-label">License Number</label>
-                <input type="text" name="licenseNumber" className="form-input" value={formData.licenseNumber || ''} onChange={handleInputChange} />
+                <input type="text" name="licenseNumber" className={`form-input ${hasFieldError(validationErrors, 'licenseNumber') ? 'is-invalid' : ''}`} value={formData.licenseNumber || ''} onChange={handleInputChange} />
+                {hasFieldError(validationErrors, 'licenseNumber') && (
+                  <small className="form-error">{getFieldError(validationErrors, 'licenseNumber')}</small>
+                )}
               </div>
               <div className="form-group">
                 <label className="form-label">Status</label>
@@ -174,6 +318,13 @@ const DriverManagement = () => {
           <table className="management-table">
             <thead>
               <tr>
+                <HeaderCheckbox
+                  isAllSelected={selectedDrivers.size === drivers.length && drivers.length > 0}
+                  isIndeterminate={selectedDrivers.size > 0 && selectedDrivers.size < drivers.length}
+                  onChange={handleSelectAllChange}
+                  disabled={loading || drivers.length === 0}
+                  title="Select all drivers"
+                />
                 <th>ID</th>
                 <th>Name</th>
                 <th>Contact</th>
@@ -186,6 +337,12 @@ const DriverManagement = () => {
               {drivers.length > 0 ? (
                 drivers.map((driver) => (
                   <tr key={driver.id}>
+                    <RowCheckbox
+                      isSelected={isItemSelected(selectedDrivers, driver.id)}
+                      onChange={() => handleRowCheckboxChange(driver.id)}
+                      disabled={loading}
+                      rowId={driver.id}
+                    />
                     <td>#{driver.id}</td>
                     <td>{driver.name}</td>
                     <td>
@@ -216,12 +373,32 @@ const DriverManagement = () => {
                   </tr>
                 ))
               ) : (
-                <tr><td colSpan="6" style={{textAlign: 'center', padding: '2rem'}}>No drivers found.</td></tr>
+                <tr><td colSpan="7" style={{textAlign: 'center', padding: '2rem'}}>No drivers found.</td></tr>
               )}
             </tbody>
           </table>
         </div>
       )}
+
+      <PaginationControls
+        currentPage={pagination?.drivers?.page || page}
+        totalPages={pagination?.drivers?.totalPages || 1}
+        totalElements={pagination?.drivers?.totalElements || drivers.length}
+        pageSize={pageSize}
+        onPageChange={handlePageChange}
+        onPageSizeChange={handlePageSizeChange}
+        loading={loading}
+      />
+
+      <ExportModal
+        show={showExportModal}
+        onHide={() => setShowExportModal(false)}
+        data={selectedDrivers.size > 0 ? drivers.filter(d => selectedDrivers.has(d.id)) : drivers}
+        entityType="driver"
+        filename="drivers"
+        selectedOnly={selectedDrivers.size > 0}
+        selectedCount={selectedDrivers.size}
+      />
     </div>
   );
 };

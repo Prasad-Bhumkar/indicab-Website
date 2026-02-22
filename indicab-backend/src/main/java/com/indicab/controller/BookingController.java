@@ -4,8 +4,10 @@ import com.indicab.dto.BookingRequestDTO;
 import com.indicab.dto.BookingResponseDTO;
 import com.indicab.dto.PagedResponseDTO;
 import com.indicab.entity.Booking;
+import com.indicab.entity.User;
 import com.indicab.mapper.BookingMapper;
 import com.indicab.service.BookingService;
+import com.indicab.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -19,6 +21,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -38,17 +41,29 @@ public class BookingController {
     @Autowired
     private BookingService bookingService;
 
+    @Autowired
+    private UserService userService;
+
     @GetMapping
-    @Operation(summary = "Get all bookings with pagination", description = "Retrieve paginated list of bookings")
-    @ApiResponse(responseCode = "200", description = "Paginated list of bookings retrieved successfully")
-    public ResponseEntity<PagedResponseDTO<BookingResponseDTO>> getAllBookings(
+    @Operation(summary = "Get user's bookings with pagination", description = "Retrieve paginated list of bookings for the authenticated user")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Paginated list of user bookings retrieved successfully"),
+        @ApiResponse(responseCode = "401", description = "Unauthorized - user not authenticated")
+    })
+    public ResponseEntity<PagedResponseDTO<BookingResponseDTO>> getUserBookings(
             @Parameter(description = "Page number (0-indexed)", example = "0")
             @RequestParam(defaultValue = "0") int page,
             @Parameter(description = "Page size", example = "10")
             @RequestParam(defaultValue = "10") int size) {
 
+        // Get currently authenticated user
+        String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+        User currentUser = userService.findByEmail(userEmail)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        // Fetch bookings for current user only
         Pageable pageable = PageRequest.of(page, size);
-        Page<Booking> bookingsPage = bookingService.getAllBookingsPaged(pageable);
+        Page<Booking> bookingsPage = bookingService.getBookingsByUserId(currentUser.getId(), pageable);
 
         List<BookingResponseDTO> content = bookingsPage.getContent().stream()
                 .map(BookingMapper::toDto)
@@ -95,7 +110,14 @@ public class BookingController {
         @ApiResponse(responseCode = "400", description = "Validation failed")
     })
     public ResponseEntity<BookingResponseDTO> createBooking(@Valid @RequestBody BookingRequestDTO bookingRequest) {
-        Booking savedBooking = bookingService.createBooking(bookingRequest);
+        Long currentUserId = null;
+        try {
+            String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+            currentUserId = userService.findByEmail(userEmail).map(User::getId).orElse(null);
+        } catch (Exception ignored) {
+            // unauthenticated or no user – book as guest
+        }
+        Booking savedBooking = bookingService.createBooking(bookingRequest, currentUserId);
         return ResponseEntity.status(HttpStatus.CREATED).body(BookingMapper.toDto(savedBooking));
     }
 

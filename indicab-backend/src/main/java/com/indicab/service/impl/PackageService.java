@@ -3,6 +3,8 @@ package com.indicab.service.impl;
 import com.indicab.dto.PackageDTO;
 import com.indicab.entity.Package;
 import com.indicab.repository.PackageRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -14,7 +16,9 @@ import java.util.List;
 @Service
 @Transactional
 public class PackageService {
-    
+
+    private static final Logger logger = LoggerFactory.getLogger(PackageService.class);
+
     @Autowired
     private PackageRepository packageRepository;
     
@@ -133,5 +137,39 @@ public class PackageService {
      */
     public Page<Package> getPackagesByStatus(Boolean isActive, Pageable pageable) {
         return packageRepository.findByIsActive(isActive, pageable);
+    }
+
+    /**
+     * Delete multiple packages by ID (admin only)
+     */
+    public void bulkDeletePackages(List<Long> ids) {
+        logger.info("Bulk deleting {} packages", ids.size());
+        try {
+            packageRepository.deleteAllById(ids);
+            logger.info("Bulk deletion completed for {} package(s)", ids.size());
+        } catch (Exception e) {
+            logger.error("Failed to bulk delete packages", e);
+            throw new RuntimeException("Failed to delete multiple packages");
+        }
+    }
+
+    /**
+     * Update active status for multiple packages (admin only).
+     * status is interpreted as: "active"/"true"/"1" -> true, otherwise -> false
+     */
+    public void bulkUpdatePackagesStatus(List<Long> ids, String status) {
+        logger.info("Bulk updating package status for {} packages to {}", ids.size(), status);
+        Boolean isActive = "active".equalsIgnoreCase(status) || "true".equalsIgnoreCase(status) || "1".equals(status);
+        try {
+            List<Package> packages = packageRepository.findAllById(ids);
+            for (Package pkg : packages) {
+                pkg.setIsActive(isActive);
+            }
+            packageRepository.saveAll(packages);
+            logger.info("Bulk status update completed for {} package(s)", ids.size());
+        } catch (Exception e) {
+            logger.error("Failed to bulk update package status", e);
+            throw new RuntimeException("Failed to update status for multiple packages");
+        }
     }
 }
