@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaUsers, FaCity, FaCar, FaShieldAlt, FaHandshake, FaHeart, FaMapMarkedAlt, FaAward, FaUsersCog, FaLinkedin, FaTwitter, FaChevronDown } from 'react-icons/fa';
 import { motion } from 'framer-motion';

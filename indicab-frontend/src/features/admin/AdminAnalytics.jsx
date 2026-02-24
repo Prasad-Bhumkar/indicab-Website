@@ -29,7 +29,7 @@ import {
   generateMockVehicleData,
   generateMockStatusData,
   generateMockUserGrowthData,
-} from '../../utils/chartUtils';
+} from '../../utils/chartUtils.jsx';
 import './AdminAnalytics.css';
 
 // Memoized stat card component to prevent unnecessary re-renders

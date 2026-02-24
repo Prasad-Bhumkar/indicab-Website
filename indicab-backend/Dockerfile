@@ -1,6 +1,6 @@
 # Multi-stage build for production-ready Spring Boot application
 # Stage 1: Build stage
-FROM maven:3.9.5-eclipse-temurin-17 AS builder
+FROM maven:3.9-eclipse-temurin-17 AS builder
 
 WORKDIR /app
 
@@ -15,13 +15,13 @@ COPY src ./src
 RUN mvn clean package -DskipTests
 
 # Stage 2: Runtime stage
-FROM eclipse-temurin:17-jre-alpine
+FROM eclipse-temurin:17-jre-jammy
 
 WORKDIR /app
 
 # Create non-root user for security
-RUN addgroup -g 1000 appuser && \
-    adduser -D -u 1000 -G appuser appuser
+RUN groupadd -g 1000 appuser && \
+    useradd -u 1000 -g appuser appuser
 
 # Copy the built application from builder stage
 COPY --from=builder /app/target/indicab-backend-*.jar app.jar

@@ -58,22 +58,28 @@
   align-items: center;
   gap: 15px;
   padding: 15px 20px;
-  color: #ecf0f1;
+  color: #ecf0f1 !important;
   text-decoration: none;
   transition: all 0.3s ease;
   border-left: 4px solid transparent;
+  font-weight: 500;
+}
+
+.nav-item:link,
+.nav-item:visited {
+  color: #ecf0f1 !important;
 }
 
 .nav-item:hover {
-  background-color: transparent;
-  border-left-color: var(--accent-orange);
-  color: var(--accent-orange);
+  background-color: rgba(52, 152, 219, 0.12);
+  border-left-color: #5dade2;
+  color: #5dade2;
 }
 
 .nav-item.active {
-  background-color: #3498db;
-  border-left-color: #2980b9;
-  color: #fff;
+  background-color: rgba(52, 152, 219, 0.2);
+  border-left-color: #5dade2;
+  color: #5dade2;
 }
 
 .nav-icon {

@@ -164,10 +164,9 @@ public class AdminController {
     private Long getCurrentAdminId() {
         try {
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-            if (auth != null && auth.getPrincipal() instanceof org.springframework.security.core.userdetails.UserDetails) {
-                // In a real implementation, you would get the actual user ID from the UserDetails
-                // For now, we'll return a placeholder that should be customized
-                return 1L; // This should be replaced with actual admin ID from user details
+            if (auth != null && auth.getPrincipal() instanceof com.indicab.config.CustomUserDetails) {
+                com.indicab.config.CustomUserDetails userDetails = (com.indicab.config.CustomUserDetails) auth.getPrincipal();
+                return userDetails.getId();
             }
         } catch (Exception e) {
             logger.debug("Could not get admin ID from security context: {}", e.getMessage());

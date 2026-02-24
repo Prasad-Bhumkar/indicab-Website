@@ -17,6 +17,18 @@ const nameSchema = yup
   .max(100, 'Name cannot exceed 100 characters')
   .required('Name is required');
 
+const passwordSchema = yup
+  .string('Password must be a string')
+  .min(6, 'Password must be at least 6 characters')
+  .max(100, 'Password cannot exceed 100 characters')
+  .required('Password is required');
+
+// Admin login validation schema
+export const adminLoginValidationSchema = yup.object().shape({
+  email: emailSchema,
+  password: passwordSchema,
+});
+
 // User validation schema
 export const userValidationSchema = yup.object().shape({
   name: nameSchema,

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate, Link } from 'react-router-dom';
 import { adminLoginUser } from '../features/auth/authSlice';
+import { adminLoginValidationSchema, validateFormData } from '../features/admin/validationSchemas';
 import '../styles/AdminLogin.css';
 
 /**
@@ -13,43 +14,22 @@ const AdminLogin = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [validationErrors, setValidationErrors] = useState({});
-  
+
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { loading, error } = useSelector(state => state.auth);
-
-  /**
-   * Validate form inputs
-   */
-  const validateForm = () => {
-    const errors = {};
-    
-    if (!email) {
-      errors.email = 'Email is required';
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      errors.email = 'Please enter a valid email address';
-    }
-    
-    if (!password) {
-      errors.password = 'Password is required';
-    } else if (password.length < 6) {
-      errors.password = 'Password must be at least 6 characters';
-    }
-    
-    return errors;
-  };
 
   /**
    * Handle form submission
    */
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    // Validate form
-    const errors = validateForm();
-    setValidationErrors(errors);
-    
-    if (Object.keys(errors).length > 0) {
+
+    // Validate form using Yup schema
+    const validation = await validateFormData(adminLoginValidationSchema, { email, password });
+    setValidationErrors(validation.errors);
+
+    if (!validation.isValid) {
       return;
     }
 

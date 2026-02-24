@@ -1,9 +1,9 @@
 {
   "scripts": {
-    "dev:all": "concurrently \"cd indicab-frontend && npm run dev -- --port 5174\" \"cd indicab-backend && mvnw spring-boot:run\"",
-    "dev:all:mac": "concurrently \"cd indicab-frontend && npm run dev -- --port 5174\" \"cd indicab-backend && ./mvnw spring-boot:run\"",
-    "agent:auth": "npx --yes @builder.io/agent auth --local --json -c \"npm run dev:all\" --acceptSelfSigned",
-    "agent:launch": "npx --yes @builder.io/agent launch --local --json -c \"npm run dev:all\" --acceptSelfSigned",
+    "dev:all": "cd indicab-frontend && npm run dev -- --port 5174",
+    "dev:all:mac": "cd indicab-frontend && npm run dev -- --port 5174",
+    "agent:auth": "npx --yes @builder.io/agent auth --local --json -c --acceptSelfSigned",
+    "agent:launch": "npx --yes @builder.io/agent launch --local --json -c \"docker compose up\" --acceptSelfSigned",
     "builder": "npm run agent:auth && npm run agent:launch"
   },
   "devDependencies": {
