@@ -1,4 +1,13 @@
--- Create audit_logs table for tracking user operations
+-- Repair Flyway schema history for failed migrations
+-- This script deletes failed migration records to allow them to be retried
+
+-- Wait for database to be created
+SELECT 1;
+
+-- Delete failed migration from Flyway schema history
+DELETE FROM flyway_schema_history WHERE version = 4 AND success = FALSE;
+
+-- Verify audit_logs table exists
 CREATE TABLE IF NOT EXISTS `audit_logs` (
     `id` BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     `user_id` BIGINT NOT NULL,
