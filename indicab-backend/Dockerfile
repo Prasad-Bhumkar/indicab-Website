@@ -11,8 +11,8 @@ RUN mvn dependency:go-offline
 # Copy source code
 COPY src ./src
 
-# Build the application
-RUN mvn clean package -DskipTests
+# Build the application with retry logic for transient network failures
+RUN mvn clean package -DskipTests -Dmaven.wagon.http.retryHandler.count=3
 
 # Stage 2: Runtime stage
 FROM eclipse-temurin:17-jre-jammy
