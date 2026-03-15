@@ -1,13 +1,23 @@
 import '@testing-library/jest-dom'
 import { vi } from 'vitest'
 
-// Mock localStorage
-const localStorageMock = {
-  getItem: vi.fn(),
-  setItem: vi.fn(),
-  removeItem: vi.fn(),
-  clear: vi.fn(),
-}
+// Mock localStorage with actual data storage
+const localStorageMock = (() => {
+  let store = {}
+
+  return {
+    getItem: (key) => store[key] || null,
+    setItem: (key, value) => {
+      store[key] = String(value)
+    },
+    removeItem: (key) => {
+      delete store[key]
+    },
+    clear: () => {
+      store = {}
+    },
+  }
+})()
 global.localStorage = localStorageMock
 
 // Mock window.matchMedia
@@ -25,8 +35,11 @@ Object.defineProperty(window, 'matchMedia', {
   })),
 })
 
-// Suppress console errors in tests (optional)
+// Suppress console errors and verbose output in tests
 const originalError = console.error
+const originalLog = console.log
+const originalWarn = console.warn
+
 beforeAll(() => {
   console.error = (...args) => {
     if (
@@ -37,8 +50,18 @@ beforeAll(() => {
     }
     originalError.call(console, ...args)
   }
+
+  // Suppress verbose component rendering output
+  console.log = (...args) => {
+    const msg = args[0]?.toString?.() || ''
+    if (!msg.includes('<') && !msg.includes('class=')) {
+      originalLog.call(console, ...args)
+    }
+  }
 })
 
 afterAll(() => {
   console.error = originalError
+  console.log = originalLog
+  console.warn = originalWarn
 })

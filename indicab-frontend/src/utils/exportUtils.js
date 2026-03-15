@@ -194,7 +194,7 @@ export const exportToPDF = (data, filename, columns, options = {}) => {
  * @param {Array} columns - Column definitions
  * @param {Object} options - Additional options
  */
-export const exportSelectedItems = (selectedItems, format, filename, columns, options = {}) => {
+export const exportSelectedItems = async (selectedItems, format, filename, columns, options = {}) => {
   if (!selectedItems || selectedItems.length === 0) {
     console.warn('No items selected for export');
     return;
@@ -206,7 +206,7 @@ export const exportSelectedItems = (selectedItems, format, filename, columns, op
       break;
     case 'excel':
     case 'xlsx':
-      exportToExcel(selectedItems, filename, columns, options);
+      await exportToExcel(selectedItems, filename, columns, options);
       break;
     case 'pdf':
       exportToPDF(selectedItems, filename, columns, options);

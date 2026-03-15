@@ -134,6 +134,15 @@ const Header = () => {
                 Contact Us
               </Link>
             </li>
+            {/* Login Button - only for unauthenticated users */}
+            {!user && (
+              <li className="nav-item">
+                <Link className="nav-link login-btn" to="/login" onClick={closeMenu}>
+                  <i className="bi bi-box-arrow-in-right me-1"></i>
+                  Login
+                </Link>
+              </li>
+            )}
             {user && (
               <>
                 {/* Show dashboard links based on role */}

@@ -51,3 +51,6 @@ indicab-frontend/playwright-report/
 
 # AI plan artifacts
 .builder/
+
+# Environment
+.env.production

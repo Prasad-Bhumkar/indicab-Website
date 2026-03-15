@@ -16,16 +16,10 @@ const AdminDashboard = () => {
   });
   const [recentBookings, setRecentBookings] = useState([
     { id: 1, customer: 'John Doe', destination: 'Airport', amount: 450, status: 'completed', time: '2 hours ago' },
-    { id: 2, customer: 'Jane Smith', destination: 'Mall', amount: 320, status: 'in-progress', time: '30 mins ago' },
-    { id: 3, customer: 'Bob Johnson', destination: 'Station', amount: 280, status: 'pending', time: '5 mins ago' },
-    { id: 4, customer: 'Alice Williams', destination: 'Hotel', amount: 500, status: 'completed', time: '1 hour ago' },
   ]);
 
   const [activeDrivers, setActiveDrivers] = useState([
     { id: 1, name: 'Raj Kumar', vehicle: 'Swift DZire', status: 'available', rating: 4.8, trips: 156 },
-    { id: 2, name: 'Priya Singh', vehicle: 'Creta', status: 'on-trip', rating: 4.9, trips: 203 },
-    { id: 3, name: 'Amit Patel', vehicle: 'Fortuner', status: 'available', rating: 4.6, trips: 89 },
-    { id: 4, name: 'Sophia Lee', vehicle: 'Baleno', status: 'available', rating: 4.7, trips: 142 },
   ]);
 
   const [loading, setLoading] = useState(false);

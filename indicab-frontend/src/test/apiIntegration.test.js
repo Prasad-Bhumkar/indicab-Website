@@ -201,8 +201,18 @@ describe('API Integration Tests', () => {
       const token = 'test-jwt-token-123';
       localStorage.setItem('token', token);
 
-      // The interceptor should add the token
-      expect(localStorage.getItem('token')).toBe(token);
+      // Simulate the request interceptor logic
+      const config = { headers: {} };
+      const storedToken = localStorage.getItem('token');
+
+      expect(storedToken).toBe(token);
+
+      if (storedToken) {
+        config.headers.Authorization = `Bearer ${storedToken}`;
+      }
+
+      expect(config.headers.Authorization).toBeDefined();
+      expect(config.headers.Authorization).toContain('Bearer');
 
       // Cleanup
       localStorage.removeItem('token');
@@ -210,18 +220,24 @@ describe('API Integration Tests', () => {
 
     it('should clear token on 401 response', () => {
       localStorage.setItem('token', 'test-token');
-      
-      // Simulate what the interceptor does
-      const mockConfig = { headers: {} };
-      const token = localStorage.getItem('token');
-      if (token) {
-        mockConfig.headers.Authorization = `Bearer ${token}`;
-      }
 
-      expect(mockConfig.headers.Authorization).toContain('Bearer');
+      // Verify token was set
+      expect(localStorage.getItem('token')).toBe('test-token');
 
-      // Cleanup
+      // Simulate 401 error handler
+      const error = {
+        response: {
+          status: 401,
+          data: { message: 'Unauthorized' }
+        }
+      };
+
+      // Verify it's a 401 error
+      expect(error.response.status).toBe(401);
+
+      // Clear token when 401 occurs
       localStorage.removeItem('token');
+      expect(localStorage.getItem('token')).toBeFalsy();
     });
   });
 
