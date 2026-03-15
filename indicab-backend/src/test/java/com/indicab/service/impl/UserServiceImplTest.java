@@ -3,6 +3,7 @@ package com.indicab.service.impl;
 import com.indicab.dto.UserProfileDTO;
 import com.indicab.dto.UserRegistrationDTO;
 import com.indicab.entity.User;
+import com.indicab.controller.AdminWebSocketController;
 import com.indicab.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -31,6 +32,9 @@ class UserServiceImplTest {
 
     @Mock
     private UserRepository userRepository;
+
+    @Mock
+    private AdminWebSocketController adminWebSocketController;
 
     @Mock
     private PasswordEncoder passwordEncoder;
@@ -64,7 +68,7 @@ class UserServiceImplTest {
     @DisplayName("Should register user successfully when email doesn't exist")
     void testRegisterUserSuccess() {
         // Arrange
-        when(userRepository.findByEmail(registrationDTO.getEmail())).thenReturn(null);
+        when(userRepository.findByEmail(registrationDTO.getEmail())).thenReturn(Optional.empty());
         when(passwordEncoder.encode(registrationDTO.getPassword())).thenReturn("hashedPassword");
         when(userRepository.save(any(User.class))).thenReturn(testUser);
 
@@ -84,7 +88,7 @@ class UserServiceImplTest {
     @DisplayName("Should throw exception when email already exists")
     void testRegisterUserEmailExists() {
         // Arrange
-        when(userRepository.findByEmail(registrationDTO.getEmail())).thenReturn(testUser);
+        when(userRepository.findByEmail(registrationDTO.getEmail())).thenReturn(Optional.of(testUser));
 
         // Act & Assert
         assertThatThrownBy(() -> userService.registerUser(registrationDTO))
@@ -97,7 +101,7 @@ class UserServiceImplTest {
     @DisplayName("Should find user by email")
     void testFindByEmail() {
         // Arrange
-        when(userRepository.findByEmail(testUser.getEmail())).thenReturn(testUser);
+        when(userRepository.findByEmail(testUser.getEmail())).thenReturn(Optional.of(testUser));
 
         // Act
         Optional<User> result = userService.findByEmail(testUser.getEmail());
@@ -111,7 +115,7 @@ class UserServiceImplTest {
     @DisplayName("Should return empty when user email not found")
     void testFindByEmailNotFound() {
         // Arrange
-        when(userRepository.findByEmail("nonexistent@example.com")).thenReturn(null);
+        when(userRepository.findByEmail("nonexistent@example.com")).thenReturn(Optional.empty());
 
         // Act
         Optional<User> result = userService.findByEmail("nonexistent@example.com");
@@ -175,7 +179,7 @@ class UserServiceImplTest {
     @DisplayName("Should check if email exists")
     void testEmailExists() {
         // Arrange
-        when(userRepository.findByEmail(testUser.getEmail())).thenReturn(testUser);
+        when(userRepository.findByEmail(testUser.getEmail())).thenReturn(Optional.of(testUser));
 
         // Act
         boolean result = userService.emailExists(testUser.getEmail());
@@ -188,7 +192,7 @@ class UserServiceImplTest {
     @DisplayName("Should return false when email doesn't exist")
     void testEmailNotExists() {
         // Arrange
-        when(userRepository.findByEmail("nonexistent@example.com")).thenReturn(null);
+        when(userRepository.findByEmail("nonexistent@example.com")).thenReturn(Optional.empty());
 
         // Act
         boolean result = userService.emailExists("nonexistent@example.com");
@@ -221,5 +225,79 @@ class UserServiceImplTest {
         assertThatThrownBy(() -> userService.getUserOrThrow(999L))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("User not found with ID: 999");
+    }
+
+    @Test
+    @DisplayName("Should perform bulk delete users")
+    void testBulkDeleteUsers() {
+        // Arrange
+        List<Long> userIds = new ArrayList<>();
+        userIds.add(1L);
+        userIds.add(2L);
+
+        List<User> users = new ArrayList<>();
+        users.add(testUser);
+
+        when(userRepository.findAllById(userIds)).thenReturn(users);
+        when(userRepository.saveAll(any())).thenReturn(users);
+
+        // Act
+        userService.bulkDeleteUsers(userIds);
+
+        // Assert
+        verify(userRepository).findAllById(userIds);
+        verify(userRepository).saveAll(any());
+    }
+
+    @Test
+    @DisplayName("Should perform bulk update users role")
+    void testBulkUpdateUsersRole() {
+        // Arrange
+        List<Long> userIds = new ArrayList<>();
+        userIds.add(1L);
+        userIds.add(2L);
+
+        List<User> users = new ArrayList<>();
+        users.add(testUser);
+
+        when(userRepository.findAllById(userIds)).thenReturn(users);
+        when(userRepository.saveAll(any())).thenReturn(users);
+
+        // Act
+        userService.bulkUpdateUsersRole(userIds, "ADMIN");
+
+        // Assert
+        verify(userRepository).findAllById(userIds);
+        verify(userRepository).saveAll(any());
+    }
+
+    @Test
+    @DisplayName("Should handle exception during bulk delete")
+    void testBulkDeleteUsersException() {
+        // Arrange
+        List<Long> userIds = new ArrayList<>();
+        userIds.add(1L);
+
+        when(userRepository.findAllById(userIds)).thenThrow(new RuntimeException("Database error"));
+
+        // Act & Assert
+        assertThatThrownBy(() -> userService.bulkDeleteUsers(userIds))
+                .isInstanceOf(RuntimeException.class)
+                .hasMessage("Failed to delete multiple users");
+    }
+
+    @Test
+    @DisplayName("Should handle exception during bulk update role")
+    void testBulkUpdateUsersRoleException() {
+        // Arrange
+        List<Long> userIds = new ArrayList<>();
+        userIds.add(1L);
+
+        when(userRepository.findAllById(userIds)).thenThrow(new RuntimeException("Database error"));
+
+        // Act & Assert
+        assertThatThrownBy(() -> userService.bulkUpdateUsersRole(userIds, "DRIVER"))
+                .isInstanceOf(RuntimeException.class)
+                .hasMessage("Failed to update role for multiple users");
     }
 }

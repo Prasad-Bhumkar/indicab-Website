@@ -104,7 +104,7 @@ public class AdminController {
      * Delete user by ID
      */
     @DeleteMapping("/user/{id}")
-    @Operation(summary = "Delete user", description = "Delete a user by ID (ADMIN only)")
+    @Operation(summary = "Delete user", description = "Soft delete a user by ID (ADMIN only) - marks as deleted without removing from database")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "User deleted successfully"),
         @ApiResponse(responseCode = "404", description = "User not found"),
@@ -112,23 +112,25 @@ public class AdminController {
         @ApiResponse(responseCode = "401", description = "Unauthorized - missing or invalid token")
     })
     public ResponseEntity<?> deleteUser(@PathVariable Long id) {
-        logger.info("Deleting user with ID: {}", id);
-        if (!userRepository.existsById(id)) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
-        }
-        userRepository.deleteById(id);
-        logger.info("User deleted successfully - ID: {}", id);
-        return ResponseEntity.ok("User deleted successfully");
+        logger.info("Soft deleting user with ID: {}", id);
+        return userRepository.findById(id)
+                .map(user -> {
+                    user.softDelete();
+                    userRepository.save(user);
+                    logger.info("User soft deleted successfully - ID: {}", id);
+                    return ResponseEntity.ok("User deleted successfully");
+                })
+                .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found"));
     }
 
     /**
      * Delete multiple users
      */
     @DeleteMapping("/users/bulk")
-    @Operation(summary = "Bulk delete users", description = "Delete multiple users by ID at once (ADMIN only)")
+    @Operation(summary = "Bulk delete users", description = "Soft delete multiple users by ID at once (ADMIN only) - marks as deleted without removing from database")
     @ApiResponse(responseCode = "204", description = "Users deleted successfully")
     public ResponseEntity<Void> bulkDeleteUsers(@RequestBody java.util.List<Long> ids, HttpServletRequest request) {
-        logger.info("Admin performing bulk delete on users. Count: {}", ids.size());
+        logger.info("Admin performing bulk soft delete on users. Count: {}", ids.size());
 
         try {
             userService.bulkDeleteUsers(ids);
@@ -137,11 +139,11 @@ public class AdminController {
             Long adminId = getCurrentAdminId();
             String ipAddress = request.getRemoteAddr();
             auditLoggingService.logBulkOperation(adminId, "DELETE", "USER", ids, ipAddress,
-                                                "Bulk deleted " + ids.size() + " users");
+                                                "Bulk soft deleted " + ids.size() + " users");
 
             return ResponseEntity.noContent().build();
         } catch (Exception e) {
-            logger.error("Error performing bulk delete on users: {}", e.getMessage());
+            logger.error("Error performing bulk soft delete on users: {}", e.getMessage());
             Long adminId = getCurrentAdminId();
             String ipAddress = request.getRemoteAddr();
             auditLoggingService.logFailedBulkOperation(adminId, "DELETE", "USER", ids, ipAddress, e.getMessage());

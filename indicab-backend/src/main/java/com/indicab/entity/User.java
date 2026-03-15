@@ -7,7 +7,13 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 @Entity
-@Table(name = "users")
+@Table(name = "users", indexes = {
+        @Index(name = "idx_email", columnList = "email"),
+        @Index(name = "idx_role", columnList = "role"),
+        @Index(name = "idx_created_at", columnList = "created_at"),
+        @Index(name = "idx_driver_status", columnList = "driverStatus"),
+        @Index(name = "idx_email_role", columnList = "email,role")
+})
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -58,6 +64,10 @@ public class User {
     @Column(nullable = true)
     private LocalDateTime driverApprovedAt;
 
+    // Soft Delete Support
+    @Column(name = "deleted_at", nullable = true)
+    private LocalDateTime deletedAt;
+
     // Add validation annotations if using DTOs
 
     public Long getId() { return id; }
@@ -104,4 +114,21 @@ public class User {
 
     public LocalDateTime getDriverApprovedAt() { return driverApprovedAt; }
     public void setDriverApprovedAt(LocalDateTime driverApprovedAt) { this.driverApprovedAt = driverApprovedAt; }
+
+    public LocalDateTime getDeletedAt() { return deletedAt; }
+    public void setDeletedAt(LocalDateTime deletedAt) { this.deletedAt = deletedAt; }
+
+    /**
+     * Soft delete this user - marks as deleted without removing from database
+     */
+    public void softDelete() {
+        this.deletedAt = LocalDateTime.now();
+    }
+
+    /**
+     * Check if this user is soft deleted
+     */
+    public boolean isDeleted() {
+        return deletedAt != null;
+    }
 }

@@ -3,6 +3,7 @@ package com.indicab.controller;
 import com.indicab.entity.Booking;
 import com.indicab.service.impl.BookingServiceImpl;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -11,10 +12,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -39,24 +42,33 @@ public class AdminBookingController {
      * Get all bookings with pagination, sorting, and search
      */
     @GetMapping
-    @Operation(summary = "Get all bookings", description = "Retrieve all bookings with pagination, sorting, and search filters")
+    @Operation(summary = "Get all bookings", description = "Retrieve all bookings with pagination, sorting, and search filters including date range filtering")
     @ApiResponse(responseCode = "200", description = "Bookings retrieved successfully")
     public ResponseEntity<Page<Booking>> getAllBookings(
             Pageable pageable,
+            @Parameter(description = "Search in pickup and dropoff locations")
             @RequestParam(required = false) String search,
+            @Parameter(description = "Filter by booking status")
             @RequestParam(required = false) String status,
-            @RequestParam(required = false) String userId) {
+            @Parameter(description = "Filter by user ID")
+            @RequestParam(required = false) String userId,
+            @Parameter(description = "Filter from date (ISO format: yyyy-MM-dd or yyyy-MM-dd'T'HH:mm:ss)")
+            @RequestParam(required = false)
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime fromDate,
+            @Parameter(description = "Filter to date (ISO format: yyyy-MM-dd or yyyy-MM-dd'T'HH:mm:ss)")
+            @RequestParam(required = false)
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime toDate) {
 
-        logger.info("Fetching all bookings - Page: {}, Size: {}, Status: {}, UserId: {}",
-                   pageable.getPageNumber(), pageable.getPageSize(), status, userId);
+        logger.info("Fetching all bookings - Page: {}, Size: {}, Status: {}, UserId: {}, fromDate: {}, toDate: {}",
+                   pageable.getPageNumber(), pageable.getPageSize(), status, userId, fromDate, toDate);
 
         com.indicab.util.SearchSpecification.SpecificationBuilder<Booking> builder =
             new com.indicab.util.SearchSpecification.SpecificationBuilder<>();
 
         if (search != null && !search.isEmpty()) {
-            // Search in pickup and dropoff locations
-            builder.with("pickupLocation", search, com.indicab.util.SearchSpecification.SearchOperator.CONTAINS)
-                   .with("dropoffLocation", search, com.indicab.util.SearchSpecification.SearchOperator.CONTAINS);
+            // Search in pickup and dropoff addresses
+            builder.with("pickupAddress", search, com.indicab.util.SearchSpecification.SearchOperator.CONTAINS)
+                   .with("dropoffAddress", search, com.indicab.util.SearchSpecification.SearchOperator.CONTAINS);
         }
 
         if (status != null && !status.isEmpty()) {
@@ -65,6 +77,17 @@ public class AdminBookingController {
 
         if (userId != null && !userId.isEmpty()) {
             builder.with("user.id", userId, com.indicab.util.SearchSpecification.SearchOperator.EQUALS);
+        }
+
+        // Add date range filtering
+        if (fromDate != null) {
+            builder.with("createdAt", fromDate, com.indicab.util.SearchSpecification.SearchOperator.GREATER_THAN_EQUAL);
+            logger.debug("Filtering bookings from date: {}", fromDate);
+        }
+
+        if (toDate != null) {
+            builder.with("createdAt", toDate, com.indicab.util.SearchSpecification.SearchOperator.LESS_THAN_EQUAL);
+            logger.debug("Filtering bookings to date: {}", toDate);
         }
 
         Page<Booking> bookings = bookingService.getAllBookingsPaged(pageable, builder.build());

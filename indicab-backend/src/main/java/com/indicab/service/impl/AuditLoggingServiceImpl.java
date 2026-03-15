@@ -4,6 +4,8 @@ import com.indicab.controller.AdminWebSocketController;
 import com.indicab.entity.AuditLog;
 import com.indicab.repository.AuditLogRepository;
 import com.indicab.service.AuditLoggingService;
+import com.indicab.service.EncryptionService;
+import com.indicab.util.MetricsHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,8 +30,14 @@ public class AuditLoggingServiceImpl implements AuditLoggingService {
     @Autowired
     private AuditLogRepository auditLogRepository;
 
-    @Autowired
+    @Autowired(required = false)
     private AdminWebSocketController adminWebSocketController;
+
+    @Autowired
+    private EncryptionService encryptionService;
+
+    @Autowired
+    private MetricsHelper metricsHelper;
 
     // Statistics tracking
     private final AtomicLong totalOperations = new AtomicLong(0);
@@ -54,7 +62,8 @@ public class AuditLoggingServiceImpl implements AuditLoggingService {
             auditLog.setOperation(operation);
             auditLog.setResourceType(resourceType);
             auditLog.setResourceId(resourceId);
-            auditLog.setDetails(details);
+            // Encrypt sensitive details to protect PII and confidential information
+            auditLog.setDetails(details != null ? encryptionService.encrypt(details) : null);
             auditLog.setIpAddress(ipAddress);
             auditLog.setUserAgent(userAgent);
             auditLog.setStatus("SUCCESS");
@@ -64,13 +73,16 @@ public class AuditLoggingServiceImpl implements AuditLoggingService {
             totalOperations.incrementAndGet();
 
             // Notify admin via WebSocket
-            adminWebSocketController.broadcastNewAuditLog(auditLog);
+            if (adminWebSocketController != null) {
+                adminWebSocketController.broadcastNewAuditLog(auditLog);
+            }
 
             logger.info("Audit log recorded - User: {}, Operation: {}, Resource: {} (ID: {}), IP: {}",
                        userId, operation, resourceType, resourceId, ipAddress);
 
         } catch (Exception e) {
             logger.error("Failed to log operation: {}", operation, e);
+            metricsHelper.recordError("AuditLoggingService", e, "logOperation");
         }
     }
 
@@ -99,6 +111,7 @@ public class AuditLoggingServiceImpl implements AuditLoggingService {
 
         } catch (Exception e) {
             logger.error("Failed to log failed operation: {}", operation, e);
+            metricsHelper.recordError("AuditLoggingService", e, "logFailedOperation");
         }
     }
 
@@ -162,7 +175,8 @@ public class AuditLoggingServiceImpl implements AuditLoggingService {
             auditLog.setUserId(userId);
             auditLog.setOperation("BULK_" + operation);
             auditLog.setResourceType(resourceType);
-            auditLog.setDetails(bulkDetails);
+            // Encrypt sensitive bulk operation details
+            auditLog.setDetails(encryptionService.encrypt(bulkDetails));
             auditLog.setIpAddress(ipAddress);
             auditLog.setStatus("SUCCESS");
             auditLog.setCreatedAt(LocalDateTime.now());
@@ -184,6 +198,7 @@ public class AuditLoggingServiceImpl implements AuditLoggingService {
 
         } catch (Exception e) {
             logger.error("Failed to log bulk operation: {}", operation, e);
+            metricsHelper.recordError("AuditLoggingService", e, "logBulkOperation");
         }
     }
 

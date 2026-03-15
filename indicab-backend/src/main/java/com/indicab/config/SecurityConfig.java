@@ -18,6 +18,7 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 
 import java.util.Arrays;
 import java.util.List;
@@ -50,17 +51,36 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http.csrf(csrf -> csrf.disable())
+        // Configure CSRF protection: disabled for API endpoints (JWT-based), enabled for form-based endpoints
+        http.csrf(csrf -> csrf
+                .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
+                // Ignore CSRF for REST API endpoints (use JWT tokens instead)
+                .ignoringRequestMatchers("/api/**", "/v1/**")
+        )
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth
+                        // Auth endpoints - public access for login, register, refresh, logout
                         .requestMatchers("/api/v1/auth/**").permitAll()
+                        .requestMatchers("/v1/auth/**").permitAll()
+                        // Public booking status checks
                         .requestMatchers("/api/v1/bookings/*/public").permitAll()
+                        .requestMatchers("/v1/bookings/*/public").permitAll()
+                        // Public GET endpoints for homepage and public pages
                         .requestMatchers(HttpMethod.GET, "/api/v1/blogs/published").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/v1/blogs/published").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/routes").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/v1/routes").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/service-cities").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/v1/service-cities").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/recommendations").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/v1/recommendations").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/vehicles").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/v1/vehicles").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/packages").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/v1/packages").permitAll()
+                        // Health check endpoint for Docker
+                        .requestMatchers("/actuator/health").permitAll()
+                        // Everything else requires authentication
                         .anyRequest().authenticated()
                 )
                 .exceptionHandling(exception -> exception.authenticationEntryPoint(jwtAuthenticationEntryPoint))

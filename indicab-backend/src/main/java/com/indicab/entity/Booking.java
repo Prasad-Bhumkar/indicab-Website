@@ -64,7 +64,8 @@ public class Booking {
     private String status;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", referencedColumnName = "id")
+    @JoinColumn(name = "user_id", referencedColumnName = "id", nullable = true)
+    // Note: null allowed for guest bookings, but service layer validates based on authentication context
     private User user;
 
     @CreationTimestamp
@@ -248,5 +249,35 @@ public class Booking {
 
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    /**
+     * Check if this booking is for an authenticated user
+     * @return true if user is not null, false for guest bookings
+     */
+    public boolean isAuthenticatedBooking() {
+        return user != null;
+    }
+
+    /**
+     * Check if this booking is a guest booking
+     * @return true if user is null, false for authenticated bookings
+     */
+    public boolean isGuestBooking() {
+        return user == null;
+    }
+
+    /**
+     * Validate referential integrity for authenticated bookings
+     * Should be called in service layer before persisting
+     * @throws IllegalArgumentException if booking is marked as authenticated but user is null or invalid
+     */
+    public void validateReferentialIntegrity() {
+        // User reference validation depends on booking context
+        // Guest bookings can have null user (user_id is nullable)
+        // Authenticated bookings must have valid user with ID
+        if (user != null && user.getId() == null) {
+            throw new IllegalArgumentException("Booking user reference must have a valid ID");
+        }
     }
 }

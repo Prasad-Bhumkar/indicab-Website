@@ -3,6 +3,7 @@ package com.indicab.util;
 import com.indicab.entity.User;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Path;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import org.junit.jupiter.api.BeforeEach;
@@ -12,6 +13,8 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 /**
@@ -25,6 +28,9 @@ class SearchSpecificationTest {
     private Root<User> root;
 
     @Mock
+    private Path<?> path;
+
+    @Mock
     private CriteriaQuery<?> query;
 
     @Mock
@@ -33,6 +39,17 @@ class SearchSpecificationTest {
     @BeforeEach
     void setup() {
         MockitoAnnotations.openMocks(this);
+
+        // Provide default behavior for common CriteriaBuilder operations
+        when(cb.conjunction()).thenReturn(mock(Predicate.class));
+        when(cb.equal(any(), any())).thenReturn(mock(Predicate.class));
+        when(cb.notEqual(any(), any())).thenReturn(mock(Predicate.class));
+        when(cb.like(any(), anyString())).thenReturn(mock(Predicate.class));
+
+        // Provide a stable path for root.get(...) calls
+        doReturn(path).when(root).get(anyString());
+        doReturn(path).when(path).as(String.class);
+        doReturn(path).when(path).as(Comparable.class);
     }
 
     @Test
@@ -57,7 +74,6 @@ class SearchSpecificationTest {
     @DisplayName("Test EQUALS operator")
     void testEqualsOperator() {
         SearchSpecification<User> spec = new SearchSpecification<>("role", "ADMIN", SearchSpecification.SearchOperator.EQUALS);
-        when(root.get("role")).thenReturn(root.get("role"));
         
         Predicate result = spec.toPredicate(root, query, cb);
         
@@ -68,7 +84,6 @@ class SearchSpecificationTest {
     @DisplayName("Test NOT_EQUALS operator")
     void testNotEqualsOperator() {
         SearchSpecification<User> spec = new SearchSpecification<>("status", "INACTIVE", SearchSpecification.SearchOperator.NOT_EQUALS);
-        when(root.get("status")).thenReturn(root.get("status"));
         
         Predicate result = spec.toPredicate(root, query, cb);
         
@@ -79,8 +94,6 @@ class SearchSpecificationTest {
     @DisplayName("Test STARTS_WITH operator")
     void testStartsWithOperator() {
         SearchSpecification<User> spec = new SearchSpecification<>("firstName", "John", SearchSpecification.SearchOperator.STARTS_WITH);
-        when(root.get("firstName")).thenReturn(root.get("firstName"));
-        when(root.get("firstName").as(String.class)).thenReturn(root.get("firstName").as(String.class));
         
         Predicate result = spec.toPredicate(root, query, cb);
         
@@ -91,8 +104,6 @@ class SearchSpecificationTest {
     @DisplayName("Test ENDS_WITH operator")
     void testEndsWithOperator() {
         SearchSpecification<User> spec = new SearchSpecification<>("email", "@gmail.com", SearchSpecification.SearchOperator.ENDS_WITH);
-        when(root.get("email")).thenReturn(root.get("email"));
-        when(root.get("email").as(String.class)).thenReturn(root.get("email").as(String.class));
         
         Predicate result = spec.toPredicate(root, query, cb);
         
@@ -100,14 +111,45 @@ class SearchSpecificationTest {
     }
 
     @Test
+    @DisplayName("Test GREATER_THAN operator")
+    void testGreaterThanOperator() {
+        SearchSpecification<User> spec = new SearchSpecification<>("id", 10L, SearchSpecification.SearchOperator.GREATER_THAN);
+
+        Predicate result = spec.toPredicate(root, query, cb);
+
+        assertNotNull(result);
+    }
+
+    @Test
+    @DisplayName("Test LESS_THAN operator")
+    void testLessThanOperator() {
+        SearchSpecification<User> spec = new SearchSpecification<>("id", 100L, SearchSpecification.SearchOperator.LESS_THAN);
+
+        Predicate result = spec.toPredicate(root, query, cb);
+
+        assertNotNull(result);
+    }
+
+    @Test
     @DisplayName("Test SpecificationBuilder with multiple conditions")
     void testSpecificationBuilder() {
         SearchSpecification.SpecificationBuilder<User> builder = new SearchSpecification.SpecificationBuilder<>();
-        
+
         builder.with("firstName", "John", SearchSpecification.SearchOperator.CONTAINS)
                .with("email", "test@example.com", SearchSpecification.SearchOperator.EQUALS)
                .with("role", "ADMIN", SearchSpecification.SearchOperator.EQUALS);
-        
+
+        assertNotNull(builder.build());
+    }
+
+    @Test
+    @DisplayName("Test SpecificationBuilder with comparison operators")
+    void testSpecificationBuilderWithComparisonOperators() {
+        SearchSpecification.SpecificationBuilder<User> builder = new SearchSpecification.SpecificationBuilder<>();
+
+        builder.with("id", 5L, SearchSpecification.SearchOperator.GREATER_THAN_EQUAL)
+               .with("email", "test@example.com", SearchSpecification.SearchOperator.EQUALS);
+
         assertNotNull(builder.build());
     }
 

@@ -46,6 +46,6 @@ ENTRYPOINT ["java", \
     "-Xms256m", \
     "-XX:+UseG1GC", \
     "-XX:MaxGCPauseMillis=200", \
-    "-Dspring.profiles.active=${SPRING_PROFILE:prod}", \
+    "-Dspring.profiles.active=${SPRING_PROFILES_ACTIVE:prod}", \
     "-jar", \
     "app.jar"]

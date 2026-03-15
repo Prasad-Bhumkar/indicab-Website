@@ -6,6 +6,7 @@ import com.indicab.dto.DriverResponseDTO;
 import com.indicab.entity.User;
 import com.indicab.repository.UserRepository;
 import com.indicab.service.DriverService;
+import com.indicab.util.MetricsHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +30,9 @@ public class DriverServiceImpl implements DriverService {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private MetricsHelper metricsHelper;
 
     @Override
     public DriverResponseDTO applyAsDriver(Long userId, DriverRegistrationDTO registrationDTO) {
@@ -289,6 +293,7 @@ public class DriverServiceImpl implements DriverService {
             logger.info("Bulk deletion completed for {} driver(s)", ids.size());
         } catch (Exception e) {
             logger.error("Failed to bulk delete drivers", e);
+            metricsHelper.recordError("DriverService", e, "bulkDeleteDrivers");
             throw new RuntimeException("Failed to delete multiple drivers");
         }
     }
@@ -305,6 +310,7 @@ public class DriverServiceImpl implements DriverService {
             logger.info("Bulk status update completed for {} driver(s)", ids.size());
         } catch (Exception e) {
             logger.error("Failed to bulk update driver status", e);
+            metricsHelper.recordError("DriverService", e, "bulkUpdateDriversStatus");
             throw new RuntimeException("Failed to update status for multiple drivers");
         }
     }

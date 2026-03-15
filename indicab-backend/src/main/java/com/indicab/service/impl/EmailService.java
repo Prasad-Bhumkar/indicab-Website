@@ -9,7 +9,6 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
-import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 
 /**
@@ -54,7 +53,7 @@ public class EmailService {
             
             mailSender.send(message);
             logger.info("Booking notification email sent to admin successfully");
-        } catch (MessagingException e) {
+        } catch (Exception e) {
             logger.error("Failed to send booking notification email to admin: {}", e.getMessage(), e);
         }
     }
@@ -84,7 +83,7 @@ public class EmailService {
             
             mailSender.send(message);
             logger.info("Confirmation email sent to customer successfully");
-        } catch (MessagingException e) {
+        } catch (Exception e) {
             logger.error("Failed to send confirmation email to customer: {}", e.getMessage(), e);
         }
     }
@@ -114,7 +113,7 @@ public class EmailService {
             
             mailSender.send(message);
             logger.info("Cancellation email sent to customer successfully");
-        } catch (MessagingException e) {
+        } catch (Exception e) {
             logger.error("Failed to send cancellation email to customer: {}", e.getMessage(), e);
         }
     }

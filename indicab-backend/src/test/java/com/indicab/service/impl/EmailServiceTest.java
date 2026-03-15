@@ -110,7 +110,7 @@ class EmailServiceTest {
     @DisplayName("Should handle messaging exception when sending admin notification")
     void testAdminNotificationHandlesMessagingException() throws MessagingException {
         // Arrange
-        when(mailSender.createMimeMessage()).thenThrow(new MessagingException("Mail configuration error"));
+        when(mailSender.createMimeMessage()).thenThrow(new RuntimeException("Mail configuration error"));
 
         // Act & Assert - Should not throw exception
         emailService.sendBookingNotificationToAdmin(testBooking);
@@ -163,7 +163,7 @@ class EmailServiceTest {
     @DisplayName("Should handle exception during confirmation email send")
     void testConfirmationEmailHandlesException() throws MessagingException {
         // Arrange
-        when(mailSender.createMimeMessage()).thenThrow(new MessagingException("SMTP error"));
+        when(mailSender.createMimeMessage()).thenThrow(new RuntimeException("SMTP error"));
 
         // Act & Assert - Should not throw exception
         emailService.sendConfirmationEmailToCustomer(testBooking);
@@ -231,7 +231,7 @@ class EmailServiceTest {
     @DisplayName("Should handle exception during cancellation email")
     void testCancellationEmailHandlesException() throws MessagingException {
         // Arrange
-        when(mailSender.createMimeMessage()).thenThrow(new MessagingException("Connection timeout"));
+        when(mailSender.createMimeMessage()).thenThrow(new RuntimeException("Connection timeout"));
 
         // Act & Assert - Should not throw exception
         emailService.sendCancellationEmailToCustomer(testBooking, "Driver cancelled");

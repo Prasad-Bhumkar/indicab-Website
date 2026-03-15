@@ -16,7 +16,7 @@ import java.util.List;
 public class SearchSpecification<T> implements Specification<T> {
 
     private final String field;
-    private final String value;
+    private final Object value;
     private final SearchOperator operator;
 
     public enum SearchOperator {
@@ -32,29 +32,42 @@ public class SearchSpecification<T> implements Specification<T> {
         NOT_EQUALS
     }
 
-    public SearchSpecification(String field, String value, SearchOperator operator) {
+    public SearchSpecification(String field, Object value, SearchOperator operator) {
         this.field = field;
         this.value = value;
         this.operator = operator;
     }
 
     @Override
+    @SuppressWarnings({"unchecked", "rawtypes"})
     public Predicate toPredicate(Root<T> root, CriteriaQuery<?> query, CriteriaBuilder cb) {
-        if (value == null || value.isEmpty()) {
+        if (value == null || (value instanceof String && ((String) value).isEmpty())) {
             return cb.conjunction();
         }
 
+        String stringValue = value instanceof String ? (String) value : value.toString();
+
         switch (operator) {
             case CONTAINS:
-                return cb.like(cb.lower(root.get(field).as(String.class)), "%" + value.toLowerCase() + "%");
+                return cb.like(cb.lower(root.get(field).as(String.class)), "%" + stringValue.toLowerCase() + "%");
             case STARTS_WITH:
-                return cb.like(cb.lower(root.get(field).as(String.class)), value.toLowerCase() + "%");
+                return cb.like(cb.lower(root.get(field).as(String.class)), stringValue.toLowerCase() + "%");
             case ENDS_WITH:
-                return cb.like(cb.lower(root.get(field).as(String.class)), "%" + value.toLowerCase());
+                return cb.like(cb.lower(root.get(field).as(String.class)), "%" + stringValue.toLowerCase());
             case EQUALS:
                 return cb.equal(root.get(field), value);
             case NOT_EQUALS:
                 return cb.notEqual(root.get(field), value);
+            case GREATER_THAN:
+                return cb.greaterThan(root.get(field).as(Comparable.class), (Comparable) value);
+            case LESS_THAN:
+                return cb.lessThan(root.get(field).as(Comparable.class), (Comparable) value);
+            case GREATER_THAN_EQUAL:
+                return cb.greaterThanOrEqualTo(root.get(field).as(Comparable.class), (Comparable) value);
+            case LESS_THAN_EQUAL:
+                return cb.lessThanOrEqualTo(root.get(field).as(Comparable.class), (Comparable) value);
+            case IN:
+                return root.get(field).in((Object[]) stringValue.split(","));
             default:
                 return cb.conjunction();
         }
@@ -66,8 +79,8 @@ public class SearchSpecification<T> implements Specification<T> {
     public static class SpecificationBuilder<T> {
         private final List<Specification<T>> specifications = new ArrayList<>();
 
-        public SpecificationBuilder<T> with(String field, String value, SearchOperator operator) {
-            if (value != null && !value.isEmpty()) {
+        public SpecificationBuilder<T> with(String field, Object value, SearchOperator operator) {
+            if (value != null && (!(value instanceof String) || !((String) value).isEmpty())) {
                 specifications.add(new SearchSpecification<>(field, value, operator));
             }
             return this;

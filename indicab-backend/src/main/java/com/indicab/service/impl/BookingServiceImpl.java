@@ -5,6 +5,7 @@ import com.indicab.entity.Booking;
 import com.indicab.repository.BookingRepository;
 import com.indicab.service.BookingService;
 import com.indicab.service.UserService;
+import com.indicab.util.MetricsHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,42 +42,61 @@ public class BookingServiceImpl implements BookingService {
     @Autowired(required = false)
     private EmailService emailService;
 
+    @Autowired
+    private MetricsHelper metricsHelper;
+
     @Override
     public Booking createBooking(BookingRequestDTO bookingDTO, Long currentUserId) {
-        logger.info("Creating new booking from {} to {} for {}",
-            bookingDTO.getFrom(), bookingDTO.getTo(), bookingDTO.getFullName());
+        logger.info("Creating new booking: from='{}' to='{}' passenger='{}' amount=${} userId={}",
+            bookingDTO.getFrom(), bookingDTO.getTo(), bookingDTO.getFullName(),
+            bookingDTO.getAmount(), currentUserId);
 
-        Booking booking = new Booking(
-            bookingDTO.getFrom(),
-            bookingDTO.getTo(),
-            bookingDTO.getDate(),
-            bookingDTO.getVehicle(),
-            bookingDTO.getAmount(),
-            bookingDTO.getFullName(),
-            bookingDTO.getEmail(),
-            bookingDTO.getPhoneNumber(),
-            bookingDTO.getLicense(),
-            bookingDTO.getPickupAddress(),
-            bookingDTO.getDropoffAddress(),
-            bookingDTO.getPassengerCount(),
-            bookingDTO.getSpecialRequirements(),
-            bookingDTO.getContactPreference(),
-            bookingDTO.getStatus() != null ? bookingDTO.getStatus() : "PENDING"
-        );
+        try {
+            Booking booking = new Booking(
+                bookingDTO.getFrom(),
+                bookingDTO.getTo(),
+                bookingDTO.getDate(),
+                bookingDTO.getVehicle(),
+                bookingDTO.getAmount(),
+                bookingDTO.getFullName(),
+                bookingDTO.getEmail(),
+                bookingDTO.getPhoneNumber(),
+                bookingDTO.getLicense(),
+                bookingDTO.getPickupAddress(),
+                bookingDTO.getDropoffAddress(),
+                bookingDTO.getPassengerCount(),
+                bookingDTO.getSpecialRequirements(),
+                bookingDTO.getContactPreference(),
+                bookingDTO.getStatus() != null ? bookingDTO.getStatus() : "PENDING"
+            );
 
-        if (currentUserId != null && userService != null) {
-            userService.findById(currentUserId).ifPresent(booking::setUser);
+            logger.debug("Booking object created - setting user and validating");
+            if (currentUserId != null && userService != null) {
+                userService.findById(currentUserId).ifPresent(user -> {
+                    booking.setUser(user);
+                    logger.debug("User assigned to booking - userId={}", currentUserId);
+                });
+            }
+
+            // Validate referential integrity for authenticated bookings
+            booking.validateReferentialIntegrity();
+            logger.debug("Booking passed referential integrity validation");
+
+            Booking savedBooking = bookingRepository.save(booking);
+            logger.info("Booking created successfully: id={} amount=${} status={} userId={}",
+                       savedBooking.getId(), savedBooking.getAmount(), savedBooking.getStatus(), currentUserId);
+
+            broadcastNewBooking(savedBooking);
+            if (emailService != null) {
+                emailService.sendBookingNotificationToAdmin(savedBooking);
+            }
+
+            return savedBooking;
+        } catch (Exception e) {
+            logger.error("Failed to create booking: {}", e.getMessage(), e);
+            metricsHelper.recordError("BookingService", e, "createBooking");
+            throw e;
         }
-
-        Booking savedBooking = bookingRepository.save(booking);
-        logger.info("Booking created successfully with ID: {} - Amount: ${}", savedBooking.getId(), savedBooking.getAmount());
-
-        broadcastNewBooking(savedBooking);
-        if (emailService != null) {
-            emailService.sendBookingNotificationToAdmin(savedBooking);
-        }
-
-        return savedBooking;
     }
 
     private void broadcastNewBooking(Booking booking) {
@@ -110,42 +130,61 @@ public class BookingServiceImpl implements BookingService {
      * Confirm a booking and send confirmation email to customer
      */
     public Booking confirmBooking(Long bookingId) {
-        logger.info("Confirming booking with ID: {}", bookingId);
-        Booking booking = getBookingOrThrow(bookingId);
+        logger.info("Confirming booking: id={}", bookingId);
+        try {
+            Booking booking = getBookingOrThrow(bookingId);
+            logger.debug("Retrieved booking for confirmation: id={} currentStatus={}", bookingId, booking.getStatus());
 
-        booking.setStatus("CONFIRMED");
-        Booking confirmedBooking = bookingRepository.save(booking);
+            booking.setStatus("CONFIRMED");
+            Booking confirmedBooking = bookingRepository.save(booking);
+            logger.info("Booking confirmed: id={} status=CONFIRMED customer={}", bookingId, confirmedBooking.getFullName());
 
-        broadcastBookingStatusUpdate(bookingId, "CONFIRMED");
+            broadcastBookingStatusUpdate(bookingId, "CONFIRMED");
+            logger.debug("Broadcast booking status update");
 
-        // Send confirmation email to customer
-        if (emailService != null) {
-            emailService.sendConfirmationEmailToCustomer(confirmedBooking);
+            // Send confirmation email to customer
+            if (emailService != null) {
+                emailService.sendConfirmationEmailToCustomer(confirmedBooking);
+                logger.debug("Confirmation email sent to: {}", confirmedBooking.getEmail());
+            }
+
+            return confirmedBooking;
+        } catch (Exception e) {
+            logger.error("Failed to confirm booking id={}: {}", bookingId, e.getMessage(), e);
+            metricsHelper.recordError("BookingService", e, "confirmBooking");
+            throw e;
         }
-
-        logger.info("Booking confirmed successfully with ID: {}", bookingId);
-        return confirmedBooking;
     }
 
     /**
      * Cancel a booking and send cancellation email to customer
      */
     public Booking cancelBooking(Long bookingId, String cancellationReason) {
-        logger.info("Cancelling booking with ID: {}", bookingId);
-        Booking booking = getBookingOrThrow(bookingId);
+        logger.info("Cancelling booking: id={} reason={}", bookingId, cancellationReason);
+        try {
+            Booking booking = getBookingOrThrow(bookingId);
+            logger.debug("Retrieved booking for cancellation: id={} currentStatus={}", bookingId, booking.getStatus());
 
-        booking.setStatus("CANCELLED");
-        Booking cancelledBooking = bookingRepository.save(booking);
+            booking.setStatus("CANCELLED");
+            Booking cancelledBooking = bookingRepository.save(booking);
+            logger.info("Booking cancelled: id={} status=CANCELLED customer={} reason={}",
+                       bookingId, cancelledBooking.getFullName(), cancellationReason);
 
-        broadcastBookingStatusUpdate(bookingId, "CANCELLED");
+            broadcastBookingStatusUpdate(bookingId, "CANCELLED");
+            logger.debug("Broadcast booking status update");
 
-        // Send cancellation email to customer
-        if (emailService != null) {
-            emailService.sendCancellationEmailToCustomer(cancelledBooking, cancellationReason);
+            // Send cancellation email to customer
+            if (emailService != null) {
+                emailService.sendCancellationEmailToCustomer(cancelledBooking, cancellationReason);
+                logger.debug("Cancellation email sent to: {}", cancelledBooking.getEmail());
+            }
+
+            return cancelledBooking;
+        } catch (Exception e) {
+            logger.error("Failed to cancel booking id={}: {}", bookingId, e.getMessage(), e);
+            metricsHelper.recordError("BookingService", e, "cancelBooking");
+            throw e;
         }
-
-        logger.info("Booking cancelled successfully with ID: {}", bookingId);
-        return cancelledBooking;
     }
 
     @Override
@@ -257,6 +296,7 @@ public class BookingServiceImpl implements BookingService {
             logger.info("Bulk deletion completed for {} records", ids.size());
         } catch (Exception e) {
             logger.error("Failed to perform bulk deletion", e);
+            metricsHelper.recordError("BookingService", e, "bulkDeleteBookings");
             throw new RuntimeException("Failed to delete multiple bookings");
         }
     }
@@ -273,6 +313,7 @@ public class BookingServiceImpl implements BookingService {
             logger.info("Bulk status update completed for {} records", ids.size());
         } catch (Exception e) {
             logger.error("Failed to perform bulk status update", e);
+            metricsHelper.recordError("BookingService", e, "bulkUpdateBookingsStatus");
             throw new RuntimeException("Failed to update status for multiple bookings");
         }
     }

@@ -49,7 +49,7 @@ public class AdminAuditController {
      * Get all audit logs with pagination, sorting, and search
      */
     @GetMapping
-    @Operation(summary = "Get all audit logs", description = "Retrieve all audit logs with pagination, sorting, and search filters")
+    @Operation(summary = "Get all audit logs", description = "Retrieve all audit logs with pagination, sorting, and search filters including date range filtering")
     @ApiResponse(responseCode = "200", description = "Audit logs retrieved successfully")
     @ApiResponse(responseCode = "403", description = "Access denied - Admin role required")
     public ResponseEntity<?> getAllAuditLogs(
@@ -62,8 +62,15 @@ public class AdminAuditController {
             @Parameter(description = "Search by operation type")
             @RequestParam(required = false) String operation,
             @Parameter(description = "Filter by status (SUCCESS/FAILED)")
-            @RequestParam(required = false) String status) {
-        logger.debug("Fetching all audit logs - page: {}, size: {}, operation: {}, status: {}", page, size, operation, status);
+            @RequestParam(required = false) String status,
+            @Parameter(description = "Filter from date (ISO format: yyyy-MM-dd or yyyy-MM-dd'T'HH:mm:ss)")
+            @RequestParam(required = false)
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime fromDate,
+            @Parameter(description = "Filter to date (ISO format: yyyy-MM-dd or yyyy-MM-dd'T'HH:mm:ss)")
+            @RequestParam(required = false)
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime toDate) {
+        logger.debug("Fetching all audit logs - page: {}, size: {}, operation: {}, status: {}, fromDate: {}, toDate: {}",
+                   page, size, operation, status, fromDate, toDate);
 
         try {
             Pageable pageable = org.springframework.data.domain.PageRequest.of(page, size,
@@ -78,6 +85,17 @@ public class AdminAuditController {
 
             if (status != null && !status.isEmpty()) {
                 builder.with("status", status, com.indicab.util.SearchSpecification.SearchOperator.EQUALS);
+            }
+
+            // Add date range filtering
+            if (fromDate != null) {
+                builder.with("createdAt", fromDate, com.indicab.util.SearchSpecification.SearchOperator.GREATER_THAN_EQUAL);
+                logger.debug("Filtering audit logs from date: {}", fromDate);
+            }
+
+            if (toDate != null) {
+                builder.with("createdAt", toDate, com.indicab.util.SearchSpecification.SearchOperator.LESS_THAN_EQUAL);
+                logger.debug("Filtering audit logs to date: {}", toDate);
             }
 
             Page<AuditLog> allLogs = auditLoggingService.getAuditLogs(pageable, builder.build());

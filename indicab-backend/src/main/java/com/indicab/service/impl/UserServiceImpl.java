@@ -6,11 +6,13 @@ import com.indicab.dto.UserRegistrationDTO;
 import com.indicab.entity.User;
 import com.indicab.repository.UserRepository;
 import com.indicab.service.UserService;
+import com.indicab.util.MetricsHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -33,7 +35,11 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    @Autowired
+    private MetricsHelper metricsHelper;
+
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public User registerUser(UserRegistrationDTO registrationDTO) {
         logger.info("Attempting to register user with email: {}", registrationDTO.getEmail());
 
@@ -62,7 +68,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public Optional<User> findByEmail(String email) {
         logger.debug("Finding user by email: {}", email);
-        return Optional.ofNullable(userRepository.findByEmail(email));
+        return userRepository.findByEmail(email);
     }
 
     @Override
@@ -78,6 +84,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public User updateUserProfile(Long id, UserProfileDTO profileDTO) {
         logger.info("Updating user profile for ID: {}", id);
         User user = getUserOrThrow(id);
@@ -94,7 +101,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public boolean emailExists(String email) {
-        boolean exists = userRepository.findByEmail(email) != null;
+        boolean exists = userRepository.findByEmail(email).isPresent();
         logger.debug("Email existence check - email: {}, exists: {}", email, exists);
         return exists;
     }
@@ -110,18 +117,25 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void bulkDeleteUsers(List<Long> ids) {
-        logger.info("Bulk deleting {} users", ids.size());
+        logger.info("Bulk soft deleting {} users", ids.size());
         try {
-            userRepository.deleteAllById(ids);
-            logger.info("Bulk deletion completed for {} users", ids.size());
+            List<User> users = userRepository.findAllById(ids);
+            for (User user : users) {
+                user.softDelete();
+            }
+            userRepository.saveAll(users);
+            logger.info("Bulk soft deletion completed for {} users", ids.size());
         } catch (Exception e) {
-            logger.error("Failed to perform bulk deletion for users", e);
+            logger.error("Failed to perform bulk soft deletion for users", e);
+            metricsHelper.recordError("UserService", e, "bulkDeleteUsers");
             throw new RuntimeException("Failed to delete multiple users");
         }
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void bulkUpdateUsersRole(List<Long> ids, String role) {
         logger.info("Bulk updating role to {} for {} users", role, ids.size());
         try {
@@ -133,6 +147,7 @@ public class UserServiceImpl implements UserService {
             logger.info("Bulk role update completed for {} users", ids.size());
         } catch (Exception e) {
             logger.error("Failed to perform bulk role update", e);
+            metricsHelper.recordError("UserService", e, "bulkUpdateUsersRole");
             throw new RuntimeException("Failed to update role for multiple users");
         }
     }
