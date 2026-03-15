@@ -46,10 +46,10 @@ public class AdminAuditController {
     private AuditLoggingService auditLoggingService;
 
     /**
-     * Get all audit logs with pagination
+     * Get all audit logs with pagination, sorting, and search
      */
     @GetMapping
-    @Operation(summary = "Get all audit logs", description = "Retrieve all audit logs with pagination and sorting")
+    @Operation(summary = "Get all audit logs", description = "Retrieve all audit logs with pagination, sorting, and search filters")
     @ApiResponse(responseCode = "200", description = "Audit logs retrieved successfully")
     @ApiResponse(responseCode = "403", description = "Access denied - Admin role required")
     public ResponseEntity<?> getAllAuditLogs(
@@ -58,14 +58,29 @@ public class AdminAuditController {
             @Parameter(description = "Page size")
             @RequestParam(defaultValue = "20") int size,
             @Parameter(description = "Sort field and direction (e.g., createdAt,desc)")
-            @RequestParam(required = false) String sort) {
-        logger.debug("Fetching all audit logs - page: {}, size: {}", page, size);
+            @RequestParam(required = false) String sort,
+            @Parameter(description = "Search by operation type")
+            @RequestParam(required = false) String operation,
+            @Parameter(description = "Filter by status (SUCCESS/FAILED)")
+            @RequestParam(required = false) String status) {
+        logger.debug("Fetching all audit logs - page: {}, size: {}, operation: {}, status: {}", page, size, operation, status);
 
         try {
             Pageable pageable = org.springframework.data.domain.PageRequest.of(page, size,
                     org.springframework.data.domain.Sort.by("createdAt").descending());
 
-            Page<AuditLog> allLogs = auditLoggingService.getResourceAuditLogs("", pageable);
+            com.indicab.util.SearchSpecification.SpecificationBuilder<AuditLog> builder =
+                new com.indicab.util.SearchSpecification.SpecificationBuilder<>();
+
+            if (operation != null && !operation.isEmpty()) {
+                builder.with("operation", operation, com.indicab.util.SearchSpecification.SearchOperator.EQUALS);
+            }
+
+            if (status != null && !status.isEmpty()) {
+                builder.with("status", status, com.indicab.util.SearchSpecification.SearchOperator.EQUALS);
+            }
+
+            Page<AuditLog> allLogs = auditLoggingService.getAuditLogs(pageable, builder.build());
 
             List<AuditLogDTO> content = convertToDTO(allLogs.getContent());
             PagedResponseDTO<AuditLogDTO> response = new PagedResponseDTO<>(

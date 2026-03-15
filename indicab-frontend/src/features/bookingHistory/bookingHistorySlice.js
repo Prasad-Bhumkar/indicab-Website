@@ -4,7 +4,7 @@ import { bookingHistory } from '../../data/bookingHistory';
 
 export const fetchBookings = createAsyncThunk('bookingHistory/fetchBookings', async () => {
   const result = await apiCall(
-    () => apiClient.get('/v1/bookings'),
+    () => apiClient.get('v1/bookings'),
     bookingHistory.map(booking => ({ ...booking, amount: booking.fare })) // Map fare to amount for consistency
   );
 
@@ -17,7 +17,7 @@ export const fetchBookings = createAsyncThunk('bookingHistory/fetchBookings', as
 
 export const updateBookingAsync = createAsyncThunk('bookingHistory/updateBookingAsync', async (booking) => {
   const result = await apiCall(
-    () => apiClient.put(`/v1/bookings/${booking.id}`, booking),
+    () => apiClient.put(`v1/bookings/${booking.id}`, booking),
     booking // Return the booking as-is for offline mode
   );
 
@@ -68,6 +68,8 @@ const bookingHistorySlice = createSlice({
             bookingsData = bookingsData.data;
           } else if (bookingsData.bookings && Array.isArray(bookingsData.bookings)) {
             bookingsData = bookingsData.bookings;
+          } else if (bookingsData.content && Array.isArray(bookingsData.content)) {
+            bookingsData = bookingsData.content;
           } else {
             // If it's a single booking object, wrap in array
             bookingsData = bookingsData ? [bookingsData] : [];

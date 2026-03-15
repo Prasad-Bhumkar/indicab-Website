@@ -44,18 +44,41 @@ public class AdminController {
     private AuditLoggingService auditLoggingService;
 
     /**
-     * Get all users with pagination and sorting
+     * Get all users with pagination, sorting, and search
      */
     @GetMapping("/users")
-    @Operation(summary = "Get all users", description = "Retrieve paginated list of all system users (ADMIN only)")
+    @Operation(summary = "Get all users", description = "Retrieve paginated list of all system users with optional search, sort, and filters (ADMIN only)")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Users retrieved successfully"),
         @ApiResponse(responseCode = "403", description = "User does not have admin role"),
         @ApiResponse(responseCode = "401", description = "Unauthorized - missing or invalid token")
     })
-    public ResponseEntity<Page<User>> getAllUsers(Pageable pageable) {
-        logger.info("Fetching all users with pagination - Page: {}, Size: {}", pageable.getPageNumber(), pageable.getPageSize());
-        Page<User> users = userRepository.findAll(pageable);
+    public ResponseEntity<Page<User>> getAllUsers(
+            Pageable pageable,
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) String email,
+            @RequestParam(required = false) String role) {
+
+        logger.info("Fetching all users - Page: {}, Size: {}, Search: {}, Email: {}, Role: {}",
+                   pageable.getPageNumber(), pageable.getPageSize(), search, email, role);
+
+        com.indicab.util.SearchSpecification.SpecificationBuilder<User> builder =
+            new com.indicab.util.SearchSpecification.SpecificationBuilder<>();
+
+        if (search != null && !search.isEmpty()) {
+            builder.with("name", search, com.indicab.util.SearchSpecification.SearchOperator.CONTAINS)
+                   .with("email", search, com.indicab.util.SearchSpecification.SearchOperator.CONTAINS);
+        }
+
+        if (email != null && !email.isEmpty()) {
+            builder.with("email", email, com.indicab.util.SearchSpecification.SearchOperator.EQUALS);
+        }
+
+        if (role != null && !role.isEmpty()) {
+            builder.with("role", role, com.indicab.util.SearchSpecification.SearchOperator.EQUALS);
+        }
+
+        Page<User> users = userRepository.findAll(builder.build(), pageable);
         return ResponseEntity.ok(users);
     }
 

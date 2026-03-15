@@ -1,5 +1,11 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
+
+// Polyfill for global - needed by sockjs-client and stompjs
+if (typeof global === 'undefined') {
+  window.global = window;
+}
+
 import App from './App.jsx'
 import ErrorBoundary from './components/ErrorBoundary'
 import { ToastProvider } from './components/ToastContainer'

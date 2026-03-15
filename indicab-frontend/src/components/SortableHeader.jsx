@@ -12,16 +12,24 @@ const SortableHeader = ({
   sortDirection,
   onSort,
   disabled = false,
+  allowNeutral = true,
 }) => {
   const isSorted = sortColumn === column;
-  
+
   const handleClick = () => {
     if (disabled) return;
-    
-    // Toggle sort direction if same column, otherwise set to ascending
+
+    // Toggle sort direction: asc -> desc -> (optional) neutral -> asc
     if (isSorted) {
-      const newDirection = sortDirection === 'asc' ? 'desc' : 'asc';
-      onSort(column, newDirection);
+      if (sortDirection === 'asc') {
+        onSort(column, 'desc');
+      } else if (sortDirection === 'desc') {
+        if (allowNeutral) {
+          onSort(null, null);
+        } else {
+          onSort(column, 'asc');
+        }
+      }
     } else {
       onSort(column, 'asc');
     }
@@ -29,7 +37,7 @@ const SortableHeader = ({
 
   return (
     <th
-      className={`sortable-header ${isSorted ? 'sorted' : ''} ${sortDirection}`}
+      className={`sortable-header ${isSorted ? 'sorted' : ''} ${isSorted ? sortDirection : ''}`}
       onClick={handleClick}
       aria-sort={
         isSorted ? (sortDirection === 'asc' ? 'ascending' : 'descending') : 'none'
@@ -38,11 +46,10 @@ const SortableHeader = ({
     >
       <div className="header-content">
         <span className="header-label">{label}</span>
-        {isSorted && (
-          <span className="sort-indicator" aria-hidden="true">
-            {sortDirection === 'asc' ? '↑' : '↓'}
-          </span>
-        )}
+        <span className="sort-icons" aria-hidden="true">
+          <span className={`sort-icon up ${isSorted && sortDirection === 'asc' ? 'active' : ''}`}>▲</span>
+          <span className={`sort-icon down ${isSorted && sortDirection === 'desc' ? 'active' : ''}`}>▼</span>
+        </span>
       </div>
     </th>
   );

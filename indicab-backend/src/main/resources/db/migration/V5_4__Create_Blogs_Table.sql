@@ -1,2 +1,0 @@
--- DEPRECATED: This migration has been renamed to V009__Create_Blogs_Table.sql
--- Please use V009 instead. Keeping this file empty to avoid Flyway conflicts.

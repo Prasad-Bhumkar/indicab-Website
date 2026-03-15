@@ -17,6 +17,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.http.HttpMethod;
 
 import java.util.Arrays;
 import java.util.List;
@@ -52,7 +53,14 @@ public class SecurityConfig {
         http.csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers("/api/v1/auth/**").permitAll()
+                        .requestMatchers("/api/v1/bookings/*/public").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/blogs/published").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/routes").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/service-cities").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/recommendations").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/vehicles").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/packages").permitAll()
                         .anyRequest().authenticated()
                 )
                 .exceptionHandling(exception -> exception.authenticationEntryPoint(jwtAuthenticationEntryPoint))

@@ -1,8 +1,16 @@
 import React, { useState } from 'react';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
+import { useSEO } from '../hooks/useSEO';
 
 const ContactUs = () => {
+  useSEO({
+    title: 'Contact IndiCab - Get Support & Information',
+    description: 'Have questions? Contact IndiCab support team for ride booking assistance, driver inquiries, and general support. Available 24/7.',
+    keywords: 'contact, support, customer service, help, inquiry, IndiCab',
+    image: 'https://img.icons8.com/color/96/taxi.png',
+    type: 'website',
+  });
   const position = [12.9716, 77.5946]; // Bangalore coordinates
   const [formData, setFormData] = useState({
     name: '',

@@ -1,1369 +1,816 @@
-# IndiCab - Complete API Reference
-
-**Last Updated:** February 22, 2026  
-**Base URL:** `http://localhost:8000/api/v1` (Development) | `https://api.indicab.com/api/v1` (Production)  
-**API Version:** 1.0  
-**Authentication:** JWT Bearer Token
-
----
-
-## Table of Contents
-
-1. [Overview](#overview)
-2. [Authentication Endpoints](#authentication-endpoints)
-3. [User Endpoints](#user-endpoints)
-4. [Booking Endpoints](#booking-endpoints)
-5. [Driver Endpoints](#driver-endpoints)
-6. [Route Endpoints](#route-endpoints)
-7. [Vehicle Endpoints](#vehicle-endpoints)
-8. [Admin Endpoints](#admin-endpoints)
-9. [WebSocket Endpoints](#websocket-endpoints)
-10. [Response Format](#response-format)
-11. [Error Handling](#error-handling)
-
----
+# IndiCab API Reference - Admin Endpoints
 
 ## Overview
 
-### API Characteristics
-- **Style:** RESTful API following REST principles
-- **Data Format:** JSON for request and response bodies
-- **Authentication:** JWT Bearer tokens in Authorization header
-- **Rate Limiting:** 100 requests/second per user
-- **Response Pagination:** Supports page, size, sort parameters
-- **CORS:** Enabled for frontend domains
+This document provides comprehensive API documentation for all admin endpoints with search, sorting, and pagination capabilities.
 
-### Common Headers
+**Base URL:** `http://localhost:8000/api/v1`
 
+**Authentication:** All endpoints require Bearer token in Authorization header:
 ```
-Authorization: Bearer <jwt_token>
-Content-Type: application/json
-Accept: application/json
-```
-
-### Response Pagination
-
-Available on list endpoints (GET requests returning multiple records):
-
-```
-Query Parameters:
-- page=0              → Page number (0-indexed, default: 0)
-- size=20             → Records per page (default: 20, max: 100)
-- sort=id,desc        → Sort field and direction (default: id,desc)
-
-Example:
-GET /api/v1/bookings?page=0&size=10&sort=created_at,desc
+Authorization: Bearer <JWT_TOKEN>
 ```
 
 ---
 
-## Authentication Endpoints
+## Admin User Management
 
-### 1. User Login
+### GET /admin/users
+Retrieve all system users with pagination, sorting, and search filters.
 
-```http
-POST /auth/login
-Content-Type: application/json
+**Parameters:**
+- `page` (query, integer): Page number (0-indexed), default: 0
+- `size` (query, integer): Page size, default: 20
+- `sort` (query, string): Sort criteria (e.g., `email,asc` or `createdAt,desc`)
+- `search` (query, string, optional): Search in name and email fields
+- `email` (query, string, optional): Filter by exact email
+- `role` (query, string, optional): Filter by role (USER, DRIVER, ADMIN)
 
-Request Body:
+**Example Request:**
+```bash
+GET /api/v1/admin/users?page=0&size=10&search=john&role=USER&sort=email,asc
+```
+
+**Response:**
+```json
 {
-  "email": "user@example.com",
-  "password": "password123"
-}
-
-Response: 200 OK
-{
-  "success": true,
-  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-  "user": {
-    "id": 1,
-    "name": "John Doe",
-    "email": "user@example.com",
-    "phone": "9876543210",
-    "role": "CUSTOMER",
-    "profileImageUrl": "https://..."
-  }
-}
-
-Error Response: 401 Unauthorized
-{
-  "success": false,
-  "error": "Invalid email or password",
-  "status": 401,
-  "timestamp": "2026-02-22T10:30:00Z"
+  "content": [
+    {
+      "id": 1,
+      "name": "John Doe",
+      "email": "john@example.com",
+      "role": "USER",
+      "phone": "9876543210",
+      "address": "123 Main St",
+      "createdAt": "2026-03-01T10:00:00",
+      "updatedAt": "2026-03-03T15:30:00"
+    }
+  ],
+  "number": 0,
+  "size": 10,
+  "totalElements": 1,
+  "totalPages": 1,
+  "hasNext": false,
+  "hasPrevious": false
 }
 ```
 
-**Token Details:**
-- **Access Token:** Expires in 15 minutes (900 seconds)
-- **Refresh Token:** Expires in 7 days (604800 seconds)
-- **Storage:** localStorage (frontend)
+**Status Codes:**
+- `200 OK`: Users retrieved successfully
+- `401 Unauthorized`: Missing or invalid token
+- `403 Forbidden`: User does not have admin role
 
 ---
 
-### 2. User Registration
+### GET /admin/user/{id}
+Retrieve a specific user by ID.
 
-```http
-POST /auth/register
-Content-Type: application/json
+**Parameters:**
+- `id` (path, long): User ID
 
-Request Body:
+**Example Request:**
+```bash
+GET /api/v1/admin/user/1
+```
+
+**Status Codes:**
+- `200 OK`: User retrieved successfully
+- `404 Not Found`: User not found
+- `401 Unauthorized`: Missing or invalid token
+- `403 Forbidden`: User does not have admin role
+
+---
+
+### DELETE /admin/user/{id}
+Delete a user by ID.
+
+**Parameters:**
+- `id` (path, long): User ID
+
+**Status Codes:**
+- `200 OK`: User deleted successfully
+- `404 Not Found`: User not found
+- `401 Unauthorized`: Missing or invalid token
+- `403 Forbidden`: User does not have admin role
+
+---
+
+### DELETE /admin/users/bulk
+Delete multiple users at once.
+
+**Request Body:**
+```json
+[1, 2, 3]
+```
+
+**Status Codes:**
+- `204 No Content`: Users deleted successfully
+- `401 Unauthorized`: Missing or invalid token
+- `403 Forbidden`: User does not have admin role
+
+---
+
+## Admin Booking Management
+
+### GET /admin/bookings
+Retrieve all bookings with pagination, sorting, and search filters.
+
+**Parameters:**
+- `page` (query, integer): Page number (0-indexed), default: 0
+- `size` (query, integer): Page size, default: 20
+- `sort` (query, string): Sort criteria (e.g., `createdAt,desc`)
+- `search` (query, string, optional): Search in pickup and dropoff locations
+- `status` (query, string, optional): Filter by status (PENDING, CONFIRMED, COMPLETED, CANCELLED)
+- `userId` (query, long, optional): Filter by user ID
+
+**Example Request:**
+```bash
+GET /api/v1/admin/bookings?page=0&size=15&search=bangalore&status=PENDING&sort=createdAt,desc
+```
+
+**Response:**
+```json
 {
-  "name": "Jane Doe",
-  "email": "jane@example.com",
-  "password": "securePassword123",
-  "phone": "9876543210",
-  "role": "CUSTOMER"
+  "content": [
+    {
+      "id": 1,
+      "user": { "id": 1, "name": "John Doe" },
+      "status": "PENDING",
+      "pickupAddress": "123 Main St",
+      "dropoffAddress": "456 Park Ave",
+      "amount": 500.00,
+      "createdAt": "2026-03-03T10:00:00",
+      "updatedAt": "2026-03-03T15:30:00"
+    }
+  ],
+  "number": 0,
+  "size": 15,
+  "totalElements": 10,
+  "totalPages": 1
 }
+```
 
-Response: 201 Created
+**Status Codes:**
+- `200 OK`: Bookings retrieved successfully
+- `401 Unauthorized`: Missing or invalid token
+- `403 Forbidden`: User does not have admin role
+
+---
+
+### GET /admin/bookings/{id}
+Retrieve a specific booking by ID.
+
+**Parameters:**
+- `id` (path, long): Booking ID
+
+**Status Codes:**
+- `200 OK`: Booking retrieved successfully
+- `404 Not Found`: Booking not found
+- `401 Unauthorized`: Missing or invalid token
+- `403 Forbidden`: User does not have admin role
+
+---
+
+### PUT /admin/bookings/{id}/confirm
+Confirm a booking and send confirmation email to customer.
+
+**Parameters:**
+- `id` (path, long): Booking ID
+
+**Status Codes:**
+- `200 OK`: Booking confirmed successfully
+- `404 Not Found`: Booking not found
+- `401 Unauthorized`: Missing or invalid token
+- `403 Forbidden`: User does not have admin role
+
+---
+
+### PUT /admin/bookings/{id}/cancel
+Cancel a booking and send cancellation email to customer.
+
+**Parameters:**
+- `id` (path, long): Booking ID
+- `reason` (query, string, optional): Cancellation reason
+
+**Status Codes:**
+- `200 OK`: Booking cancelled successfully
+- `404 Not Found`: Booking not found
+- `401 Unauthorized`: Missing or invalid token
+- `403 Forbidden`: User does not have admin role
+
+---
+
+### DELETE /admin/bookings/{id}
+Delete a booking record permanently.
+
+**Parameters:**
+- `id` (path, long): Booking ID
+
+**Status Codes:**
+- `204 No Content`: Booking deleted successfully
+- `404 Not Found`: Booking not found
+- `401 Unauthorized`: Missing or invalid token
+- `403 Forbidden`: User does not have admin role
+
+---
+
+### DELETE /admin/bookings/bulk
+Delete multiple bookings at once.
+
+**Request Body:**
+```json
+[1, 2, 3]
+```
+
+**Status Codes:**
+- `204 No Content`: Bookings deleted successfully
+- `401 Unauthorized`: Missing or invalid token
+- `403 Forbidden`: User does not have admin role
+
+---
+
+### PUT /admin/bookings/bulk/status
+Update status for multiple bookings at once.
+
+**Parameters:**
+- `status` (query, string): New status (PENDING, CONFIRMED, COMPLETED, CANCELLED)
+
+**Request Body:**
+```json
+[1, 2, 3]
+```
+
+**Status Codes:**
+- `200 OK`: Bookings updated successfully
+- `401 Unauthorized`: Missing or invalid token
+- `403 Forbidden`: User does not have admin role
+
+---
+
+### GET /admin/bookings/stats/overview
+Get booking statistics overview.
+
+**Status Codes:**
+- `200 OK`: Statistics retrieved successfully
+- `401 Unauthorized`: Missing or invalid token
+- `403 Forbidden`: User does not have admin role
+
+**Response:**
+```json
 {
-  "success": true,
-  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-  "refreshToken": "...",
-  "user": {
-    "id": 2,
-    "name": "Jane Doe",
-    "email": "jane@example.com",
-    "phone": "9876543210",
-    "role": "CUSTOMER"
-  }
+  "totalBookings": 150,
+  "pendingBookings": 25,
+  "confirmedBookings": 100,
+  "cancelledBookings": 25,
+  "totalRevenue": 75000.00
 }
+```
 
-Error Response: 400 Bad Request
+---
+
+## Admin Blog Management
+
+### GET /admin/blogs
+Retrieve all blogs with pagination, sorting, and search filters.
+
+**Parameters:**
+- `page` (query, integer): Page number (0-indexed), default: 0
+- `size` (query, integer): Page size, default: 20
+- `sort` (query, string): Sort criteria (e.g., `createdAt,desc`)
+- `search` (query, string, optional): Search in title and content
+- `status` (query, string, optional): Filter by status (DRAFT, PUBLISHED)
+
+**Example Request:**
+```bash
+GET /api/v1/admin/blogs?page=0&size=10&search=travel&status=PUBLISHED&sort=createdAt,desc
+```
+
+**Status Codes:**
+- `200 OK`: Blogs retrieved successfully
+- `401 Unauthorized`: Missing or invalid token
+- `403 Forbidden`: User does not have admin role
+
+---
+
+### GET /admin/blogs/drafts
+Retrieve draft blogs only with optional search.
+
+**Parameters:**
+- `page` (query, integer): Page number (0-indexed), default: 0
+- `size` (query, integer): Page size, default: 20
+- `sort` (query, string): Sort criteria
+- `search` (query, string, optional): Search in title and content
+
+**Status Codes:**
+- `200 OK`: Draft blogs retrieved successfully
+- `401 Unauthorized`: Missing or invalid token
+- `403 Forbidden`: User does not have admin role
+
+---
+
+### POST /admin/blogs
+Create a new blog post.
+
+**Request Body:**
+```json
 {
-  "success": false,
-  "error": "User with email already exists",
+  "title": "Blog Title",
+  "content": "Blog content...",
+  "status": "DRAFT",
+  "author": "Admin Name"
+}
+```
+
+**Status Codes:**
+- `201 Created`: Blog created successfully
+- `400 Bad Request`: Invalid input
+- `401 Unauthorized`: Missing or invalid token
+- `403 Forbidden`: User does not have admin role
+
+---
+
+### GET /admin/blogs/{id}
+Retrieve a specific blog by ID.
+
+**Parameters:**
+- `id` (path, long): Blog ID
+
+**Status Codes:**
+- `200 OK`: Blog retrieved successfully
+- `404 Not Found`: Blog not found
+- `401 Unauthorized`: Missing or invalid token
+- `403 Forbidden`: User does not have admin role
+
+---
+
+### PUT /admin/blogs/{id}
+Update an existing blog post.
+
+**Parameters:**
+- `id` (path, long): Blog ID
+
+**Request Body:**
+```json
+{
+  "title": "Updated Title",
+  "content": "Updated content...",
+  "status": "PUBLISHED"
+}
+```
+
+**Status Codes:**
+- `200 OK`: Blog updated successfully
+- `404 Not Found`: Blog not found
+- `400 Bad Request`: Invalid input
+- `401 Unauthorized`: Missing or invalid token
+- `403 Forbidden`: User does not have admin role
+
+---
+
+### DELETE /admin/blogs/{id}
+Delete a blog post permanently.
+
+**Parameters:**
+- `id` (path, long): Blog ID
+
+**Status Codes:**
+- `204 No Content`: Blog deleted successfully
+- `404 Not Found`: Blog not found
+- `401 Unauthorized`: Missing or invalid token
+- `403 Forbidden`: User does not have admin role
+
+---
+
+### PUT /admin/blogs/{id}/publish
+Publish a blog (change status to PUBLISHED).
+
+**Parameters:**
+- `id` (path, long): Blog ID
+
+**Status Codes:**
+- `200 OK`: Blog published successfully
+- `404 Not Found`: Blog not found
+- `401 Unauthorized`: Missing or invalid token
+- `403 Forbidden`: User does not have admin role
+
+---
+
+### PUT /admin/blogs/{id}/unpublish
+Unpublish a blog (change status to DRAFT).
+
+**Parameters:**
+- `id` (path, long): Blog ID
+
+**Status Codes:**
+- `200 OK`: Blog unpublished successfully
+- `404 Not Found`: Blog not found
+- `401 Unauthorized`: Missing or invalid token
+- `403 Forbidden`: User does not have admin role
+
+---
+
+### DELETE /admin/blogs/bulk
+Delete multiple blogs at once.
+
+**Request Body:**
+```json
+[1, 2, 3]
+```
+
+**Status Codes:**
+- `204 No Content`: Blogs deleted successfully
+- `401 Unauthorized`: Missing or invalid token
+- `403 Forbidden`: User does not have admin role
+
+---
+
+### PUT /admin/blogs/bulk/status
+Update status for multiple blogs at once.
+
+**Parameters:**
+- `status` (query, string): New status (DRAFT, PUBLISHED)
+
+**Request Body:**
+```json
+[1, 2, 3]
+```
+
+**Status Codes:**
+- `200 OK`: Blogs updated successfully
+- `401 Unauthorized`: Missing or invalid token
+- `403 Forbidden`: User does not have admin role
+
+---
+
+## Admin Driver Management
+
+### GET /admin/drivers
+Retrieve all drivers with pagination, sorting, and search filters.
+
+**Parameters:**
+- `page` (query, integer): Page number (0-indexed), default: 0
+- `size` (query, integer): Page size, default: 20
+- `sort` (query, string): Sort criteria
+- `search` (query, string, optional): Search in driver name and email
+
+**Example Request:**
+```bash
+GET /api/v1/admin/drivers?page=0&size=20&search=john&sort=name,asc
+```
+
+**Status Codes:**
+- `200 OK`: Drivers retrieved successfully
+- `401 Unauthorized`: Missing or invalid token
+- `403 Forbidden`: User does not have admin role
+
+---
+
+### GET /admin/drivers/pending
+Retrieve pending driver applications with pagination, sorting, and search filters.
+
+**Parameters:**
+- `page` (query, integer): Page number (0-indexed), default: 0
+- `size` (query, integer): Page size, default: 20
+- `sort` (query, string): Sort criteria
+- `search` (query, string, optional): Search in driver name and email
+
+**Status Codes:**
+- `200 OK`: Pending applications retrieved successfully
+- `401 Unauthorized`: Missing or invalid token
+- `403 Forbidden`: User does not have admin role
+
+---
+
+### GET /admin/drivers/approved
+Retrieve approved drivers with pagination, sorting, and search filters.
+
+**Parameters:**
+- `page` (query, integer): Page number (0-indexed), default: 0
+- `size` (query, integer): Page size, default: 20
+- `sort` (query, string): Sort criteria
+- `search` (query, string, optional): Search in driver name and email
+
+**Status Codes:**
+- `200 OK`: Approved drivers retrieved successfully
+- `401 Unauthorized`: Missing or invalid token
+- `403 Forbidden`: User does not have admin role
+
+---
+
+### GET /admin/drivers/{id}
+Retrieve a specific driver by ID.
+
+**Parameters:**
+- `id` (path, long): Driver ID
+
+**Status Codes:**
+- `200 OK`: Driver retrieved successfully
+- `404 Not Found`: Driver not found
+- `401 Unauthorized`: Missing or invalid token
+- `403 Forbidden`: User does not have admin role
+
+---
+
+### PUT /admin/drivers/{id}/review
+Approve or reject a driver application.
+
+**Parameters:**
+- `id` (path, long): Driver ID
+
+**Request Body:**
+```json
+{
+  "status": "APPROVED",
+  "comments": "License verified"
+}
+```
+
+**Status Codes:**
+- `200 OK`: Driver application reviewed successfully
+- `404 Not Found`: Driver not found
+- `400 Bad Request`: Invalid approval status
+- `401 Unauthorized`: Missing or invalid token
+- `403 Forbidden`: User does not have admin role
+
+---
+
+### DELETE /admin/drivers/bulk
+Delete multiple drivers at once.
+
+**Request Body:**
+```json
+[1, 2, 3]
+```
+
+**Status Codes:**
+- `204 No Content`: Drivers deleted successfully
+- `401 Unauthorized`: Missing or invalid token
+- `403 Forbidden`: User does not have admin role
+
+---
+
+## Admin Package Management
+
+### GET /admin/packages
+Retrieve all packages with pagination, sorting, and search filters.
+
+**Parameters:**
+- `page` (query, integer): Page number (0-indexed), default: 0
+- `size` (query, integer): Page size, default: 20
+- `sort` (query, string): Sort criteria
+- `search` (query, string, optional): Search in package name and description
+- `isActive` (query, boolean, optional): Filter by active status
+- `type` (query, string, optional): Filter by package type
+
+**Example Request:**
+```bash
+GET /api/v1/admin/packages?page=0&size=10&search=premium&isActive=true&sort=createdAt,desc
+```
+
+**Status Codes:**
+- `200 OK`: Packages retrieved successfully
+- `401 Unauthorized`: Missing or invalid token
+- `403 Forbidden`: User does not have admin role
+
+---
+
+### GET /admin/packages/active
+Retrieve only active packages with pagination, sorting, and search filters.
+
+**Parameters:**
+- `page` (query, integer): Page number (0-indexed), default: 0
+- `size` (query, integer): Page size, default: 20
+- `sort` (query, string): Sort criteria
+- `search` (query, string, optional): Search in name and description
+
+**Status Codes:**
+- `200 OK`: Active packages retrieved successfully
+- `401 Unauthorized`: Missing or invalid token
+- `403 Forbidden`: User does not have admin role
+
+---
+
+### GET /admin/packages/type/{type}
+Retrieve packages filtered by type with pagination, sorting, and search.
+
+**Parameters:**
+- `type` (path, string): Package type
+- `page` (query, integer): Page number (0-indexed), default: 0
+- `size` (query, integer): Page size, default: 20
+- `sort` (query, string): Sort criteria
+- `search` (query, string, optional): Search in name and description
+
+**Status Codes:**
+- `200 OK`: Packages retrieved successfully
+- `401 Unauthorized`: Missing or invalid token
+- `403 Forbidden`: User does not have admin role
+
+---
+
+### GET /admin/packages/{id}
+Retrieve a specific package by ID.
+
+**Parameters:**
+- `id` (path, long): Package ID
+
+**Status Codes:**
+- `200 OK`: Package retrieved successfully
+- `404 Not Found`: Package not found
+- `401 Unauthorized`: Missing or invalid token
+- `403 Forbidden`: User does not have admin role
+
+---
+
+### POST /admin/packages
+Create a new travel package.
+
+**Request Body:**
+```json
+{
+  "name": "Premium Package",
+  "description": "A premium travel package",
+  "type": "PREMIUM",
+  "price": 5000.00,
+  "isActive": true
+}
+```
+
+**Status Codes:**
+- `201 Created`: Package created successfully
+- `400 Bad Request`: Invalid input
+- `401 Unauthorized`: Missing or invalid token
+- `403 Forbidden`: User does not have admin role
+
+---
+
+### PUT /admin/packages/{id}
+Update an existing package.
+
+**Parameters:**
+- `id` (path, long): Package ID
+
+**Status Codes:**
+- `200 OK`: Package updated successfully
+- `404 Not Found`: Package not found
+- `400 Bad Request`: Invalid input
+- `401 Unauthorized`: Missing or invalid token
+- `403 Forbidden`: User does not have admin role
+
+---
+
+### DELETE /admin/packages/{id}
+Delete a package.
+
+**Parameters:**
+- `id` (path, long): Package ID
+
+**Status Codes:**
+- `204 No Content`: Package deleted successfully
+- `404 Not Found`: Package not found
+- `401 Unauthorized`: Missing or invalid token
+- `403 Forbidden`: User does not have admin role
+
+---
+
+## Admin Audit Logs
+
+### GET /admin/audit-logs
+Retrieve all audit logs with pagination, sorting, and search filters.
+
+**Parameters:**
+- `page` (query, integer): Page number (0-indexed), default: 0
+- `size` (query, integer): Page size, default: 20
+- `sort` (query, string): Sort criteria (default: createdAt,desc)
+- `operation` (query, string, optional): Filter by operation type (CREATE, UPDATE, DELETE)
+- `status` (query, string, optional): Filter by status (SUCCESS, FAILED)
+
+**Example Request:**
+```bash
+GET /api/v1/admin/audit-logs?page=0&size=20&operation=DELETE&status=SUCCESS&sort=createdAt,desc
+```
+
+**Status Codes:**
+- `200 OK`: Audit logs retrieved successfully
+- `401 Unauthorized`: Missing or invalid token
+- `403 Forbidden`: User does not have admin role
+
+---
+
+### GET /admin/audit-logs/user/{userId}
+Retrieve audit logs for a specific user.
+
+**Parameters:**
+- `userId` (path, long): User ID
+- `page` (query, integer): Page number (0-indexed), default: 0
+- `size` (query, integer): Page size, default: 20
+
+**Status Codes:**
+- `200 OK`: User audit logs retrieved successfully
+- `401 Unauthorized`: Missing or invalid token
+- `403 Forbidden`: User does not have admin role
+
+---
+
+### GET /admin/audit-logs/operation/{operation}
+Retrieve audit logs for a specific operation type.
+
+**Parameters:**
+- `operation` (path, string): Operation type (CREATE, UPDATE, DELETE)
+- `page` (query, integer): Page number (0-indexed), default: 0
+- `size` (query, integer): Page size, default: 20
+
+**Status Codes:**
+- `200 OK`: Operation audit logs retrieved successfully
+- `401 Unauthorized`: Missing or invalid token
+- `403 Forbidden`: User does not have admin role
+
+---
+
+## Query Parameters Reference
+
+### Pagination Parameters
+- `page` (integer, 0-indexed): Which page to retrieve
+- `size` (integer): Number of records per page
+
+### Sorting Parameters
+- `sort` (string): Field to sort by and direction
+  - Format: `fieldName,asc` or `fieldName,desc`
+  - Example: `createdAt,desc` or `email,asc`
+  - Multiple sorts: `createdAt,desc&sort=email,asc`
+
+### Search/Filter Parameters
+- `search` (string): Full-text search across multiple fields
+- Field-specific filters vary by endpoint
+  - User filters: `email`, `role`
+  - Booking filters: `status`, `userId`
+  - Blog filters: `status`
+  - Driver filters: search only
+  - Package filters: `isActive`, `type`
+  - Audit filters: `operation`, `status`
+
+---
+
+## Error Response Format
+
+All endpoints return error responses in this format:
+
+```json
+{
+  "code": "ERROR_CODE",
+  "message": "Human-readable error message",
+  "timestamp": "2026-03-03T15:30:00",
   "status": 400
 }
 ```
 
-**Password Requirements:**
-- Minimum 8 characters
-- At least 1 uppercase letter
-- At least 1 lowercase letter
-- At least 1 number
+### Common Error Codes
+- `VALIDATION_ERROR` (422): Invalid input parameters
+- `UNAUTHORIZED` (401): Missing or invalid authentication token
+- `FORBIDDEN` (403): User lacks required ADMIN role
+- `NOT_FOUND` (404): Requested resource not found
+- `CONFLICT` (409): Resource already exists
+- `INTERNAL_ERROR` (500): Server error
 
 ---
 
-### 3. Admin Login
+## Authentication
 
-```http
-POST /auth/admin-login
-Content-Type: application/json
-
-Request Body:
-{
-  "email": "admin@example.com",
-  "password": "adminPassword123"
-}
-
-Response: 200 OK
-{
-  "success": true,
-  "token": "...",
-  "refreshToken": "...",
-  "user": {
-    "id": 5,
-    "name": "Admin User",
-    "email": "admin@example.com",
-    "role": "ADMIN"
-  }
-}
-
-Error Response: 403 Forbidden
-{
-  "success": false,
-  "error": "User is not an admin",
-  "status": 403
-}
-```
-
----
-
-### 4. Refresh Token
-
-```http
-POST /auth/refresh-token
-Content-Type: application/json
-
-Request Body:
-{
-  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
-}
-
-Response: 200 OK
-{
-  "success": true,
-  "token": "new_access_token...",
-  "refreshToken": "new_refresh_token..."
-}
-
-Error Response: 401 Unauthorized
-{
-  "success": false,
-  "error": "Refresh token expired or invalid",
-  "status": 401
-}
-```
-
----
-
-### 5. Logout
-
-```http
-POST /auth/logout
-Authorization: Bearer <jwt_token>
-
-Response: 200 OK
-{
-  "success": true,
-  "message": "Logged out successfully"
-}
-```
-
----
-
-## User Endpoints
-
-### 1. Get Current User Profile
-
-```http
-GET /users/profile
-Authorization: Bearer <jwt_token>
-
-Response: 200 OK
-{
-  "success": true,
-  "data": {
-    "id": 1,
-    "name": "John Doe",
-    "email": "user@example.com",
-    "phone": "9876543210",
-    "address": "123 Main St, Mumbai",
-    "role": "CUSTOMER",
-    "profileImageUrl": "https://...",
-    "isActive": true,
-    "isVerified": true,
-    "createdAt": "2026-01-15T10:30:00Z"
-  }
-}
-```
-
----
-
-### 2. Update User Profile
-
-```http
-PUT /users/profile
-Authorization: Bearer <jwt_token>
-Content-Type: application/json
-
-Request Body:
-{
-  "name": "John Doe Updated",
-  "phone": "9876543210",
-  "address": "456 New Street, Mumbai",
-  "profileImageUrl": "https://..."
-}
-
-Response: 200 OK
-{
-  "success": true,
-  "message": "Profile updated successfully",
-  "data": {
-    "id": 1,
-    "name": "John Doe Updated",
-    ...
-  }
-}
-```
-
----
-
-### 3. Change Password
-
-```http
-PUT /users/change-password
-Authorization: Bearer <jwt_token>
-Content-Type: application/json
-
-Request Body:
-{
-  "oldPassword": "currentPassword123",
-  "newPassword": "newPassword123"
-}
-
-Response: 200 OK
-{
-  "success": true,
-  "message": "Password changed successfully"
-}
-
-Error Response: 400 Bad Request
-{
-  "success": false,
-  "error": "Old password is incorrect"
-}
-```
-
----
-
-### 4. Upload Profile Image
-
-```http
-POST /users/upload-profile-image
-Authorization: Bearer <jwt_token>
-Content-Type: multipart/form-data
-
-Body:
-profile_image: <file>
-
-Response: 200 OK
-{
-  "success": true,
-  "message": "Image uploaded successfully",
-  "data": {
-    "imageUrl": "https://..."
-  }
-}
-```
-
----
-
-## Booking Endpoints
-
-### 1. Create Booking
-
-```http
-POST /bookings
-Authorization: Bearer <jwt_token>
-Content-Type: application/json
-
-Request Body:
-{
-  "sourceLocation": "Mumbai Central",
-  "destinationLocation": "Pune Station",
-  "pickupTime": "2026-02-23T10:30:00Z",
-  "estimatedDistance": 150.5,
-  "paymentMethod": "CASH",
-  "notes": "Please call before arrival"
-}
-
-Response: 201 Created
-{
-  "success": true,
-  "data": {
-    "id": 1,
-    "bookingNumber": "BK-20260222-001",
-    "userId": 1,
-    "sourceLocation": "Mumbai Central",
-    "destinationLocation": "Pune Station",
-    "pickupTime": "2026-02-23T10:30:00Z",
-    "status": "PENDING",
-    "baseFare": 100,
-    "totalFare": 500,
-    "paymentStatus": "PENDING",
-    "createdAt": "2026-02-22T10:30:00Z"
-  }
-}
-```
-
----
-
-### 2. Get Bookings List
-
-```http
-GET /bookings?page=0&size=20&sort=createdAt,desc
-Authorization: Bearer <jwt_token>
-
-Response: 200 OK
-{
-  "success": true,
-  "data": [
-    {
-      "id": 1,
-      "bookingNumber": "BK-20260222-001",
-      "sourceLocation": "Mumbai Central",
-      "destinationLocation": "Pune Station",
-      "status": "COMPLETED",
-      "totalFare": 500,
-      "createdAt": "2026-02-22T10:30:00Z"
-    }
-  ],
-  "pagination": {
-    "currentPage": 0,
-    "totalPages": 5,
-    "totalItems": 100,
-    "pageSize": 20
-  }
-}
-```
-
----
-
-### 3. Get Booking Details
-
-```http
-GET /bookings/{bookingId}
-Authorization: Bearer <jwt_token>
-
-Response: 200 OK
-{
-  "success": true,
-  "data": {
-    "id": 1,
-    "bookingNumber": "BK-20260222-001",
-    "userId": 1,
-    "driverId": 3,
-    "sourceLocation": "Mumbai Central",
-    "destinationLocation": "Pune Station",
-    "pickupTime": "2026-02-23T10:30:00Z",
-    "estimatedArrivalTime": "2026-02-23T12:30:00Z",
-    "actualArrivalTime": null,
-    "status": "PENDING",
-    "baseFare": 100,
-    "distanceCharge": 300,
-    "totalFare": 500,
-    "paymentMethod": "CASH",
-    "paymentStatus": "PENDING",
-    "driver": {
-      "id": 3,
-      "name": "Driver Name",
-      "rating": 4.5,
-      "totalTrips": 250
-    },
-    "createdAt": "2026-02-22T10:30:00Z"
-  }
-}
-```
-
----
-
-### 4. Cancel Booking
-
-```http
-DELETE /bookings/{bookingId}
-Authorization: Bearer <jwt_token>
-Content-Type: application/json
-
-Request Body:
-{
-  "cancellationReason": "Changed my schedule"
-}
-
-Response: 200 OK
-{
-  "success": true,
-  "message": "Booking cancelled successfully",
-  "data": {
-    "id": 1,
-    "status": "CANCELLED",
-    "cancellationReason": "Changed my schedule"
-  }
-}
-```
-
----
-
-### 5. Rate Booking
-
-```http
-POST /bookings/{bookingId}/rate
-Authorization: Bearer <jwt_token>
-Content-Type: application/json
-
-Request Body:
-{
-  "rating": 5,
-  "feedback": "Great ride, driver was very friendly"
-}
-
-Response: 200 OK
-{
-  "success": true,
-  "message": "Booking rated successfully",
-  "data": {
-    "id": 1,
-    "passengerRating": 5,
-    "passengerFeedback": "Great ride, driver was very friendly"
-  }
-}
-```
-
----
-
-## Driver Endpoints
-
-### 1. Register as Driver
-
-```http
-POST /drivers/register
-Authorization: Bearer <jwt_token>
-Content-Type: application/json
-
-Request Body:
-{
-  "licenseNumber": "DL123456",
-  "licenseExpiryDate": "2030-12-31",
-  "bankAccountNumber": "123456789012",
-  "bankIfscCode": "HDFC0001234"
-}
-
-Response: 201 Created
-{
-  "success": true,
-  "data": {
-    "id": 3,
-    "userId": 2,
-    "licenseNumber": "DL123456",
-    "status": "PENDING",
-    "rating": 0,
-    "totalTrips": 0,
-    "createdAt": "2026-02-22T10:30:00Z"
-  }
-}
-```
-
----
-
-### 2. Get Driver Profile
-
-```http
-GET /drivers/{driverId}
-Authorization: Bearer <jwt_token>
-
-Response: 200 OK
-{
-  "success": true,
-  "data": {
-    "id": 3,
-    "name": "Driver Name",
-    "email": "driver@example.com",
-    "phone": "9876543210",
-    "licenseNumber": "DL123456",
-    "status": "APPROVED",
-    "rating": 4.7,
-    "totalTrips": 250,
-    "completedTrips": 248,
-    "vehicleId": 1,
-    "vehicleName": "Economy Sedan",
-    "isActive": true,
-    "createdAt": "2026-01-15T10:30:00Z"
-  }
-}
-```
-
----
-
-### 3. Update Driver Location
-
-```http
-POST /drivers/{driverId}/update-location
-Authorization: Bearer <jwt_token>
-Content-Type: application/json
-
-Request Body:
-{
-  "latitude": 19.0760,
-  "longitude": 72.8777
-}
-
-Response: 200 OK
-{
-  "success": true,
-  "message": "Location updated successfully"
-}
-```
-
----
-
-### 4. Get Assigned Bookings
-
-```http
-GET /drivers/assignments?status=PENDING
-Authorization: Bearer <jwt_token>
-
-Response: 200 OK
-{
-  "success": true,
-  "data": [
-    {
-      "id": 1,
-      "bookingNumber": "BK-20260222-001",
-      "passengerName": "John Doe",
-      "sourceLocation": "Mumbai Central",
-      "destinationLocation": "Pune Station",
-      "pickupTime": "2026-02-23T10:30:00Z",
-      "status": "ACCEPTED"
-    }
-  ]
-}
-```
-
----
-
-### 5. Accept Booking Assignment
-
-```http
-POST /drivers/accept-booking/{bookingId}
-Authorization: Bearer <jwt_token>
-
-Response: 200 OK
-{
-  "success": true,
-  "message": "Booking accepted successfully",
-  "data": {
-    "id": 1,
-    "status": "ACCEPTED"
-  }
-}
-```
-
----
-
-### 6. Update Booking Status
-
-```http
-PATCH /drivers/bookings/{bookingId}/status
-Authorization: Bearer <jwt_token>
-Content-Type: application/json
-
-Request Body:
-{
-  "status": "IN_PROGRESS"
-}
-
-Allowed Status Transitions:
-PENDING → ACCEPTED
-ACCEPTED → IN_PROGRESS
-IN_PROGRESS → COMPLETED
-Any Status → CANCELLED
-
-Response: 200 OK
-{
-  "success": true,
-  "data": {
-    "id": 1,
-    "status": "IN_PROGRESS"
-  }
-}
-```
-
----
-
-## Route Endpoints
-
-### 1. Get Popular Routes
-
-```http
-GET /routes?page=0&size=10
-Authorization: Bearer <jwt_token>
-
-Response: 200 OK
-{
-  "success": true,
-  "data": [
-    {
-      "id": 1,
-      "sourceCity": "Mumbai",
-      "destinationCity": "Pune",
-      "distanceKm": 150.5,
-      "estimatedDurationMinutes": 180,
-      "baseFare": 100,
-      "perKmCharge": 2.5,
-      "popularityScore": 850,
-      "totalBookings": 5000,
-      "isActive": true
-    }
-  ]
-}
-```
-
----
-
-### 2. Search Routes
-
-```http
-GET /routes/search?from=Mumbai&to=Pune
-Authorization: Bearer <jwt_token>
-
-Response: 200 OK
-{
-  "success": true,
-  "data": [
-    {
-      "id": 1,
-      "sourceCity": "Mumbai",
-      "destinationCity": "Pune",
-      "distanceKm": 150.5,
-      "baseFare": 100,
-      "perKmCharge": 2.5
-    }
-  ]
-}
-```
-
----
-
-### 3. Calculate Fare
-
-```http
-POST /routes/calculate-fare
-Authorization: Bearer <jwt_token>
-Content-Type: application/json
-
-Request Body:
-{
-  "sourceLocation": "Mumbai Central",
-  "destinationLocation": "Pune Station",
-  "vehicleType": "ECONOMY",
-  "distance": 150.5
-}
-
-Response: 200 OK
-{
-  "success": true,
-  "data": {
-    "baseFare": 100,
-    "distanceCharge": 376.25,
-    "surcharge": 0,
-    "totalFare": 476.25,
-    "estimatedDuration": "180 minutes"
-  }
-}
-```
-
----
-
-## Vehicle Endpoints
-
-### 1. Get Available Vehicles
-
-```http
-GET /vehicles?isActive=true
-Authorization: Bearer <jwt_token>
-
-Response: 200 OK
-{
-  "success": true,
-  "data": [
-    {
-      "id": 1,
-      "name": "Economy Sedan",
-      "vehicleType": "ECONOMY",
-      "seatCapacity": 4,
-      "priceMultiplier": 1.0,
-      "imageUrl": "https://...",
-      "description": "Affordable and comfortable",
-      "isActive": true
-    },
-    {
-      "id": 2,
-      "name": "Premium SUV",
-      "vehicleType": "PREMIUM",
-      "seatCapacity": 6,
-      "priceMultiplier": 1.5,
-      "imageUrl": "https://...",
-      "isActive": true
-    }
-  ]
-}
-```
-
----
-
-### 2. Get Vehicle Details
-
-```http
-GET /vehicles/{vehicleId}
-Authorization: Bearer <jwt_token>
-
-Response: 200 OK
-{
-  "success": true,
-  "data": {
-    "id": 1,
-    "name": "Economy Sedan",
-    "vehicleType": "ECONOMY",
-    "registrationNumber": "MH-01-AB-1234",
-    "seatCapacity": 4,
-    "luggageCapacity": 50,
-    "priceMultiplier": 1.0,
-    "manufacturer": "Toyota",
-    "model": "Fortuner",
-    "yearOfManufacture": 2023,
-    "isActive": true
-  }
-}
-```
-
----
-
-## Admin Endpoints
-
-⚠️ **Note:** All admin endpoints require `Authorization: Bearer <admin_jwt_token>` and admin role
-
-### 1. Get Dashboard Overview
-
-```http
-GET /admin/dashboard/overview
-Authorization: Bearer <admin_jwt_token>
-
-Response: 200 OK
-{
-  "success": true,
-  "data": {
-    "totalUsers": 1500,
-    "totalDrivers": 350,
-    "totalBookings": 25000,
-    "completedBookings": 24500,
-    "totalRevenue": 1250000,
-    "averageRating": 4.6,
-    "activeRides": 45,
-    "pendingApprovals": 12
-  }
-}
-```
-
----
-
-### 2. User Management
-
-#### 2.1 Get All Users
-```http
-GET /admin/users?page=0&size=20&sort=createdAt,desc
-Authorization: Bearer <admin_jwt_token>
-
-Response: 200 OK
-{
-  "success": true,
-  "data": [
-    {
-      "id": 1,
-      "name": "John Doe",
-      "email": "user@example.com",
-      "phone": "9876543210",
-      "role": "CUSTOMER",
-      "isActive": true,
-      "createdAt": "2026-01-15T10:30:00Z"
-    }
-  ],
-  "pagination": { ... }
-}
-```
-
-#### 2.2 Update User Status
-```http
-PATCH /admin/users/{userId}/status
-Authorization: Bearer <admin_jwt_token>
-Content-Type: application/json
-
-Request Body:
-{
-  "isActive": false,
-  "reason": "Suspicious activity detected"
-}
-
-Response: 200 OK
-{
-  "success": true,
-  "message": "User status updated",
-  "data": {
-    "id": 1,
-    "isActive": false
-  }
-}
-```
-
-#### 2.3 Delete User
-```http
-DELETE /admin/users/{userId}
-Authorization: Bearer <admin_jwt_token>
-
-Response: 200 OK
-{
-  "success": true,
-  "message": "User deleted successfully"
-}
-```
-
----
-
-### 3. Driver Management
-
-#### 3.1 Get All Drivers
-```http
-GET /admin/drivers?page=0&size=20&status=PENDING
-Authorization: Bearer <admin_jwt_token>
-
-Response: 200 OK
-{
-  "success": true,
-  "data": [
-    {
-      "id": 3,
-      "name": "Driver Name",
-      "email": "driver@example.com",
-      "licenseNumber": "DL123456",
-      "status": "PENDING",
-      "rating": 0,
-      "totalTrips": 0
-    }
-  ]
-}
-```
-
-#### 3.2 Approve Driver
-```http
-PATCH /admin/drivers/{driverId}/approve
-Authorization: Bearer <admin_jwt_token>
-
-Response: 200 OK
-{
-  "success": true,
-  "message": "Driver approved successfully",
-  "data": {
-    "id": 3,
-    "status": "APPROVED"
-  }
-}
-```
-
-#### 3.3 Reject Driver
-```http
-PATCH /admin/drivers/{driverId}/reject
-Authorization: Bearer <admin_jwt_token>
-Content-Type: application/json
-
-Request Body:
-{
-  "rejectionReason": "Invalid license number"
-}
-
-Response: 200 OK
-{
-  "success": true,
-  "message": "Driver rejected",
-  "data": {
-    "id": 3,
-    "status": "REJECTED",
-    "rejectionReason": "Invalid license number"
-  }
-}
-```
-
----
-
-### 4. Booking Management
-
-#### 4.1 Get All Bookings (Admin View)
-```http
-GET /admin/bookings?page=0&size=20&status=COMPLETED
-Authorization: Bearer <admin_jwt_token>
-
-Response: 200 OK
-{
-  "success": true,
-  "data": [
-    {
-      "id": 1,
-      "bookingNumber": "BK-20260222-001",
-      "passengerName": "John Doe",
-      "driverName": "Driver Name",
-      "totalFare": 500,
-      "status": "COMPLETED",
-      "createdAt": "2026-02-22T10:30:00Z"
-    }
-  ]
-}
-```
-
-#### 4.2 Update Booking Status
-```http
-PATCH /admin/bookings/{bookingId}/status
-Authorization: Bearer <admin_jwt_token>
-Content-Type: application/json
-
-Request Body:
-{
-  "status": "CANCELLED",
-  "reason": "Driver no-show"
-}
-
-Response: 200 OK
-{
-  "success": true,
-  "data": {
-    "id": 1,
-    "status": "CANCELLED"
-  }
-}
-```
-
----
-
-### 5. Blog Management
-
-#### 5.1 Create Blog Post
-```http
-POST /admin/blogs
-Authorization: Bearer <admin_jwt_token>
-Content-Type: application/json
-
-Request Body:
-{
-  "title": "Travel Tips for Summer",
-  "slug": "travel-tips-summer",
-  "content": "<p>...</p>",
-  "excerpt": "Best practices for summer travel",
-  "status": "DRAFT",
-  "metaTitle": "Travel Tips",
-  "metaDescription": "Summer travel guide"
-}
-
-Response: 201 Created
-{
-  "success": true,
-  "data": {
-    "id": 1,
-    "title": "Travel Tips for Summer",
-    "slug": "travel-tips-summer",
-    "status": "DRAFT",
-    "createdAt": "2026-02-22T10:30:00Z"
-  }
-}
-```
-
-#### 5.2 Get All Blogs
-```http
-GET /admin/blogs?page=0&size=20&status=PUBLISHED
-Authorization: Bearer <admin_jwt_token>
-
-Response: 200 OK
-{
-  "success": true,
-  "data": [
-    {
-      "id": 1,
-      "title": "Travel Tips for Summer",
-      "slug": "travel-tips-summer",
-      "status": "PUBLISHED",
-      "viewCount": 1500,
-      "publishedAt": "2026-02-20T10:30:00Z"
-    }
-  ]
-}
-```
-
-#### 5.3 Update Blog
-```http
-PUT /admin/blogs/{blogId}
-Authorization: Bearer <admin_jwt_token>
-Content-Type: application/json
-
-Request Body:
-{
-  "title": "Updated Title",
-  "content": "<p>Updated content</p>",
-  "status": "PUBLISHED"
-}
-
-Response: 200 OK
-{
-  "success": true,
-  "data": { ... }
-}
-```
-
-#### 5.4 Delete Blog
-```http
-DELETE /admin/blogs/{blogId}
-Authorization: Bearer <admin_jwt_token>
-
-Response: 200 OK
-{
-  "success": true,
-  "message": "Blog deleted successfully"
-}
-```
-
----
-
-### 6. Analytics Endpoints
-
-#### 6.1 Get Booking Analytics
-```http
-GET /admin/analytics/bookings?from=2026-02-01&to=2026-02-22
-Authorization: Bearer <admin_jwt_token>
-
-Response: 200 OK
-{
-  "success": true,
-  "data": {
-    "totalBookings": 1500,
-    "completedBookings": 1450,
-    "cancelledBookings": 50,
-    "totalRevenue": 750000,
-    "averageBookingValue": 500,
-    "dailyData": [
-      {
-        "date": "2026-02-22",
-        "bookings": 50,
-        "revenue": 25000
-      }
-    ]
-  }
-}
-```
-
-#### 6.2 Get Driver Analytics
-```http
-GET /admin/analytics/drivers?from=2026-02-01&to=2026-02-22
-Authorization: Bearer <admin_jwt_token>
-
-Response: 200 OK
-{
-  "success": true,
-  "data": {
-    "totalDrivers": 350,
-    "activeDrivers": 300,
-    "avgRating": 4.6,
-    "topDrivers": [
-      {
-        "id": 3,
-        "name": "Top Driver",
-        "rating": 4.9,
-        "completedTrips": 500
-      }
-    ]
-  }
-}
-```
-
----
-
-## WebSocket Endpoints
-
-### Connection
-```javascript
-// Frontend connection
-const stompClient = new StompJs.Client({
-  brokerURL: 'ws://localhost:8000/ws/ride',
-  connectHeaders: {
-    Authorization: `Bearer ${jwt_token}`
-  }
-});
-
-stompClient.onConnect = (frame) => {
-  // Subscribe to ride updates
-  stompClient.subscribe(`/topic/ride/{rideId}`, (message) => {
-    console.log(JSON.parse(message.body));
-  });
-};
-
-stompClient.activate();
-```
-
-### Topics Available
-
-**Ride Tracking (Real-time):**
-```
-/topic/ride/{rideId}
-- Driver location updates
-- Booking status changes
-- ETA updates
-```
-
-**Admin Updates (Admin Dashboard):**
-```
-/topic/admin/bookings      - New bookings notification
-/topic/admin/drivers       - Driver status updates
-/topic/admin/users         - User activities
-/topic/admin/dashboard     - Dashboard metrics update
-```
-
-### Example WebSocket Messages
-
-```json
-// Ride Update
-{
-  "rideId": 1,
-  "status": "IN_PROGRESS",
-  "driverLatitude": 19.0760,
-  "driverLongitude": 72.8777,
-  "estimatedArrival": "2026-02-23T10:45:00Z",
-  "distance": 2.5
-}
-
-// Admin Notification
-{
-  "type": "BOOKING_CREATED",
-  "bookingId": 1,
-  "bookingNumber": "BK-20260222-001",
-  "timestamp": "2026-02-22T10:30:00Z"
-}
-```
-
----
-
-## Response Format
-
-### Success Response
-
-```json
-{
-  "success": true,
-  "data": {
-    "id": 1,
-    "name": "Example",
-    ...
-  },
-  "message": "Operation successful",
-  "timestamp": "2026-02-22T10:30:00Z"
-}
-```
-
-### Success List Response
-
-```json
-{
-  "success": true,
-  "data": [ ... ],
-  "pagination": {
-    "currentPage": 0,
-    "totalPages": 5,
-    "totalItems": 100,
-    "pageSize": 20,
-    "hasNext": true,
-    "hasPrevious": false
-  },
-  "timestamp": "2026-02-22T10:30:00Z"
-}
-```
-
-### Error Response
-
-```json
-{
-  "success": false,
-  "error": "Error message describing what went wrong",
-  "status": 400,
-  "path": "/api/v1/endpoint",
-  "timestamp": "2026-02-22T10:30:00Z",
-  "details": {
-    "field": ["error message"]
-  }
-}
-```
-
----
-
-## Error Handling
-
-### HTTP Status Codes
-
-| Code | Meaning | Common Cause |
-|------|---------|------------|
-| 200 | OK | Successful GET, PUT, PATCH |
-| 201 | Created | Successful POST (resource created) |
-| 204 | No Content | Successful DELETE |
-| 400 | Bad Request | Invalid input, validation error |
-| 401 | Unauthorized | Missing or invalid token |
-| 403 | Forbidden | User lacks required permissions |
-| 404 | Not Found | Resource doesn't exist |
-| 409 | Conflict | Resource already exists or state conflict |
-| 429 | Too Many Requests | Rate limit exceeded |
-| 500 | Server Error | Internal server error |
-
-### Error Codes
+### Bearer Token
+Include the JWT token in the Authorization header:
 
 ```
-// Authentication
-AUTH_001 - Invalid credentials
-AUTH_002 - Token expired
-AUTH_003 - Token invalid
-
-// Validation
-VAL_001 - Email already exists
-VAL_002 - Invalid email format
-VAL_003 - Password too weak
-
-// Not Found
-NOT_FOUND_001 - User not found
-NOT_FOUND_002 - Booking not found
-NOT_FOUND_003 - Driver not found
-
-// Business Logic
-BUS_001 - Cannot cancel completed booking
-BUS_002 - Driver not approved
-BUS_003 - No vehicles available
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 ```
+
+### Token Generation
+- Login endpoint: `POST /api/v1/auth/login`
+- Token lifespan: 15 minutes (900 seconds)
+- Refresh token lifespan: 7 days (604800 seconds)
 
 ---
 
 ## Rate Limiting
 
-```
-Default Limits:
-- General API: 100 requests/second per user
-- Authentication: 10 login attempts/minute per IP
-- File Upload: 5MB max file size
-
-Rate Limit Headers:
-X-RateLimit-Limit: 100
-X-RateLimit-Remaining: 95
-X-RateLimit-Reset: 1645423200
-
-Error Response (429):
-{
-  "success": false,
-  "error": "Rate limit exceeded. Try again after 60 seconds",
-  "retryAfter": 60
-}
-```
+Currently, no rate limiting is implemented. This should be configured in production.
 
 ---
 
-## Testing API with Postman
+## Versioning
 
-1. **Import Collection:** Use the Postman collection file (if available)
-2. **Set Variables:**
-   - `base_url` = http://localhost:8000/api/v1
-   - `token` = Your JWT token (obtained from login)
-3. **Test Endpoints:** Start with login, then test other endpoints
-
-**Example Login Request:**
-```
-POST http://localhost:8000/api/v1/auth/login
-Content-Type: application/json
-
-{
-  "email": "user@example.com",
-  "password": "password123"
-}
-```
+This API follows semantic versioning:
+- Current version: v1
+- All endpoints use prefix: `/api/v1/`
 
 ---
 
-## API Documentation Tool
+## Support
 
-Interactive API documentation available at:
-- **Development:** http://localhost:8000/api/v1/swagger-ui.html
-- **Production:** https://api.indicab.com/api/v1/swagger-ui.html
-
----
-
-## Related Documentation
-
-- [ARCHITECTURE.md](ARCHITECTURE.md) - System design and architecture
-- [DATABASE_SCHEMA.md](DATABASE_SCHEMA.md) - Database structure
-- [DEVELOPMENT_SETUP.md](DEVELOPMENT_SETUP.md) - Local development setup
-- [agents.md](agents.md) - Development tasks and roadmap
+For issues or questions:
+1. Check the logs: `docker-compose logs backend`
+2. Check the Swagger UI: `http://localhost:8000/api/v1/swagger-ui.html`
+3. Contact the admin team
 
 ---
 
-**Last Updated:** February 22, 2026  
-**Version:** 1.0  
-**Status:** Complete
+*Last Updated: 2026-03-03*
+*Version: 1.0*

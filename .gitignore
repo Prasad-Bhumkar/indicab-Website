@@ -42,3 +42,12 @@ HELP.md
 .env
 .env.local
 .env.*.local
+
+# Runtime generated logs
+indicab-backend/logs/
+
+# Playwright report
+indicab-frontend/playwright-report/
+
+# AI plan artifacts
+.builder/

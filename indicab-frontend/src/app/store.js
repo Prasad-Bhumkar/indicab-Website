@@ -12,6 +12,9 @@ import profileReducer from '../features/profile/profileSlice';
 import driverReducer from '../features/driver/driverSlice';
 import adminReducer from '../features/admin/adminSlice';
 import authReducer from '../features/auth/authSlice';
+import blogReducer from '../features/blog/blogSlice';
+import ratingReducer from '../features/rating/ratingSlice';
+import notificationReducer from '../features/notification/notificationSlice';
 
 export const store = configureStore({
   reducer: {
@@ -26,5 +29,8 @@ export const store = configureStore({
     profile: profileReducer,
     driver: driverReducer,
     admin: adminReducer,
+    blog: blogReducer,
+    rating: ratingReducer,
+    notification: notificationReducer,
   },
 });

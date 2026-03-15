@@ -14,13 +14,14 @@ public class BookingResponseDTO {
     private String license;
     private String phoneNumber;
     private String pickupAddress;
+    private Long userId;
     private String status;
 
     public BookingResponseDTO() {}
 
     public BookingResponseDTO(Long id, String from, String to, String date, String vehicle,
                             Double amount, String fullName, String license,
-                            String phoneNumber, String pickupAddress, String status) {
+                            String phoneNumber, String pickupAddress, Long userId, String status) {
         this.id = id;
         this.from = from;
         this.to = to;
@@ -31,6 +32,7 @@ public class BookingResponseDTO {
         this.license = license;
         this.phoneNumber = phoneNumber;
         this.pickupAddress = pickupAddress;
+        this.userId = userId;
         this.status = status;
     }
 
@@ -63,6 +65,9 @@ public class BookingResponseDTO {
 
     public String getPickupAddress() { return pickupAddress; }
     public void setPickupAddress(String pickupAddress) { this.pickupAddress = pickupAddress; }
+
+    public Long getUserId() { return userId; }
+    public void setUserId(Long userId) { this.userId = userId; }
 
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }

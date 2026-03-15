@@ -1,13 +1,21 @@
 import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchBlogs } from "../features/admin/adminSlice";
+import { fetchPublishedBlogs } from "../features/blog/blogSlice";
+import { useSEO } from "../hooks/useSEO";
 
 const Blog = () => {
+  useSEO({
+    title: 'IndiCab Blog - Ride Booking Tips, Travel Guides & Driver Stories',
+    description: 'Read the latest articles on ride booking, travel tips, driver stories, and safety guides. Stay informed with IndiCab Blog.',
+    keywords: 'blog, travel tips, ride booking guide, driver stories, safety, travel advice, India',
+    image: 'https://img.icons8.com/color/96/taxi.png',
+    type: 'website',
+  });
   const dispatch = useDispatch();
-  const { blogs, loading } = useSelector((state) => state.admin);
+  const { publishedBlogs: blogs, loading } = useSelector((state) => state.blog);
 
   useEffect(() => {
-    dispatch(fetchBlogs());
+    dispatch(fetchPublishedBlogs());
   }, [dispatch]);
 
   const blogPosts = blogs && blogs.length > 0 ? blogs : [];
@@ -36,9 +44,9 @@ const Blog = () => {
                 className="card h-100 shadow-sm"
                 style={{ borderRadius: "15px" }}
               >
-                {post.image && (
+                { (post.image || post.imageUrl) && (
                   <img
-                    src={post.image}
+                    src={post.image || post.imageUrl}
                     className="card-img-top"
                     alt={post.title}
                     style={{
@@ -54,10 +62,10 @@ const Blog = () => {
                     {post.title}
                   </h5>
                   <div className="text-muted small mb-2">
-                    <span>{post.date}</span> &middot;{" "}
+                    <span>{post.date || post.createdAt}</span> &middot;{" "}
                     <span>{post.views || 0} Views</span>
                   </div>
-                  <p className="card-text flex-grow-1">{post.preview}</p>
+                  <p className="card-text flex-grow-1">{post.preview || post.excerpt}</p>
                   <a
                     href="#"
                     className="btn btn-primary mt-auto align-self-start"

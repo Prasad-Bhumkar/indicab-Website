@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -62,6 +63,14 @@ public class BlogService {
     public Page<Blog> getAllBlogs(Pageable pageable) {
         logger.debug("Fetching all blogs");
         return blogRepository.findAll(pageable);
+    }
+
+    /**
+     * Get all blogs with pagination and search/filter specifications
+     */
+    public Page<Blog> getAllBlogs(Pageable pageable, Specification<Blog> spec) {
+        logger.debug("Fetching all blogs with search/filter specifications");
+        return blogRepository.findAll(spec, pageable);
     }
     
     /**

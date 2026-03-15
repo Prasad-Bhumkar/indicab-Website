@@ -73,4 +73,9 @@ public interface DriverService {
      * Update driver status for multiple drivers (admin only)
      */
     void bulkUpdateDriversStatus(List<Long> ids, String status);
+
+    /**
+     * Get rides assigned to a specific driver
+     */
+    List<Object> getRidesForDriver(Long driverId);
 }

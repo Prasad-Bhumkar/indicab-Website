@@ -3,6 +3,7 @@ package com.indicab.service;
 import com.indicab.entity.AuditLog;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -76,4 +77,9 @@ public interface AuditLoggingService {
      */
     void logFailedBulkOperation(Long userId, String operation, String resourceType,
                                List<Long> resourceIds, String ipAddress, String failureReason);
+
+    /**
+     * Get audit logs with search/filter specifications
+     */
+    Page<AuditLog> getAuditLogs(Pageable pageable, Specification<AuditLog> spec);
 }

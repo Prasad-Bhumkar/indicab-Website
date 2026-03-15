@@ -88,6 +88,32 @@ public class DriverServiceImpl implements DriverService {
         return new PageImpl<>(pagedContent, pageable, pendingDriverDTOs.size());
     }
 
+    /**
+     * Get pending driver applications with pagination and optional search
+     */
+    public Page<DriverResponseDTO> getPendingApplicationsPaged(Pageable pageable, String search) {
+        logger.debug("Fetching pending driver applications with pagination and search - Page: {}, Size: {}, Search: {}",
+                   pageable.getPageNumber(), pageable.getPageSize(), search);
+        List<User> allPendingDrivers = userRepository.findAll().stream()
+                .filter(u -> "PENDING".equals(u.getDriverStatus()))
+                .collect(Collectors.toList());
+
+        List<DriverResponseDTO> pendingDriverDTOs = allPendingDrivers.stream()
+                .map(this::mapToDriverResponseDTO)
+                .filter(dto -> search == null || search.isEmpty() ||
+                       dto.getName().toLowerCase().contains(search.toLowerCase()) ||
+                       dto.getEmail().toLowerCase().contains(search.toLowerCase()))
+                .collect(Collectors.toList());
+
+        // Apply pagination manually
+        int start = (int) pageable.getOffset();
+        int end = Math.min((start + pageable.getPageSize()), pendingDriverDTOs.size());
+        List<DriverResponseDTO> pagedContent = pendingDriverDTOs.subList(start, end);
+
+        logger.info("Returning {} pending driver applications for page {}", pagedContent.size(), pageable.getPageNumber());
+        return new PageImpl<>(pagedContent, pageable, pendingDriverDTOs.size());
+    }
+
     @Override
     public List<DriverResponseDTO> getApprovedDrivers() {
         logger.debug("Fetching all approved drivers");
@@ -121,6 +147,32 @@ public class DriverServiceImpl implements DriverService {
         return new PageImpl<>(pagedContent, pageable, approvedDriverDTOs.size());
     }
 
+    /**
+     * Get approved drivers with pagination and optional search
+     */
+    public Page<DriverResponseDTO> getApprovedDriversPaged(Pageable pageable, String search) {
+        logger.debug("Fetching approved drivers with pagination and search - Page: {}, Size: {}, Search: {}",
+                   pageable.getPageNumber(), pageable.getPageSize(), search);
+        List<User> allApprovedDrivers = userRepository.findAll().stream()
+                .filter(u -> "APPROVED".equals(u.getDriverStatus()))
+                .collect(Collectors.toList());
+
+        List<DriverResponseDTO> approvedDriverDTOs = allApprovedDrivers.stream()
+                .map(this::mapToDriverResponseDTO)
+                .filter(dto -> search == null || search.isEmpty() ||
+                       dto.getName().toLowerCase().contains(search.toLowerCase()) ||
+                       dto.getEmail().toLowerCase().contains(search.toLowerCase()))
+                .collect(Collectors.toList());
+
+        // Apply pagination manually
+        int start = (int) pageable.getOffset();
+        int end = Math.min((start + pageable.getPageSize()), approvedDriverDTOs.size());
+        List<DriverResponseDTO> pagedContent = approvedDriverDTOs.subList(start, end);
+
+        logger.info("Returning {} approved drivers for page {}", pagedContent.size(), pageable.getPageNumber());
+        return new PageImpl<>(pagedContent, pageable, approvedDriverDTOs.size());
+    }
+
     @Override
     public List<DriverResponseDTO> getAllDrivers() {
         logger.debug("Fetching all drivers");
@@ -143,6 +195,32 @@ public class DriverServiceImpl implements DriverService {
 
         List<DriverResponseDTO> driverDTOs = allDrivers.stream()
                 .map(this::mapToDriverResponseDTO)
+                .collect(Collectors.toList());
+
+        // Apply pagination manually
+        int start = (int) pageable.getOffset();
+        int end = Math.min((start + pageable.getPageSize()), driverDTOs.size());
+        List<DriverResponseDTO> pagedContent = driverDTOs.subList(start, end);
+
+        logger.info("Returning {} drivers for page {}", pagedContent.size(), pageable.getPageNumber());
+        return new PageImpl<>(pagedContent, pageable, driverDTOs.size());
+    }
+
+    /**
+     * Get all drivers with pagination and optional search
+     */
+    public Page<DriverResponseDTO> getAllDriversPaged(Pageable pageable, String search) {
+        logger.debug("Fetching all drivers with pagination and search - Page: {}, Size: {}, Search: {}",
+                   pageable.getPageNumber(), pageable.getPageSize(), search);
+        List<User> allDrivers = userRepository.findAll().stream()
+                .filter(u -> "DRIVER".equals(u.getRole()))
+                .collect(Collectors.toList());
+
+        List<DriverResponseDTO> driverDTOs = allDrivers.stream()
+                .map(this::mapToDriverResponseDTO)
+                .filter(dto -> search == null || search.isEmpty() ||
+                       dto.getName().toLowerCase().contains(search.toLowerCase()) ||
+                       dto.getEmail().toLowerCase().contains(search.toLowerCase()))
                 .collect(Collectors.toList());
 
         // Apply pagination manually
@@ -229,6 +307,14 @@ public class DriverServiceImpl implements DriverService {
             logger.error("Failed to bulk update driver status", e);
             throw new RuntimeException("Failed to update status for multiple drivers");
         }
+    }
+
+    @Override
+    public List<Object> getRidesForDriver(Long driverId) {
+        logger.debug("Fetching rides for driver ID: {}", driverId);
+        // For now return an empty list or mock data
+        // In a real system, this would query a 'rides' or 'bookings' table with a driver_id column
+        return List.of();
     }
 
     /**

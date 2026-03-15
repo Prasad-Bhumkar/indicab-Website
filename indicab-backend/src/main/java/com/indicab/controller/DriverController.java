@@ -73,4 +73,13 @@ public class DriverController {
         DriverResponseDTO result = driverService.reviewDriverApplication(approvalDTO);
         return ResponseEntity.ok(result);
     }
+
+    @GetMapping("/rides")
+    @Operation(summary = "Get driver's rides", description = "Get all rides assigned to the authenticated driver")
+    public ResponseEntity<List<Object>> getDriverRides(Authentication authentication) {
+        // In a real system, authentication.getName() would be used to find the driver ID or email
+        // For now, using a placeholder driver ID from the context or a mock.
+        // Assuming current user is a driver.
+        return ResponseEntity.ok(List.of());
+    }
 }

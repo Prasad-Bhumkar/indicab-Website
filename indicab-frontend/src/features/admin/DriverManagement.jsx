@@ -62,12 +62,28 @@ const DriverManagement = () => {
     }
   }, [successMessage, dispatch]);
 
-  const handleInputChange = (e) => {
+  const handleInputChange = async (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
+    const updatedFormData = {
+      ...formData,
       [name]: value,
-    }));
+    };
+    setFormData(updatedFormData);
+
+    // Real-time validation
+    const validation = await validateFormData(driverValidationSchema, updatedFormData);
+    if (!validation.isValid) {
+      setValidationErrors(prev => ({
+        ...prev,
+        [name]: validation.errors[name]
+      }));
+    } else {
+      setValidationErrors(prev => {
+        const next = { ...prev };
+        delete next[name];
+        return next;
+      });
+    }
   };
 
   const handleAddDriver = async (e) => {
@@ -233,10 +249,19 @@ const DriverManagement = () => {
         filterOptions={{
           showSearch: true,
           showStatus: true,
+          showDateRange: true,
           statusOptions: [
             { value: 'pending', label: 'Pending' },
             { value: 'approved', label: 'Approved' },
             { value: 'rejected', label: 'Rejected' },
+          ],
+          customFilters: [
+            { name: 'rating', label: 'Rating', type: 'select', options: [
+              { value: '4', label: '4+ Stars' },
+              { value: '3', label: '3+ Stars' },
+              { value: '0', label: 'Any Rating' },
+            ]},
+            { name: 'license', label: 'License Search', type: 'text' },
           ],
         }}
         loading={loading}
@@ -325,11 +350,46 @@ const DriverManagement = () => {
                   disabled={loading || drivers.length === 0}
                   title="Select all drivers"
                 />
-                <th>ID</th>
-                <th>Name</th>
-                <th>Contact</th>
-                <th>Rating</th>
-                <th>Status</th>
+                <SortableHeader
+                  column="id"
+                  label="ID"
+                  sortColumn={sortColumn}
+                  sortDirection={sortDirection}
+                  onSort={handleSort}
+                  disabled={loading}
+                />
+                <SortableHeader
+                  column="name"
+                  label="Name"
+                  sortColumn={sortColumn}
+                  sortDirection={sortDirection}
+                  onSort={handleSort}
+                  disabled={loading}
+                />
+                <SortableHeader
+                  column="contact"
+                  label="Contact"
+                  sortColumn={sortColumn}
+                  sortDirection={sortDirection}
+                  onSort={handleSort}
+                  disabled={loading}
+                />
+                <SortableHeader
+                  column="rating"
+                  label="Rating"
+                  sortColumn={sortColumn}
+                  sortDirection={sortDirection}
+                  onSort={handleSort}
+                  disabled={loading}
+                />
+                <SortableHeader
+                  column="status"
+                  label="Status"
+                  sortColumn={sortColumn}
+                  sortDirection={sortDirection}
+                  onSort={handleSort}
+                  disabled={loading}
+                />
                 <th>Actions</th>
               </tr>
             </thead>

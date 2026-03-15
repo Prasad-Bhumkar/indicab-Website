@@ -1,2 +1,0 @@
--- DEPRECATED: This migration has been renamed to V007__Create_Cities_Table.sql
--- Please use V007 instead. Keeping this file empty to avoid Flyway conflicts.

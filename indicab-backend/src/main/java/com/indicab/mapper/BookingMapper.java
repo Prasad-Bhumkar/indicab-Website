@@ -1,5 +1,6 @@
 package com.indicab.mapper;
 
+import com.indicab.dto.BookingPublicDTO;
 import com.indicab.dto.BookingResponseDTO;
 import com.indicab.entity.Booking;
 
@@ -30,7 +31,27 @@ public class BookingMapper {
             booking.getLicense(),
             booking.getPhoneNumber(),
             booking.getPickupAddress(),
+            booking.getUser() != null ? booking.getUser().getId() : null,
             booking.getStatus()
+        );
+    }
+
+    /**
+     * Convert Booking entity to BookingPublicDTO (guest-safe view with no personal data)
+     */
+    public static BookingPublicDTO toPublicDto(Booking booking) {
+        if (booking == null) {
+            return null;
+        }
+        return new BookingPublicDTO(
+            booking.getId(),
+            booking.getFrom(),
+            booking.getTo(),
+            booking.getDate(),
+            booking.getAmount(),
+            booking.getVehicle(),
+            booking.getStatus(),
+            booking.getCreatedAt()
         );
     }
 }

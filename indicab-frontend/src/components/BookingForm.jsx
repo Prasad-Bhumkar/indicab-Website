@@ -12,52 +12,53 @@ const BookingForm = () => {
   const dispatch = useDispatch();
   const mockRoutes = useSelector((state) => state.mockRoutes.routes);
   const adminVehicles = useSelector((state) => state.admin.vehicles);
+  const vehiclesLoading = useSelector((state) => state.admin.loading);
 
-  // Default vehicles in case API fails
+  // Default vehicles in case API fails - Controlled from Admin Panel
   const defaultVehicles = [
     {
       id: 1,
-      type: 'Sedan',
-      baseFare: 150,
+      type: 'Swift/Dzire',
+      baseFare: 120,
       ratePerKm: 10,
-      perDayCharge: 100,
-      capacity: 3,
+      perDayCharge: 800,
+      capacity: 4,
       image:
-        'https://images.unsplash.com/photo-1712885046114-5ea81a2f7555?q=80&w=880&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3MjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
-      description: 'Comfortable & Economical',
+        'https://images.unsplash.com/photo-1590362891991-f776e747a588?q=80&w=880&auto=format&fit=crop',
+      description: 'Compact & Economical - Ideal for 4 people',
     },
     {
       id: 2,
-      type: 'SUV',
-      baseFare: 200,
+      type: 'Ertiga/Xylo',
+      baseFare: 160,
       ratePerKm: 12,
-      perDayCharge: 150,
-      capacity: 5,
+      perDayCharge: 1100,
+      capacity: 6,
       image:
-        'https://images.unsplash.com/photo-1705624843697-4461f9dce482?q=80&w=880&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3MjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
-      description: 'Spacious & Versatile',
+        'https://images.unsplash.com/photo-1621135802920-133df287f89c?q=80&w=880&auto=format&fit=crop',
+      description: 'Spacious & Comfortable - Ideal for 6 people',
     },
     {
       id: 3,
-      type: 'Luxury',
-      baseFare: 300,
-      ratePerKm: 18,
-      perDayCharge: 250,
-      capacity: 4,
+      type: 'Innova Crysta',
+      baseFare: 220,
+      ratePerKm: 16,
+      perDayCharge: 1500,
+      capacity: 7,
       image:
-        'https://images.unsplash.com/photo-1611859266693-010be04d10a4?q=80&w=880&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3MjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
-      description: 'Premium & Stylish',
+        'https://images.unsplash.com/photo-1605559424843-9e4c3ca3806d?q=80&w=880&auto=format&fit=crop',
+      description: 'Premium SUV - Best-in-class comfort',
     },
     {
       id: 4,
       type: 'Tempo Traveller',
-      baseFare: 500,
-      ratePerKm: 25,
-      perDayCharge: 400,
+      baseFare: 350,
+      ratePerKm: 22,
+      perDayCharge: 2500,
       capacity: 12,
       image:
-        'https://www.maharanacab.com/wp-content/uploads/2020/03/tempo-traveller-pics-11-e1583909038270-1-280x300.jpg',
-      description: 'For Group Travel',
+        'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?q=80&w=880&auto=format&fit=crop',
+      description: 'Perfect for Large Groups (Up to 12)',
     },
   ];
   const [currentStep, setCurrentStep] = useState(1);
@@ -516,21 +517,39 @@ const BookingForm = () => {
         {/* Step 2: Vehicle Selection */}
         {currentStep === 2 && (
           <div className="form-step">
-            <h4 className="step-title">Select Your Vehicle</h4>
+            <div className="flex justify-between items-center mb-6">
+              <h4 className="step-title mb-0">Select Your Vehicle</h4>
+              {vehiclesLoading && (
+                <div className="flex items-center gap-2 text-sm text-emerald-600">
+                  <div className="spinner-border spinner-border-sm" role="status"></div>
+                  <span>Updating prices...</span>
+                </div>
+              )}
+            </div>
             <div className="vehicle-grid">
               {vehicles.map((vehicle) => (
                 <div
                   key={vehicle.id}
-                  className={`vehicle-card-compact ${selectedVehicle?.id === vehicle.id ? 'selected' : ''}`}
+                  className={`vehicle-card-compact group ${selectedVehicle?.id === vehicle.id ? 'selected' : ''}`}
                   onClick={() => handleVehicleSelect(vehicle)}
                 >
-                  <div className="vehicle-image-wrapper">
-                    <img src={vehicle.image} alt={vehicle.type} />
+                  <div className="vehicle-image-wrapper overflow-hidden">
+                    <img
+                      src={vehicle.image}
+                      alt={vehicle.type}
+                      className="group-hover:scale-110 transition-transform duration-500"
+                    />
                   </div>
                   <div className="vehicle-info-compact">
-                    <h6>{vehicle.type}</h6>
-                    <p className="vehicle-desc">{vehicle.description}</p>
-                    <p className="vehicle-capacity">👥 {vehicle.capacity} seats</p>
+                    <div className="flex justify-between items-start mb-1">
+                      <h6 className="font-bold">{vehicle.type}</h6>
+                      <span className="text-emerald-600 font-bold">₹{vehicle.ratePerKm}/km</span>
+                    </div>
+                    <p className="vehicle-desc text-xs">{vehicle.description}</p>
+                    <div className="flex items-center gap-4 mt-2">
+                      <p className="vehicle-capacity text-[10px] font-bold text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">👥 {vehicle.capacity} seats</p>
+                      <p className="text-[10px] font-bold text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">✨ AC / Chauffeur</p>
+                    </div>
                   </div>
                 </div>
               ))}

@@ -5,7 +5,7 @@ import { handleApiError } from '../utils/errorHandler';
 // API Configuration
 // In development, use relative URL to leverage Vite proxy
 // In production, use environment variable or direct URL
-export const API_BASE_URL = import.meta.env.DEV ? '/api' : (import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000');
+export const API_BASE_URL = import.meta.env.DEV ? '/api' : (import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api');
 
 // Create axios instance with default config
 export const apiClient = axios.create({
@@ -89,7 +89,7 @@ apiClient.interceptors.response.use(
       if (refreshToken) {
         try {
           logger.info('API_RESPONSE', 'Attempting to refresh access token');
-          const response = await apiClient.post('/v1/auth/refresh-token', { refreshToken });
+          const response = await apiClient.post('v1/auth/refresh-token', { refreshToken });
 
           const { accessToken, user } = response.data;
 
@@ -277,7 +277,7 @@ class OfflineQueueManager {
         this.notifyListeners({ type: 'sync_started', itemId: item.id });
 
         // Send to backend
-        const response = await apiClient.post('/v1/bookings', item.booking);
+        const response = await apiClient.post('v1/bookings', item.booking);
 
         // Mark as completed
         this.removeFromQueue(item.id);

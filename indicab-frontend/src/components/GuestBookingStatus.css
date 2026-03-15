@@ -1,0 +1,320 @@
+.guest-booking-container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, var(--custom-accent, #3b82f6) 0%, var(--custom-dark, #1e293b) 100%);
+  padding: 2rem 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.guest-booking-card {
+  background: var(--custom-bg, white);
+  border-radius: 12px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+  padding: 2rem;
+  max-width: 600px;
+  width: 100%;
+}
+
+.guest-booking-title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--custom-dark, #1e293b);
+  margin-bottom: 0.5rem;
+  text-align: center;
+}
+
+.guest-booking-subtitle {
+  font-size: 0.95rem;
+  color: var(--custom-text, #64748b);
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.booking-search-form {
+  margin-bottom: 2rem;
+}
+
+.search-input-group {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.booking-search-input {
+  flex: 1;
+  min-width: 200px;
+  padding: 0.75rem 1rem;
+  border: 2px solid var(--custom-accent, #3b82f6);
+  border-radius: 6px;
+  font-size: 1rem;
+  background: var(--custom-bg, white);
+  color: var(--custom-text, #64748b);
+  transition: all 0.2s ease;
+}
+
+.booking-search-input:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  border-color: var(--custom-dark, #1e293b);
+}
+
+.booking-search-input:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.booking-search-btn {
+  padding: 0.75rem 1.5rem;
+  background: var(--custom-accent, #3b82f6);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.booking-search-btn:hover:not(:disabled) {
+  background: var(--custom-dark, #1e293b);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px rgba(59, 130, 246, 0.3);
+}
+
+.booking-search-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.booking-error-alert {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  background: #fee2e2;
+  border: 1px solid #fca5a5;
+  border-radius: 6px;
+  color: #991b1b;
+  margin-bottom: 1.5rem;
+  font-size: 0.95rem;
+}
+
+.booking-error-alert i {
+  font-size: 1.25rem;
+}
+
+.booking-loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 3rem 1rem;
+}
+
+.booking-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 1rem;
+  color: var(--custom-text, #64748b);
+  text-align: center;
+}
+
+.booking-empty-state i {
+  font-size: 3rem;
+  color: var(--custom-accent, #3b82f6);
+  margin-bottom: 1rem;
+  opacity: 0.5;
+}
+
+.booking-details {
+  animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.status-card {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 1.5rem;
+  background: rgba(59, 130, 246, 0.05);
+  border-radius: 8px;
+  margin-bottom: 2rem;
+  border-left: 4px solid var(--custom-accent, #3b82f6);
+}
+
+.status-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  color: white;
+  font-size: 1.5rem;
+  flex-shrink: 0;
+}
+
+.status-text {
+  flex: 1;
+}
+
+.status-label {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--custom-dark, #1e293b);
+  margin: 0;
+}
+
+.booking-id {
+  font-size: 0.85rem;
+  color: var(--custom-text, #64748b);
+  margin: 0.25rem 0 0 0;
+}
+
+.booking-info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+  padding: 1.5rem;
+  background: var(--custom-bg, white);
+  border: 1px solid var(--custom-accent, #e2e8f0);
+  border-radius: 8px;
+}
+
+.info-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.info-item label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--custom-text, #64748b);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 0.5rem;
+}
+
+.info-item p {
+  font-size: 1rem;
+  color: var(--custom-dark, #1e293b);
+  margin: 0;
+  font-weight: 500;
+}
+
+.info-item i {
+  color: var(--custom-accent, #3b82f6);
+  margin: 0 0.5rem;
+}
+
+.fare-amount {
+  font-size: 1.25rem !important;
+  color: var(--custom-accent, #3b82f6) !important;
+  font-weight: 700 !important;
+}
+
+.booking-cta-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1.5rem;
+  background: rgba(59, 130, 246, 0.05);
+  border-radius: 8px;
+  gap: 1rem;
+}
+
+.cta-text {
+  font-size: 0.95rem;
+  color: var(--custom-text, #64748b);
+  margin: 0;
+  text-align: center;
+}
+
+.btn-login {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  background: var(--custom-accent, #3b82f6);
+  color: white;
+  border-radius: 6px;
+  text-decoration: none;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  width: 100%;
+  justify-content: center;
+}
+
+.btn-login:hover {
+  background: var(--custom-dark, #1e293b);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px rgba(59, 130, 246, 0.3);
+  color: white;
+}
+
+.register-prompt {
+  font-size: 0.9rem;
+  color: var(--custom-text, #64748b);
+  margin: 0;
+  text-align: center;
+}
+
+.link-register {
+  color: var(--custom-accent, #3b82f6);
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.2s ease;
+}
+
+.link-register:hover {
+  color: var(--custom-dark, #1e293b);
+  text-decoration: underline;
+}
+
+@media (max-width: 640px) {
+  .guest-booking-card {
+    padding: 1.5rem;
+  }
+
+  .guest-booking-title {
+    font-size: 1.5rem;
+  }
+
+  .search-input-group {
+    flex-direction: column;
+  }
+
+  .booking-search-input,
+  .booking-search-btn {
+    width: 100%;
+  }
+
+  .booking-info-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .status-card {
+    gap: 1rem;
+    padding: 1rem;
+  }
+
+  .status-indicator {
+    width: 40px;
+    height: 40px;
+    font-size: 1.25rem;
+  }
+}

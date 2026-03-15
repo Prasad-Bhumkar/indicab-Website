@@ -35,26 +35,63 @@ public class AdminBlogController {
     private BlogService blogService;
     
     /**
-     * Get all blogs (admin view)
+     * Get all blogs (admin view) with search and filtering
+     * Supports sorting via Pageable (e.g., sort=createdAt,desc) or explicit orderBy/orderDirection
      */
     @GetMapping
-    @Operation(summary = "Get all blogs", description = "Retrieve all blogs (admin view with pagination)")
+    @Operation(summary = "Get all blogs", description = "Retrieve all blogs (admin view with pagination, sorting, and search)")
     @ApiResponse(responseCode = "200", description = "Blogs retrieved successfully")
-    public ResponseEntity<Page<Blog>> getAllBlogs(Pageable pageable) {
-        logger.info("Fetching all blogs (admin view)");
-        Page<Blog> blogs = blogService.getAllBlogs(pageable);
+    public ResponseEntity<Page<Blog>> getAllBlogs(
+            Pageable pageable,
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) String orderBy,
+            @RequestParam(required = false, defaultValue = "desc") String orderDirection) {
+
+        logger.info("Fetching all blogs - Page: {}, Size: {}, Search: {}, Status: {}, OrderBy: {}, OrderDir: {}",
+                   pageable.getPageNumber(), pageable.getPageSize(), search, status, orderBy, orderDirection);
+
+        com.indicab.util.SearchSpecification.SpecificationBuilder<Blog> builder =
+            new com.indicab.util.SearchSpecification.SpecificationBuilder<>();
+
+        if (search != null && !search.isEmpty()) {
+            builder.with("title", search, com.indicab.util.SearchSpecification.SearchOperator.CONTAINS)
+                   .with("content", search, com.indicab.util.SearchSpecification.SearchOperator.CONTAINS);
+        }
+
+        if (status != null && !status.isEmpty()) {
+            builder.with("status", status, com.indicab.util.SearchSpecification.SearchOperator.EQUALS);
+        }
+
+        Page<Blog> blogs = blogService.getAllBlogs(pageable, builder.build());
         return ResponseEntity.ok(blogs);
     }
-    
+
     /**
-     * Get draft blogs only
+     * Get draft blogs only with search
      */
     @GetMapping("/drafts")
-    @Operation(summary = "Get draft blogs", description = "Retrieve draft blogs only")
+    @Operation(summary = "Get draft blogs", description = "Retrieve draft blogs only with optional search")
     @ApiResponse(responseCode = "200", description = "Draft blogs retrieved successfully")
-    public ResponseEntity<Page<Blog>> getDraftBlogs(Pageable pageable) {
-        logger.info("Fetching draft blogs");
-        Page<Blog> blogs = blogService.getDraftBlogs(pageable);
+    public ResponseEntity<Page<Blog>> getDraftBlogs(
+            Pageable pageable,
+            @RequestParam(required = false) String search) {
+
+        logger.info("Fetching draft blogs - Page: {}, Size: {}, Search: {}",
+                   pageable.getPageNumber(), pageable.getPageSize(), search);
+
+        com.indicab.util.SearchSpecification.SpecificationBuilder<Blog> builder =
+            new com.indicab.util.SearchSpecification.SpecificationBuilder<>();
+
+        // Always filter by DRAFT status
+        builder.with("status", "DRAFT", com.indicab.util.SearchSpecification.SearchOperator.EQUALS);
+
+        if (search != null && !search.isEmpty()) {
+            builder.with("title", search, com.indicab.util.SearchSpecification.SearchOperator.CONTAINS)
+                   .with("content", search, com.indicab.util.SearchSpecification.SearchOperator.CONTAINS);
+        }
+
+        Page<Blog> blogs = blogService.getAllBlogs(pageable, builder.build());
         return ResponseEntity.ok(blogs);
     }
     

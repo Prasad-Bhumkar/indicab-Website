@@ -3,7 +3,7 @@ import { apiClient } from '../../config/apiConfig';
 
 export const fetchRecommendations = createAsyncThunk('recommendations/fetchRecommendations', async () => {
   try {
-    const response = await apiClient.get('/v1/recommendations');
+    const response = await apiClient.get('v1/recommendations');
     return response.data;
   } catch (error) {
     // Fallback to mock data in development when API is unavailable

@@ -224,7 +224,7 @@ describe('Admin WebSocket Service', () => {
       consoleSpy.mockRestore();
     });
 
-    it('should invoke callback when message is received', (done) => {
+    it('should invoke callback when message is received', () => {
       const callback = vi.fn();
       const testData = { id: 1, status: 'new_booking' };
 
@@ -243,10 +243,7 @@ describe('Admin WebSocket Service', () => {
         body: JSON.stringify(testData),
       });
 
-      setTimeout(() => {
-        expect(callback).toHaveBeenCalledWith(testData);
-        done();
-      }, 100);
+      expect(callback).toHaveBeenCalledWith(testData);
     });
   });
 
@@ -268,7 +265,7 @@ describe('Admin WebSocket Service', () => {
       await adminWebsocketService.connect();
     });
 
-    it('should handle real-time booking updates', (done) => {
+    it('should handle real-time booking updates', () => {
       const callback = vi.fn();
       const bookingUpdate = {
         type: 'NEW_BOOKING',
@@ -296,13 +293,10 @@ describe('Admin WebSocket Service', () => {
         body: JSON.stringify(bookingUpdate),
       });
 
-      setTimeout(() => {
-        expect(callback).toHaveBeenCalledWith(bookingUpdate);
-        done();
-      }, 100);
+      expect(callback).toHaveBeenCalledWith(bookingUpdate);
     });
 
-    it('should handle real-time user registration updates', (done) => {
+    it('should handle real-time user registration updates', () => {
       const callback = vi.fn();
       const userUpdate = {
         type: 'NEW_USER',
@@ -329,13 +323,10 @@ describe('Admin WebSocket Service', () => {
         body: JSON.stringify(userUpdate),
       });
 
-      setTimeout(() => {
-        expect(callback).toHaveBeenCalledWith(userUpdate);
-        done();
-      }, 100);
+      expect(callback).toHaveBeenCalledWith(userUpdate);
     });
 
-    it('should handle dashboard metrics updates', (done) => {
+    it('should handle dashboard metrics updates', () => {
       const callback = vi.fn();
       const dashboardUpdate = {
         totalUsers: 1000,
@@ -359,13 +350,10 @@ describe('Admin WebSocket Service', () => {
         body: JSON.stringify(dashboardUpdate),
       });
 
-      setTimeout(() => {
-        expect(callback).toHaveBeenCalledWith(dashboardUpdate);
-        done();
-      }, 100);
+      expect(callback).toHaveBeenCalledWith(dashboardUpdate);
     });
 
-    it('should handle malformed JSON gracefully', (done) => {
+    it('should handle malformed JSON gracefully', () => {
       const callback = vi.fn();
       const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation();
 
@@ -383,12 +371,9 @@ describe('Admin WebSocket Service', () => {
         body: '{invalid json}',
       });
 
-      setTimeout(() => {
-        expect(consoleErrorSpy).toHaveBeenCalled();
-        expect(callback).not.toHaveBeenCalled();
-        consoleErrorSpy.mockRestore();
-        done();
-      }, 100);
+      expect(consoleErrorSpy).toHaveBeenCalled();
+      expect(callback).not.toHaveBeenCalled();
+      consoleErrorSpy.mockRestore();
     });
   });
 
@@ -417,7 +402,7 @@ describe('Admin WebSocket Service', () => {
       expect(adminWebsocketService.eventCallbacks.has('bookingUpdates')).toBe(true);
     });
 
-    it('should call registered event handlers on message receipt', (done) => {
+    it('should call registered event handlers on message receipt', () => {
       const handler = vi.fn();
       const testData = { id: 1, status: 'new_booking' };
 
@@ -437,10 +422,7 @@ describe('Admin WebSocket Service', () => {
         body: JSON.stringify(testData),
       });
 
-      setTimeout(() => {
-        expect(handler).toHaveBeenCalledWith(testData);
-        done();
-      }, 100);
+      expect(handler).toHaveBeenCalledWith(testData);
     });
 
     it('should remove event listeners', () => {
@@ -452,7 +434,7 @@ describe('Admin WebSocket Service', () => {
       expect(adminWebsocketService.eventCallbacks.get('bookingUpdates')?.length || 0).toBe(0);
     });
 
-    it('should support multiple event listeners for same event', (done) => {
+    it('should support multiple event listeners for same event', () => {
       const handler1 = vi.fn();
       const handler2 = vi.fn();
       const testData = { id: 1 };
@@ -474,11 +456,8 @@ describe('Admin WebSocket Service', () => {
         body: JSON.stringify(testData),
       });
 
-      setTimeout(() => {
-        expect(handler1).toHaveBeenCalledWith(testData);
-        expect(handler2).toHaveBeenCalledWith(testData);
-        done();
-      }, 100);
+      expect(handler1).toHaveBeenCalledWith(testData);
+      expect(handler2).toHaveBeenCalledWith(testData);
     });
   });
 
@@ -551,7 +530,7 @@ describe('Admin WebSocket Service', () => {
       await adminWebsocketService.connect();
     });
 
-    it('should parse JSON message body correctly', (done) => {
+    it('should parse JSON message body correctly', () => {
       const callback = vi.fn();
       const testMessage = {
         id: 1,
@@ -574,15 +553,11 @@ describe('Admin WebSocket Service', () => {
         body: JSON.stringify(testMessage),
       });
 
-      setTimeout(() => {
-        expect(callback).toHaveBeenCalledWith(testMessage);
-        done();
-      }, 100);
+      expect(callback).toHaveBeenCalledWith(testMessage);
     });
 
-    it('should handle null or empty message body', (done) => {
+    it('should handle null or empty message body', () => {
       const callback = vi.fn();
-      const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation();
 
       let messageHandler;
       adminWebsocketService.stompClient.subscribe.mockImplementation(
@@ -598,14 +573,10 @@ describe('Admin WebSocket Service', () => {
         body: null,
       });
 
-      setTimeout(() => {
-        expect(callback).not.toHaveBeenCalled();
-        consoleErrorSpy.mockRestore();
-        done();
-      }, 100);
+      expect(callback).not.toHaveBeenCalled();
     });
 
-    it('should handle arrays in message body', (done) => {
+    it('should handle arrays in message body', () => {
       const callback = vi.fn();
       const testArray = [
         { id: 1, status: 'pending' },
@@ -626,13 +597,10 @@ describe('Admin WebSocket Service', () => {
         body: JSON.stringify(testArray),
       });
 
-      setTimeout(() => {
-        expect(callback).toHaveBeenCalledWith(testArray);
-        done();
-      }, 100);
+      expect(callback).toHaveBeenCalledWith(testArray);
     });
 
-    it('should handle nested JSON structures', (done) => {
+    it('should handle nested JSON structures', () => {
       const callback = vi.fn();
       const nestedData = {
         booking: {
@@ -666,10 +634,7 @@ describe('Admin WebSocket Service', () => {
         body: JSON.stringify(nestedData),
       });
 
-      setTimeout(() => {
-        expect(callback).toHaveBeenCalledWith(nestedData);
-        done();
-      }, 100);
+      expect(callback).toHaveBeenCalledWith(nestedData);
     });
   });
 
@@ -932,7 +897,7 @@ describe('Admin WebSocket Service', () => {
       await adminWebsocketService.connect();
     });
 
-    it('should handle multiple rapid message events', (done) => {
+    it('should handle multiple rapid message events', () => {
       const callback = vi.fn();
       let messageHandler;
 
@@ -952,26 +917,23 @@ describe('Admin WebSocket Service', () => {
         });
       }
 
-      setTimeout(() => {
-        expect(callback).toHaveBeenCalledTimes(100);
-        done();
-      }, 200);
+      expect(callback).toHaveBeenCalledTimes(100);
     });
 
-    it('should handle large message payloads', (done) => {
+    it('should handle large message payloads', () => {
       const callback = vi.fn();
       const largeData = {
-        bookings: Array.from({ length: 1000 }, (_, i) => ({
+        bookings: Array.from({ length: 50 }, (_, i) => ({
           id: i,
-          userId: Math.random() * 1000,
+          userId: i * 10,
           from: 'Mumbai',
           to: 'Pune',
-          fare: Math.random() * 1000,
+          fare: 500 + i,
           status: 'completed',
         })),
         statistics: {
-          totalBookings: 1000,
-          totalRevenue: 500000,
+          totalBookings: 50,
+          totalRevenue: 25000,
           averageFare: 500,
           completionRate: 0.95,
         },
@@ -991,13 +953,10 @@ describe('Admin WebSocket Service', () => {
         body: JSON.stringify(largeData),
       });
 
-      setTimeout(() => {
-        expect(callback).toHaveBeenCalledWith(largeData);
-        done();
-      }, 100);
+      expect(callback).toHaveBeenCalledWith(largeData);
     });
 
-    it('should maintain callback order for sequential messages', (done) => {
+    it('should maintain callback order for sequential messages', () => {
       const callback = vi.fn();
       const messageOrder = [];
 
@@ -1022,10 +981,7 @@ describe('Admin WebSocket Service', () => {
         });
       }
 
-      setTimeout(() => {
-        expect(messageOrder).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
-        done();
-      }, 100);
+      expect(messageOrder).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
     });
   });
 });

@@ -199,6 +199,65 @@ class WebSocketService {
   }
 
   /**
+   * Subscribe to user notifications
+   * @param {string} userId - The user ID to get notifications for
+   * @param {function} callback - Function to call when notifications arrive
+   * @returns {function} Unsubscribe function
+   */
+  subscribeToNotifications(userId, callback) {
+    if (!userId) {
+      logger.error('WEBSOCKET', 'User ID is required for notification subscription');
+      return () => {};
+    }
+
+    const subscriptionTopic = `/user/${userId}/queue/notifications`;
+    logger.info('WEBSOCKET', `Subscribing to ${subscriptionTopic}`);
+
+    const ensureConnected = () => {
+      if (!this.isConnected) {
+        this.connect().then(() => performSubscription());
+        return;
+      }
+      performSubscription();
+    };
+
+    const performSubscription = () => {
+      try {
+        if (this.subscriptions.has(subscriptionTopic)) {
+          logger.warn('WEBSOCKET', `Already subscribed to ${subscriptionTopic}`);
+          return;
+        }
+
+        const subscription = this.stompClient.subscribe(subscriptionTopic, (message) => {
+          try {
+            const data = JSON.parse(message.body);
+            logger.logRequest('WEBSOCKET', subscriptionTopic);
+            logger.logResponse('WEBSOCKET', subscriptionTopic, 200, data);
+            callback(data);
+          } catch (error) {
+            logger.error('WEBSOCKET', 'Error parsing notification message', error);
+          }
+        });
+
+        this.subscriptions.set(subscriptionTopic, subscription);
+        logger.info('WEBSOCKET', `Successfully subscribed to ${subscriptionTopic}`);
+      } catch (error) {
+        logger.error('WEBSOCKET', `Failed to subscribe to ${subscriptionTopic}`, error);
+      }
+    };
+
+    ensureConnected();
+
+    return () => {
+      if (this.subscriptions.has(subscriptionTopic)) {
+        const subscription = this.subscriptions.get(subscriptionTopic);
+        subscription.unsubscribe();
+        this.subscriptions.delete(subscriptionTopic);
+      }
+    };
+  }
+
+  /**
    * Unsubscribe from ride tracking
    */
   unsubscribeFromRideTracking(rideId) {

@@ -3,7 +3,7 @@ import { apiClient } from '../../config/apiConfig';
 
 export const fetchServiceCities = createAsyncThunk('serviceCities/fetchServiceCities', async () => {
   try {
-    const response = await apiClient.get('/v1/service-cities');
+    const response = await apiClient.get('v1/service-cities');
 
     // Return API response directly
     return {

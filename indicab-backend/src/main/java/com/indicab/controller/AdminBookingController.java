@@ -36,14 +36,38 @@ public class AdminBookingController {
     private BookingServiceImpl bookingService;
     
     /**
-     * Get all bookings with pagination and filtering
+     * Get all bookings with pagination, sorting, and search
      */
     @GetMapping
-    @Operation(summary = "Get all bookings", description = "Retrieve all bookings with pagination")
+    @Operation(summary = "Get all bookings", description = "Retrieve all bookings with pagination, sorting, and search filters")
     @ApiResponse(responseCode = "200", description = "Bookings retrieved successfully")
-    public ResponseEntity<Page<Booking>> getAllBookings(Pageable pageable) {
-        logger.info("Fetching all bookings with pagination");
-        Page<Booking> bookings = bookingService.getAllBookingsPaged(pageable);
+    public ResponseEntity<Page<Booking>> getAllBookings(
+            Pageable pageable,
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) String userId) {
+
+        logger.info("Fetching all bookings - Page: {}, Size: {}, Status: {}, UserId: {}",
+                   pageable.getPageNumber(), pageable.getPageSize(), status, userId);
+
+        com.indicab.util.SearchSpecification.SpecificationBuilder<Booking> builder =
+            new com.indicab.util.SearchSpecification.SpecificationBuilder<>();
+
+        if (search != null && !search.isEmpty()) {
+            // Search in pickup and dropoff locations
+            builder.with("pickupLocation", search, com.indicab.util.SearchSpecification.SearchOperator.CONTAINS)
+                   .with("dropoffLocation", search, com.indicab.util.SearchSpecification.SearchOperator.CONTAINS);
+        }
+
+        if (status != null && !status.isEmpty()) {
+            builder.with("status", status, com.indicab.util.SearchSpecification.SearchOperator.EQUALS);
+        }
+
+        if (userId != null && !userId.isEmpty()) {
+            builder.with("user.id", userId, com.indicab.util.SearchSpecification.SearchOperator.EQUALS);
+        }
+
+        Page<Booking> bookings = bookingService.getAllBookingsPaged(pageable, builder.build());
         return ResponseEntity.ok(bookings);
     }
     

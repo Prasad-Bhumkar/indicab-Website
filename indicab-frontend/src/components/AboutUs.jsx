@@ -4,8 +4,17 @@ import { FaUsers, FaCity, FaCar, FaShieldAlt, FaHandshake, FaHeart, FaMapMarkedA
 import { motion } from 'framer-motion';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
+import { useSEO } from '../hooks/useSEO';
 
 const AboutUs = () => {
+  useSEO({
+    title: 'About IndiCab - Trusted Ride Booking Service in India',
+    description: 'Learn about IndiCab, India\'s leading ride-booking platform with trusted drivers, 25+ cities, and 1M+ completed rides. Safe, reliable, and affordable.',
+    keywords: 'about indicab, ride booking service, trusted drivers, India, taxi service, mission, vision',
+    image: 'https://img.icons8.com/color/96/taxi.png',
+    type: 'website',
+  });
+
   const navigate = useNavigate();
   const [expandedTimeline, setExpandedTimeline] = useState(null);
 

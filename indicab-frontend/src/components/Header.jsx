@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { logoutUser } from '../features/auth/authSlice';
 import { selectCurrentUser } from '../features/auth/authSelectors';
+import NotificationBell from './NotificationBell';
 import './Header.css';
 
 const Header = () => {
@@ -111,8 +112,17 @@ const Header = () => {
                 Blog
               </Link>
             </li>
+            {/* Check Booking Status - for guests */}
+            {!user && (
+              <li className="nav-item">
+                <Link className="nav-link text-white" to="/bookings/status" onClick={closeMenu}>
+                  <i className="bi bi-search me-1"></i>
+                  Check Status
+                </Link>
+              </li>
+            )}
             {/* Booking History - only for regular users, not admins */}
-            {!user || user.role !== 'ADMIN' ? (
+            {user && user.role !== 'ADMIN' ? (
               <li className="nav-item">
                 <Link className="nav-link text-white" to="/history" onClick={closeMenu}>
                   Booking History
@@ -143,6 +153,11 @@ const Header = () => {
                     </Link>
                   </li>
                 )}
+
+                {/* Notifications */}
+                <li className="nav-item d-flex align-items-center me-2">
+                  <NotificationBell />
+                </li>
 
                 {/* User Menu Dropdown */}
                 <li className="nav-item dropdown">

@@ -61,12 +61,29 @@ const UserManagement = () => {
     }
   }, [successMessage, dispatch]);
 
-  const handleInputChange = (e) => {
+  const handleInputChange = async (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
+    const updatedFormData = {
+      ...formData,
       [name]: value,
-    }));
+    };
+    setFormData(updatedFormData);
+
+    // Real-time validation
+    const validation = await validateFormData(userValidationSchema, updatedFormData);
+    if (!validation.isValid) {
+      // Only update the error for the current field to avoid distracting the user
+      setValidationErrors(prev => ({
+        ...prev,
+        [name]: validation.errors[name]
+      }));
+    } else {
+      setValidationErrors(prev => {
+        const next = { ...prev };
+        delete next[name];
+        return next;
+      });
+    }
   };
 
   const handleAddUser = async (e) => {
@@ -220,10 +237,17 @@ const UserManagement = () => {
         filterOptions={{
           showSearch: true,
           showStatus: true,
+          showDateRange: true,
           statusOptions: [
             { value: 'active', label: 'Active' },
             { value: 'inactive', label: 'Inactive' },
             { value: 'suspended', label: 'Suspended' },
+          ],
+          customFilters: [
+            { name: 'role', label: 'Role', type: 'select', options: [
+              { value: 'admin', label: 'Admin' },
+              { value: 'customer', label: 'Customer' },
+            ]},
           ],
         }}
         loading={loading}
@@ -331,7 +355,14 @@ const UserManagement = () => {
                     disabled={loading || users.length === 0}
                     title="Select all users"
                   />
-                  <th>ID</th>
+                  <SortableHeader
+                    column="id"
+                    label="ID"
+                    sortColumn={sortColumn}
+                    sortDirection={sortDirection}
+                    onSort={handleSort}
+                    disabled={loading}
+                  />
                   <SortableHeader
                     column="name"
                     label="Name"

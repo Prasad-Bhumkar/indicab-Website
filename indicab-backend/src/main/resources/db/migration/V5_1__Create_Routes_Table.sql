@@ -1,2 +1,0 @@
--- DEPRECATED: This migration has been renamed to V006__Create_Routes_Table.sql
--- Please use V006 instead. Keeping this file empty to avoid Flyway conflicts.

@@ -1,2 +1,0 @@
--- DEPRECATED: This migration has been renamed to V008__Create_Vehicles_Table.sql
--- Please use V008 instead. Keeping this file empty to avoid Flyway conflicts.

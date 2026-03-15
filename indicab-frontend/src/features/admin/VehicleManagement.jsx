@@ -10,6 +10,9 @@ import {
   clearError,
 } from './adminSlice';
 import { FiEdit2, FiTrash2, FiPlus } from 'react-icons/fi';
+import PaginationControls from '../../components/PaginationControls';
+import FilterBar from '../../components/FilterBar';
+import SortableHeader from '../../components/SortableHeader';
 import { HeaderCheckbox, RowCheckbox } from '../../components/CheckboxColumn';
 import BulkActionBar from '../../components/BulkActionBar';
 import ExportModal from '../../components/ExportModal';
@@ -26,11 +29,16 @@ import './ManagementPages.css';
 
 const VehicleManagement = () => {
   const dispatch = useDispatch();
-  const { vehicles, loading, error, successMessage } = useSelector((state) => state.admin);
+  const { vehicles, loading, error, successMessage, pagination } = useSelector((state) => state.admin);
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [showExportModal, setShowExportModal] = useState(false);
   const [selectedVehicles, setSelectedVehicles] = useState(new Set());
+  const [page, setPage] = useState(0);
+  const [pageSize, setPageSize] = useState(10);
+  const [sortColumn, setSortColumn] = useState('type');
+  const [sortDirection, setSortDirection] = useState('asc');
+  const [filters, setFilters] = useState({});
   const [formData, setFormData] = useState({
     type: '',
     baseFare: '',
@@ -42,8 +50,14 @@ const VehicleManagement = () => {
   });
 
   useEffect(() => {
-    dispatch(fetchVehicles());
-  }, [dispatch]);
+    const params = {
+      page,
+      size: pageSize,
+      sort: `${sortColumn},${sortDirection}`,
+      ...filters,
+    };
+    dispatch(fetchVehicles(params));
+  }, [dispatch, page, pageSize, sortColumn, sortDirection, filters]);
 
   useEffect(() => {
     if (successMessage) {
@@ -104,6 +118,26 @@ const VehicleManagement = () => {
     if (window.confirm('Are you sure you want to delete this vehicle?')) {
       dispatch(deleteVehicle(id));
     }
+  };
+
+  const handlePageChange = (newPage) => {
+    setPage(newPage);
+  };
+
+  const handlePageSizeChange = (newSize) => {
+    setPageSize(newSize);
+    setPage(0);
+  };
+
+  const handleSort = (column, direction) => {
+    setSortColumn(column);
+    setSortDirection(direction);
+    setPage(0);
+  };
+
+  const handleFilterChange = (newFilters) => {
+    setFilters(newFilters);
+    setPage(0);
   };
 
   // Bulk selection handlers
@@ -170,6 +204,14 @@ const VehicleManagement = () => {
           <button className="close-alert" onClick={() => dispatch(clearSuccessMessage())}>×</button>
         </div>
       )}
+
+      <FilterBar
+        onFilterChange={handleFilterChange}
+        filters={filters}
+        filterOptions={{
+          showSearch: true,
+        }}
+      />
 
       <BulkActionBar
         selectedCount={selectedVehicles.size}
@@ -286,61 +328,97 @@ const VehicleManagement = () => {
       )}
 
       <div className="table-container">
-        {loading ? (
+        {loading && !vehicles.length ? (
           <p>Loading vehicles...</p>
         ) : vehicles && vehicles.length > 0 ? (
-          <table className="table">
-            <thead>
-              <tr>
-                <HeaderCheckbox
-                  isAllSelected={selectedVehicles.size === vehicles.length && vehicles.length > 0}
-                  isIndeterminate={selectedVehicles.size > 0 && selectedVehicles.size < vehicles.length}
-                  onChange={handleSelectAllChange}
-                  disabled={loading || vehicles.length === 0}
-                  title="Select all vehicles"
-                />
-                <th>Type</th>
-                <th>Capacity</th>
-                <th>Base Fare</th>
-                <th>Rate/KM</th>
-                <th>Per Day</th>
-                <th>Description</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {vehicles.map((vehicle) => (
-                <tr key={vehicle.id}>
-                  <RowCheckbox
-                    isSelected={isItemSelected(selectedVehicles, vehicle.id)}
-                    onChange={() => handleRowCheckboxChange(vehicle.id)}
-                    disabled={loading}
-                    rowId={vehicle.id}
-                  />
-                  <td>{vehicle.type}</td>
-                  <td>{vehicle.capacity}</td>
-                  <td>₹{vehicle.baseFare}</td>
-                  <td>₹{vehicle.ratePerKm}</td>
-                  <td>₹{vehicle.perDayCharge}</td>
-                  <td>{vehicle.description}</td>
-                  <td>
-                    <button
-                      className="btn btn-sm btn-warning me-2"
-                      onClick={() => handleEdit(vehicle)}
-                    >
-                      <FiEdit2 />
-                    </button>
-                    <button
-                      className="btn btn-sm btn-danger"
-                      onClick={() => handleDelete(vehicle.id)}
-                    >
-                      <FiTrash2 />
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          <>
+            <div className="table-responsive">
+              <table className="management-table">
+                <thead>
+                  <tr>
+                    <HeaderCheckbox
+                      isAllSelected={selectedVehicles.size === vehicles.length && vehicles.length > 0}
+                      isIndeterminate={selectedVehicles.size > 0 && selectedVehicles.size < vehicles.length}
+                      onChange={handleSelectAllChange}
+                      disabled={loading || vehicles.length === 0}
+                      title="Select all vehicles"
+                    />
+                    <SortableHeader
+                      column="type"
+                      label="Type"
+                      sortColumn={sortColumn}
+                      sortDirection={sortDirection}
+                      onSort={handleSort}
+                    />
+                    <SortableHeader
+                      column="capacity"
+                      label="Capacity"
+                      sortColumn={sortColumn}
+                      sortDirection={sortDirection}
+                      onSort={handleSort}
+                    />
+                    <SortableHeader
+                      column="baseFare"
+                      label="Base Fare"
+                      sortColumn={sortColumn}
+                      sortDirection={sortDirection}
+                      onSort={handleSort}
+                    />
+                    <th>Rate/KM</th>
+                    <th>Per Day</th>
+                    <th>Description</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {vehicles.map((vehicle) => (
+                    <tr key={vehicle.id}>
+                      <RowCheckbox
+                        isSelected={isItemSelected(selectedVehicles, vehicle.id)}
+                        onChange={() => handleRowCheckboxChange(vehicle.id)}
+                        disabled={loading}
+                        rowId={vehicle.id}
+                      />
+                      <td>{vehicle.type}</td>
+                      <td>{vehicle.capacity}</td>
+                      <td>₹{vehicle.baseFare}</td>
+                      <td>₹{vehicle.ratePerKm}</td>
+                      <td>₹{vehicle.perDayCharge}</td>
+                      <td>{vehicle.description}</td>
+                      <td>
+                        <div className="action-buttons">
+                          <button
+                            className="btn-icon btn-edit"
+                            onClick={() => handleEdit(vehicle)}
+                            title="Edit"
+                          >
+                            ✏️
+                          </button>
+                          <button
+                            className="btn-icon btn-delete"
+                            onClick={() => handleDelete(vehicle.id)}
+                            title="Delete"
+                          >
+                            🗑️
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            {vehicles.length > 0 && (
+              <PaginationControls
+                currentPage={page}
+                totalPages={pagination?.totalPages || 1}
+                totalElements={pagination?.totalElements || vehicles.length}
+                pageSize={pageSize}
+                onPageChange={handlePageChange}
+                onPageSizeChange={handlePageSizeChange}
+              />
+            )}
+          </>
         ) : (
           <p>No vehicles found. Create your first vehicle!</p>
         )}

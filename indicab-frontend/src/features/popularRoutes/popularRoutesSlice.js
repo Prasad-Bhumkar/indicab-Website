@@ -3,7 +3,7 @@ import { apiClient } from '../../config/apiConfig';
 
 export const fetchPopularRoutes = createAsyncThunk('popularRoutes/fetchPopularRoutes', async () => {
   try {
-    const response = await apiClient.get('/v1/routes');
+    const response = await apiClient.get('v1/routes');
     return response.data;
   } catch (error) {
     // Fallback to mock data in development when API is unavailable

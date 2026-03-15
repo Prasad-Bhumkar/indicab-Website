@@ -1,8 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchPackages } from '../features/admin/adminSlice';
+import { useSEO } from '../hooks/useSEO';
 
 const TravelPackages = () => {
+  useSEO({
+    title: 'IndiCab Travel Packages - Hourly, Corporate & Airport Transfers',
+    description: 'Explore IndiCab travel packages including hourly rentals, airport transfers, and corporate travel solutions. Affordable prices, trusted drivers.',
+    keywords: 'travel packages, hourly rental, airport transfer, corporate travel, car rental, India',
+    image: 'https://img.icons8.com/color/96/taxi.png',
+    type: 'website',
+  });
+
   const dispatch = useDispatch();
   const { packages, loading } = useSelector((state) => state.admin);
   const [isVisible, setIsVisible] = useState({});

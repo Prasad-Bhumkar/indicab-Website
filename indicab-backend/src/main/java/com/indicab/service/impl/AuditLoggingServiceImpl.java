@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -234,5 +235,12 @@ public class AuditLoggingServiceImpl implements AuditLoggingService {
      */
     public long getFailedOperationsCount() {
         return failedOperations.get();
+    }
+
+    @Override
+    public Page<AuditLog> getAuditLogs(Pageable pageable, Specification<AuditLog> spec) {
+        logger.debug("Fetching audit logs with specifications - Page: {}, Size: {}",
+                   pageable.getPageNumber(), pageable.getPageSize());
+        return auditLogRepository.findAll(spec, pageable);
     }
 }

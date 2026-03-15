@@ -14,7 +14,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -22,7 +21,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -149,17 +147,12 @@ public class AdminDashboardController {
             Page<Booking> bookingsPage;
 
             if (status != null && !status.isEmpty()) {
-                List<Booking> filteredBookings = bookingRepository.findAll()
-                                                                .stream()
-                                                                .filter(b -> status.equals(b.getStatus()))
-                                                                .toList();
+                // Use database-level filtering via Specification
+                com.indicab.util.SearchSpecification.SpecificationBuilder<Booking> builder =
+                    new com.indicab.util.SearchSpecification.SpecificationBuilder<>();
+                builder.with("status", status, com.indicab.util.SearchSpecification.SearchOperator.EQUALS);
 
-                // Manually apply pagination to the filtered list
-                int start = (int) pageable.getOffset();
-                int end = Math.min((start + pageable.getPageSize()), filteredBookings.size());
-
-                List<Booking> pagedList = filteredBookings.subList(start, end);
-                bookingsPage = new PageImpl<>(pagedList, pageable, filteredBookings.size());
+                bookingsPage = bookingRepository.findAll(builder.build(), pageable);
             } else {
                 bookingsPage = bookingRepository.findAll(pageable);
             }

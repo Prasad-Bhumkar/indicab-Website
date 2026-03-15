@@ -1,15 +1,57 @@
 {
+  "name": "indicab-website",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
   "scripts": {
-    "dev:all": "cd indicab-frontend && npm run dev -- --port 5174",
-    "dev:all:mac": "cd indicab-frontend && npm run dev -- --port 5174",
-    "agent:auth": "npx --yes @builder.io/agent auth --local --json -c --acceptSelfSigned",
-    "agent:launch": "npx --yes @builder.io/agent launch --local --json -c \"docker compose up\" --acceptSelfSigned",
-    "builder": "npm run agent:auth && npm run agent:launch"
+    "dev:frontend": "cd indicab-frontend && npm run dev -- --host --port 5173",
+    "dev:backend": "cd indicab-backend && mvnw.cmd spring-boot:run",
+    "dev:all": "concurrently \"npm run dev:frontend\" \"npm run dev:backend\"",
+    "kill-ports": "npx kill-port 5173 5174 5175 3000 3001 5000 8000",
+    "agent:auth": "npx --yes @builder.io/agent@latest auth --local --json --acceptSelfSigned",
+    "agent:launch": "npx --yes @builder.io/agent@latest launch --local --json -c \"docker-compose up\" --acceptSelfSigned",
+    "builder": "npm run kill-ports && npm run agent:auth && npm run agent:launch",
+    "_comment": "=== DOCKER RECOVERY COMMANDS (For AI Agents) ===",
+    "docker:status": "docker-compose ps && echo '\\n--- Docker Disk Usage ---' && docker system df",
+    "docker:logs": "docker-compose logs -f --tail=50",
+    "docker:logs:backend": "docker-compose logs -f --tail=100 backend",
+    "docker:logs:frontend": "docker-compose logs -f --tail=100 frontend",
+    "docker:logs:mysql": "docker-compose logs -f --tail=100 mysql",
+    "docker:restart": "docker-compose restart",
+    "docker:restart:backend": "docker-compose restart backend",
+    "docker:restart:frontend": "docker-compose restart frontend",
+    "docker:restart:mysql": "docker-compose restart mysql",
+    "docker:health": "docker-compose exec -T backend curl -s http://localhost:8000/actuator/health | jq . || echo 'Health check failed'",
+    "docker:rebuild": "docker-compose down && docker-compose build --no-cache && docker-compose up -d",
+    "docker:clean:containers": "docker-compose down --remove-orphans && echo 'Stopped and removed all containers'",
+    "docker:clean:images": "docker rmi $(docker images -q indicab-*) 2>/dev/null || echo 'No indicab images to remove'",
+    "docker:clean:volumes": "docker volume prune -f && echo 'Cleaned unused volumes'",
+    "docker:clean:cache": "docker builder prune -f && echo 'Cleaned build cache'",
+    "docker:clean:all": "npm run docker:clean:containers && npm run docker:clean:images && npm run docker:clean:volumes && npm run docker:clean:cache && echo '✅ DOCKER CLEANUP COMPLETE: Volumes, images, caches, and containers cleaned'",
+    "docker:reset": "npm run kill-ports && npm run docker:clean:all && docker system prune -f && echo '✅ DOCKER SYSTEM RESET: Ready for fresh start'",
+    "docker:emergency": "npm run kill-ports && npm run docker:clean:all && rm -rf indicab-frontend/node_modules indicab-backend/target 2>/dev/null; docker-compose down -v && docker system prune -af && echo '🚨 EMERGENCY DOCKER RESET: All containers, volumes, images, and caches cleaned. Fresh rebuild ready.'",
+    "docker:up": "docker-compose up -d && npm run docker:health && docker-compose ps",
+    "docker:down": "docker-compose down",
+    "docker:down:full": "docker-compose down -v && echo 'Stopped all services and removed volumes'",
+    "docker:shell:backend": "docker-compose exec backend /bin/bash",
+    "docker:shell:mysql": "docker-compose exec mysql mysql -u root -p",
+    "docker:inspect": "docker-compose config && echo '\\n--- Image Layers ---' && docker-compose images",
+    "docker:network": "docker network inspect indicab-website_default 2>/dev/null || docker network ls | grep indicab",
+    "docker:database:backup": "docker-compose exec -T mysql mysqldump -u root -p indicab_website > backup_$(date +%Y%m%d_%H%M%S).sql && echo 'Database backed up'",
+    "docker:database:check": "docker-compose exec -T mysql mysql -u root -p -e 'SELECT VERSION(); SHOW TABLES FROM indicab_website;'",
+    "docker:prune:aggressive": "docker system prune -af --volumes && echo '✅ AGGRESSIVE CLEANUP: Removed ALL unused containers, images, volumes, and networks'",
+    "docker:diagnose": "echo '=== DOCKER DIAGNOSIS ===' && docker --version && docker-compose --version && docker-compose config --quiet && docker-compose ps && docker system df && echo '=== END DIAGNOSIS ==='",
+    "docker:validate": "docker-compose config --quiet && echo '✅ Docker Compose configuration is valid' || echo '❌ Docker Compose configuration is invalid'",
+    "docker:backup-full": "mkdir -p .backups && docker-compose exec -T mysql mysqldump -u root -p --all-databases > .backups/full_backup_$(date +%Y%m%d_%H%M%S).sql && echo '✅ Full database backup created in .backups/'",
+    "docker:restore": "if [ -f \"$1\" ]; then docker-compose exec -T mysql mysql -u root -p < $1 && echo '✅ Database restored'; else echo '❌ Backup file not found'; fi",
+    "docker:fix-permissions": "docker-compose exec -T mysql mysql -u root -p -e 'ALTER USER root@localhost IDENTIFIED BY \"root\"; FLUSH PRIVILEGES;' && echo '✅ MySQL permissions fixed'"
   },
+  "workspaces": [
+    "indicab-frontend",
+    "indicab-backend"
+  ],
   "devDependencies": {
-    "gh-pages": "^6.3.0"
-  },
-  "dependencies": {
-    "concurrently": "^9.2.1"
+    "concurrently": "^9.2.1",
+    "kill-port": "^2.0.1"
   }
 }

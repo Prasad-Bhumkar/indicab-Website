@@ -3,10 +3,10 @@
  * Functions for exporting table data as CSV, Excel, or PDF
  */
 
+import ExcelJS from 'exceljs';
 import Papa from 'papaparse';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
-import * as XLSX from 'xlsx';
 
 /**
  * Export data to CSV format using papaparse
@@ -40,13 +40,13 @@ export const exportToCSV = (data, filename, columns) => {
 };
 
 /**
- * Export data to Excel format using xlsx
+ * Export data to Excel format using exceljs
  * @param {Array} data - Array of objects to export
  * @param {string} filename - Output filename (without extension)
  * @param {Array} columns - Column definitions [{ key: 'name', label: 'User Name' }]
  * @param {Object} options - Additional options (sheetName, etc.)
  */
-export const exportToExcel = (data, filename, columns, options = {}) => {
+export const exportToExcel = async (data, filename, columns, options = {}) => {
   try {
     if (!data || data.length === 0) {
       console.warn('No data to export');
@@ -64,16 +64,42 @@ export const exportToExcel = (data, filename, columns, options = {}) => {
     );
 
     // Create workbook and worksheet
-    const worksheet = XLSX.utils.json_to_sheet(formattedData);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, sheetName);
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet(sheetName);
 
-    // Auto-fit column widths
-    const columnWidths = columns.map(col => ({ wch: Math.max(col.label.length, 15) }));
-    worksheet['!cols'] = columnWidths;
+    // Define columns: header and keys are the column labels
+    worksheet.columns = columns.map(col => ({
+      header: col.label,
+      key: col.label,
+      width: Math.max(col.label.length, 15)
+    }));
 
-    // Write file
-    XLSX.writeFile(workbook, `${filename}_${getCurrentDate()}.xlsx`);
+    // Add rows
+    formattedData.forEach(row => {
+      worksheet.addRow(row);
+    });
+
+    // Adjust column widths based on content
+    worksheet.columns.forEach(column => {
+      let maxColumnLength = 0;
+      column.eachCell({ includeEmpty: true }, (cell) => {
+        const columnLength = cell.value ? cell.value.toString().length : 0;
+        if (columnLength > maxColumnLength) {
+          maxColumnLength = columnLength;
+        }
+      });
+      column.width = Math.min(Math.max(maxColumnLength + 2, 15), 50);
+    });
+
+    // Write workbook to buffer
+    const buffer = await workbook.xlsx.writeBuffer();
+
+    // Create blob and trigger download
+    const blob = new Blob([buffer], {
+      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    });
+
+    downloadFile(blob, `${filename}_${getCurrentDate()}.xlsx`);
   } catch (error) {
     console.error('Excel export error:', error);
   }

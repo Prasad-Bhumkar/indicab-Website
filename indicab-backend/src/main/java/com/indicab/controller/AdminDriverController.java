@@ -36,50 +36,57 @@ public class AdminDriverController {
     private DriverServiceImpl driverService;
     
     /**
-     * Get all drivers with pagination and sorting
+     * Get all drivers with pagination, sorting, and search
      */
     @GetMapping
-    @Operation(summary = "Get all drivers", description = "Retrieve paginated list of all drivers")
+    @Operation(summary = "Get all drivers", description = "Retrieve paginated list of all drivers with optional search and filters")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Drivers retrieved successfully"),
         @ApiResponse(responseCode = "403", description = "User does not have admin role"),
         @ApiResponse(responseCode = "401", description = "Unauthorized - missing or invalid token")
     })
-    public ResponseEntity<Page<DriverResponseDTO>> getAllDrivers(Pageable pageable) {
-        logger.info("Fetching all drivers with pagination - Page: {}, Size: {}", pageable.getPageNumber(), pageable.getPageSize());
-        Page<DriverResponseDTO> drivers = driverService.getAllDriversPaged(pageable);
+    public ResponseEntity<Page<DriverResponseDTO>> getAllDrivers(
+            Pageable pageable,
+            @RequestParam(required = false) String search) {
+        logger.info("Fetching all drivers with pagination - Page: {}, Size: {}, Search: {}",
+                   pageable.getPageNumber(), pageable.getPageSize(), search);
+        Page<DriverResponseDTO> drivers = driverService.getAllDriversPaged(pageable, search);
         return ResponseEntity.ok(drivers);
     }
-    
+
     /**
-     * Get all pending driver applications with pagination and sorting
+     * Get all pending driver applications with pagination, sorting, and search
      */
     @GetMapping("/pending")
-    @Operation(summary = "Get pending applications", description = "Retrieve paginated list of pending driver applications")
+    @Operation(summary = "Get pending applications", description = "Retrieve paginated list of pending driver applications with optional search")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Pending applications retrieved successfully"),
         @ApiResponse(responseCode = "403", description = "User does not have admin role"),
         @ApiResponse(responseCode = "401", description = "Unauthorized - missing or invalid token")
     })
-    public ResponseEntity<Page<DriverResponseDTO>> getPendingApplications(Pageable pageable) {
-        logger.info("Fetching pending driver applications with pagination");
-        Page<DriverResponseDTO> pendingApplications = driverService.getPendingApplicationsPaged(pageable);
+    public ResponseEntity<Page<DriverResponseDTO>> getPendingApplications(
+            Pageable pageable,
+            @RequestParam(required = false) String search) {
+        logger.info("Fetching pending driver applications with pagination - Search: {}", search);
+        Page<DriverResponseDTO> pendingApplications = driverService.getPendingApplicationsPaged(pageable, search);
         return ResponseEntity.ok(pendingApplications);
     }
-    
+
     /**
-     * Get all approved drivers with pagination and sorting
+     * Get all approved drivers with pagination, sorting, and search
      */
     @GetMapping("/approved")
-    @Operation(summary = "Get approved drivers", description = "Retrieve paginated list of approved drivers")
+    @Operation(summary = "Get approved drivers", description = "Retrieve paginated list of approved drivers with optional search")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Approved drivers retrieved successfully"),
         @ApiResponse(responseCode = "403", description = "User does not have admin role"),
         @ApiResponse(responseCode = "401", description = "Unauthorized - missing or invalid token")
     })
-    public ResponseEntity<Page<DriverResponseDTO>> getApprovedDrivers(Pageable pageable) {
-        logger.info("Fetching approved drivers with pagination");
-        Page<DriverResponseDTO> approvedDrivers = driverService.getApprovedDriversPaged(pageable);
+    public ResponseEntity<Page<DriverResponseDTO>> getApprovedDrivers(
+            Pageable pageable,
+            @RequestParam(required = false) String search) {
+        logger.info("Fetching approved drivers with pagination - Search: {}", search);
+        Page<DriverResponseDTO> approvedDrivers = driverService.getApprovedDriversPaged(pageable, search);
         return ResponseEntity.ok(approvedDrivers);
     }
     

@@ -38,8 +38,14 @@ class AdminWebSocketService {
    * Connect to admin WebSocket server
    */
   connect() {
-    if (this.isConnected || this.connectionPromise) {
-      return this.connectionPromise || Promise.resolve();
+    // If already connected, resolve immediately
+    if (this.isConnected) {
+      return Promise.resolve();
+    }
+
+    // If connection is in progress, return the existing promise
+    if (this.connectionPromise) {
+      return this.connectionPromise;
     }
 
     this.connectionPromise = new Promise((resolve, reject) => {
@@ -60,12 +66,14 @@ class AdminWebSocketService {
         );
 
         setTimeout(() => {
-          if (!this.isConnected && !this.connectionPromise) {
+          if (!this.isConnected && this.connectionPromise) {
+            this.connectionPromise = null;
             reject(new Error('Admin WebSocket connection timeout'));
           }
         }, 10000);
       } catch (error) {
         logger.error('ADMIN_WEBSOCKET', 'Failed to initialize WebSocket', error);
+        this.connectionPromise = null;
         reject(error);
       }
     });
@@ -80,18 +88,14 @@ class AdminWebSocketService {
     this.isConnected = true;
     this.reconnectAttempts = 0;
     this.reconnectDelay = 2000;
+    this.connectionPromise = null;
+    this.resolveConnection = null;
 
     logger.info('ADMIN_WEBSOCKET', 'Connected to Admin WebSocket server');
 
     if (resolve) {
       resolve();
     }
-    if (this.resolveConnection) {
-      this.resolveConnection();
-      this.resolveConnection = null;
-    }
-
-    this.connectionPromise = null;
   }
 
   /**
@@ -178,23 +182,20 @@ class AdminWebSocketService {
    * @private
    */
   subscribeTopic(topic, eventType, callback) {
-    const ensureConnected = () => {
-      if (!this.isConnected) {
-        this.connect().then(() => performSubscription());
-        return;
-      }
-      performSubscription();
-    };
-
     const performSubscription = () => {
       try {
         if (this.subscriptions.has(topic)) {
           logger.warn('ADMIN_WEBSOCKET', `Already subscribed to ${topic}`);
-          return;
+          return true;
         }
 
         const subscription = this.stompClient.subscribe(topic, (message) => {
           try {
+            if (!message.body) {
+              logger.warn('ADMIN_WEBSOCKET', 'Received empty message body');
+              return;
+            }
+
             const data = JSON.parse(message.body);
             logger.logRequest('ADMIN_WEBSOCKET', topic);
             logger.logResponse('ADMIN_WEBSOCKET', topic, 200, data);
@@ -219,12 +220,24 @@ class AdminWebSocketService {
 
         this.subscriptions.set(topic, subscription);
         logger.info('ADMIN_WEBSOCKET', `Successfully subscribed to ${topic}`);
+        return true;
       } catch (error) {
         logger.error('ADMIN_WEBSOCKET', `Failed to subscribe to ${topic}`, error);
+        return false;
       }
     };
 
-    ensureConnected();
+    // If already connected, subscribe immediately
+    if (this.isConnected) {
+      performSubscription();
+    } else {
+      // Otherwise, ensure connection first then subscribe
+      this.connect().then(() => {
+        performSubscription();
+      }).catch((error) => {
+        logger.error('ADMIN_WEBSOCKET', `Failed to connect before subscribing to ${topic}`, error);
+      });
+    }
 
     // Return unsubscribe function
     return () => {
@@ -303,22 +316,30 @@ class AdminWebSocketService {
    * Disconnect from WebSocket
    */
   disconnect() {
-    if (this.stompClient && this.isConnected) {
-      // Unsubscribe from all topics
-      this.subscriptions.forEach((subscription) => {
-        try {
-          subscription.unsubscribe();
-        } catch (error) {
-          logger.warn('ADMIN_WEBSOCKET', 'Error unsubscribing', error);
-        }
-      });
-      this.subscriptions.clear();
+    // Unsubscribe from all topics
+    this.subscriptions.forEach((subscription) => {
+      try {
+        subscription.unsubscribe();
+      } catch (error) {
+        logger.warn('ADMIN_WEBSOCKET', 'Error unsubscribing', error);
+      }
+    });
+    this.subscriptions.clear();
 
-      // Disconnect
-      this.stompClient.disconnect(() => {
+    // Clear all event callbacks
+    this.eventCallbacks.clear();
+
+    // Disconnect if connected
+    if (this.stompClient && this.isConnected) {
+      try {
+        this.stompClient.disconnect(() => {
+          this.isConnected = false;
+          logger.info('ADMIN_WEBSOCKET', 'Disconnected from Admin WebSocket');
+        });
+      } catch (error) {
+        logger.warn('ADMIN_WEBSOCKET', 'Error disconnecting', error);
         this.isConnected = false;
-        logger.info('ADMIN_WEBSOCKET', 'Disconnected from Admin WebSocket');
-      });
+      }
     }
 
     this.connectionPromise = null;

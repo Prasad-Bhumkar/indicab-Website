@@ -61,10 +61,15 @@ const BookingConfirmationModal = ({ onClose }) => {
               </div>
             )}
             {(bookingId || bookingReference) && (
-              <div style={{ backgroundColor: isOffline ? '#fbbf24' : 'var(--custom-accent)', color: 'var(--custom-dark)', padding: '0.75rem', borderRadius: '6px', marginTop: '1rem', marginBottom: '1rem' }}>
-                {bookingReference && <p style={{ margin: '0.25rem 0', fontSize: '0.9rem' }}>Reference: <strong>{bookingReference}</strong></p>}
-                {bookingId && <p style={{ margin: '0.25rem 0', fontSize: '0.9rem' }}>ID: <strong>{bookingId}</strong></p>}
-              </div>
+              <>
+                <div style={{ backgroundColor: isOffline ? '#fbbf24' : 'var(--custom-accent)', color: 'var(--custom-dark)', padding: '0.75rem', borderRadius: '6px', marginTop: '1rem', marginBottom: '1rem' }}>
+                  {bookingReference && <p style={{ margin: '0.25rem 0', fontSize: '0.9rem' }}>Reference: <strong>{bookingReference}</strong></p>}
+                  {bookingId && <p style={{ margin: '0.25rem 0', fontSize: '0.9rem' }}>ID: <strong>{bookingId}</strong></p>}
+                </div>
+                <p style={{ fontSize: '0.85rem', color: 'var(--custom-text)', marginTop: '0.75rem', marginBottom: 0 }}>
+                  ✓ Save this ID to check your booking status anytime
+                </p>
+              </>
             )}
           </div>
           <div className="booking-summary" style={{ backgroundColor: 'rgba(255, 255, 255, 0.5)', padding: '1rem', borderRadius: '8px' }}>
@@ -91,16 +96,26 @@ const BookingConfirmationModal = ({ onClose }) => {
             </h5>
           </div>
         </div>
-        <div className="modal-footer" style={{ borderTop: '1px solid var(--custom-accent)' }}>
+        <div className="modal-footer" style={{ borderTop: '1px solid var(--custom-accent)', flexDirection: 'column', gap: '0.75rem' }}>
           <button
             type="button"
             className="btn"
             onClick={onClose}
             aria-label="Confirm and close modal"
-            style={{ backgroundColor: 'var(--custom-dark)', color: 'var(--custom-bg)' }}
+            style={{ backgroundColor: 'var(--custom-dark)', color: 'var(--custom-bg)', width: '100%' }}
           >
             Done
           </button>
+          {bookingId && (
+            <a
+              href={`/bookings/status/${bookingId}`}
+              className="btn"
+              aria-label="Check booking status as guest"
+              style={{ backgroundColor: 'var(--custom-accent)', color: 'white', width: '100%', textDecoration: 'none', textAlign: 'center' }}
+            >
+              Check Status (Guest Link)
+            </a>
+          )}
         </div>
       </div>
     </div>

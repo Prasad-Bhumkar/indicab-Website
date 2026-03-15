@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
@@ -166,6 +167,20 @@ public class BookingServiceImpl implements BookingService {
         logger.debug("Fetching bookings with pagination - Page: {}, Size: {}",
                    pageable.getPageNumber(), pageable.getPageSize());
         Page<Booking> bookingsPage = bookingRepository.findAll(pageable);
+        logger.debug("Found {} bookings on page {} of {}",
+                   bookingsPage.getNumberOfElements(),
+                   bookingsPage.getNumber(),
+                   bookingsPage.getTotalPages());
+        return bookingsPage;
+    }
+
+    /**
+     * Get all bookings with pagination and search/filter specifications
+     */
+    public Page<Booking> getAllBookingsPaged(Pageable pageable, Specification<Booking> spec) {
+        logger.debug("Fetching bookings with pagination and search - Page: {}, Size: {}",
+                   pageable.getPageNumber(), pageable.getPageSize());
+        Page<Booking> bookingsPage = bookingRepository.findAll(spec, pageable);
         logger.debug("Found {} bookings on page {} of {}",
                    bookingsPage.getNumberOfElements(),
                    bookingsPage.getNumber(),

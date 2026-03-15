@@ -4,10 +4,14 @@ import react from '@vitejs/plugin-react'
 export default defineConfig({
   base: '/',
   plugins: [react()],
+  define: {
+    global: 'window',
+  },
   optimizeDeps: {
     exclude: ['lucide-react'],
     include: ['react', 'react-dom', 'react-router-dom', '@reduxjs/toolkit', 'react-redux'],
   },
+  assetsInclude: ['**/*.webp', '**/*.png', '**/*.jpg', '**/*.jpeg', '**/*.gif', '**/*.svg'],
   server: {
     port: 5173,
     strictPort: false,
@@ -65,7 +69,11 @@ export default defineConfig({
     // Optimize chunk sizes
     chunkSizeWarningLimit: 500,
     reportCompressedSize: true,
+    // Asset size limits
+    assetsInlineLimit: 4096, // 4KB - inline smaller assets
   },
+  // Image optimization settings
+  envPrefix: 'VITE_',
   test: {
     globals: true,
     environment: 'jsdom',

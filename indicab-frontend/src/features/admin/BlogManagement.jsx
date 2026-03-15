@@ -12,6 +12,9 @@ import {
 } from './adminSlice';
 import { FiEdit2, FiTrash2, FiPlus } from 'react-icons/fi';
 import ExportModal from '../../components/ExportModal';
+import PaginationControls from '../../components/PaginationControls';
+import FilterBar from '../../components/FilterBar';
+import SortableHeader from '../../components/SortableHeader';
 import { HeaderCheckbox, RowCheckbox } from '../../components/CheckboxColumn';
 import BulkActionBar from '../../components/BulkActionBar';
 import {
@@ -27,11 +30,16 @@ import './ManagementPages.css';
 
 const BlogManagement = () => {
   const dispatch = useDispatch();
-  const { blogs, loading, error, successMessage } = useSelector((state) => state.admin);
+  const { blogs, loading, error, successMessage, pagination } = useSelector((state) => state.admin);
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [showExportModal, setShowExportModal] = useState(false);
   const [selectedBlogs, setSelectedBlogs] = useState(new Set());
+  const [page, setPage] = useState(0);
+  const [pageSize, setPageSize] = useState(10);
+  const [sortColumn, setSortColumn] = useState('date');
+  const [sortDirection, setSortDirection] = useState('desc');
+  const [filters, setFilters] = useState({ status: '' });
   const [formData, setFormData] = useState({
     title: '',
     content: '',
@@ -44,8 +52,14 @@ const BlogManagement = () => {
   });
 
   useEffect(() => {
-    dispatch(fetchBlogs());
-  }, [dispatch]);
+    const params = {
+      page,
+      size: pageSize,
+      sort: `${sortColumn},${sortDirection}`,
+      ...filters,
+    };
+    dispatch(fetchBlogs(params));
+  }, [dispatch, page, pageSize, sortColumn, sortDirection, filters]);
 
   useEffect(() => {
     if (successMessage) {
@@ -99,6 +113,26 @@ const BlogManagement = () => {
     if (window.confirm('Are you sure you want to delete this blog?')) {
       dispatch(deleteBlog(id));
     }
+  };
+
+  const handlePageChange = (newPage) => {
+    setPage(newPage);
+  };
+
+  const handlePageSizeChange = (newSize) => {
+    setPageSize(newSize);
+    setPage(0);
+  };
+
+  const handleSort = (column, direction) => {
+    setSortColumn(column);
+    setSortDirection(direction);
+    setPage(0);
+  };
+
+  const handleFilterChange = (newFilters) => {
+    setFilters(newFilters);
+    setPage(0);
   };
 
   // Bulk selection handlers
@@ -167,6 +201,19 @@ const BlogManagement = () => {
           </button>
         </div>
       </div>
+
+      <FilterBar
+        onFilterChange={handleFilterChange}
+        filters={filters}
+        filterOptions={{
+          showSearch: true,
+          showStatus: true,
+          statusOptions: [
+            { value: 'draft', label: 'Draft' },
+            { value: 'published', label: 'Published' },
+          ],
+        }}
+      />
 
       {error && (
         <div className="alert alert-danger">
@@ -308,10 +355,28 @@ const BlogManagement = () => {
                     disabled={loading || blogs.length === 0}
                     title="Select all blogs"
                   />
-                  <th>Title</th>
+                  <SortableHeader
+                    column="title"
+                    label="Title"
+                    sortColumn={sortColumn}
+                    sortDirection={sortDirection}
+                    onSort={handleSort}
+                  />
                   <th>Category</th>
-                  <th>Date</th>
-                  <th>Status</th>
+                  <SortableHeader
+                    column="date"
+                    label="Date"
+                    sortColumn={sortColumn}
+                    sortDirection={sortDirection}
+                    onSort={handleSort}
+                  />
+                  <SortableHeader
+                    column="status"
+                    label="Status"
+                    sortColumn={sortColumn}
+                    sortDirection={sortDirection}
+                    onSort={handleSort}
+                  />
                   <th>Actions</th>
                 </tr>
               </thead>
@@ -361,6 +426,17 @@ const BlogManagement = () => {
           </div>
         )}
       </div>
+
+      {blogs.length > 0 && (
+        <PaginationControls
+          currentPage={page}
+          totalPages={pagination?.totalPages || 1}
+          totalElements={pagination?.totalElements || blogs.length}
+          pageSize={pageSize}
+          onPageChange={handlePageChange}
+          onPageSizeChange={handlePageSizeChange}
+        />
+      )}
 
       <ExportModal
         show={showExportModal}

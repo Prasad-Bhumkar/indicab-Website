@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   fetchAdminDashboard,
@@ -12,17 +12,21 @@ import {
 } from './adminSlice';
 import { adminWebsocketService } from '../../services/adminWebsocketService';
 import Skeleton, { SkeletonTable } from '../../components/Skeleton';
+import SortableHeader from '../../components/SortableHeader';
 import './AdminDashboard.css';
 
 const AdminDashboard = () => {
   const dispatch = useDispatch();
   const { dashboard, users, drivers, bookings, loading, error } = useSelector((state) => state.admin);
+  const [sortColumn, setSortColumn] = useState('id');
+  const [sortDirection, setSortDirection] = useState('desc');
 
   useEffect(() => {
     dispatch(fetchAdminDashboard());
     dispatch(fetchUsers());
     dispatch(fetchDrivers());
     dispatch(fetchBookings());
+    // ... rest of the effect
 
     // Connect and subscribe to WebSocket updates
     adminWebsocketService.connect().then(() => {
@@ -133,7 +137,30 @@ const AdminDashboard = () => {
     avgRating: '4.7', // Mock for now
   };
 
-  const recentBookings = bookings.slice(0, 5);
+  const handleSort = (column, direction) => {
+    setSortColumn(column);
+    setSortDirection(direction);
+  };
+
+  const getSortedBookings = () => {
+    if (!sortColumn) return bookings.slice(0, 5);
+
+    return [...bookings].sort((a, b) => {
+      let valA = a[sortColumn];
+      let valB = b[sortColumn];
+
+      if (sortColumn === 'user') {
+        valA = a.user?.toLowerCase() || '';
+        valB = b.user?.toLowerCase() || '';
+      }
+
+      if (valA < valB) return sortDirection === 'asc' ? -1 : 1;
+      if (valA > valB) return sortDirection === 'asc' ? 1 : -1;
+      return 0;
+    }).slice(0, 5);
+  };
+
+  const recentBookings = getSortedBookings();
   const recentDrivers = drivers.slice(0, 4);
 
   return (
@@ -188,11 +215,29 @@ const AdminDashboard = () => {
             <table className="data-table">
               <thead>
                 <tr>
-                  <th>ID</th>
-                  <th>Customer</th>
+                  <SortableHeader
+                    column="id"
+                    label="ID"
+                    sortColumn={sortColumn}
+                    sortDirection={sortDirection}
+                    onSort={handleSort}
+                  />
+                  <SortableHeader
+                    column="user"
+                    label="Customer"
+                    sortColumn={sortColumn}
+                    sortDirection={sortDirection}
+                    onSort={handleSort}
+                  />
                   <th>From</th>
                   <th>To</th>
-                  <th>Status</th>
+                  <SortableHeader
+                    column="status"
+                    label="Status"
+                    sortColumn={sortColumn}
+                    sortDirection={sortDirection}
+                    onSort={handleSort}
+                  />
                   <th>Action</th>
                 </tr>
               </thead>

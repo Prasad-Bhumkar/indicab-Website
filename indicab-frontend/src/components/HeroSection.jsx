@@ -1,7 +1,16 @@
 import React, { useState } from 'react'
+import { useSEO } from '../hooks/useSEO';
 import BookingForm from './BookingForm'
 
 const HeroSection = () => {
+  useSEO({
+    title: 'IndiCab - Reliable Ride Booking with Trusted Indian Drivers',
+    description: 'Book reliable rides with trusted Indian drivers across India. Easy booking, safe travel, affordable prices. Download the app now!',
+    keywords: 'ride booking, taxi service, car rental, India, drivers, Uber alternative, affordable cabs',
+    image: 'https://img.icons8.com/color/96/taxi.png',
+    type: 'website',
+  });
+
   return (
     <section className="hero-section" id="home">
       {/* Animated Background Elements */}

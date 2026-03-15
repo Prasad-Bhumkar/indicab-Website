@@ -123,7 +123,7 @@ export const adminLoginUser = createAsyncThunk('auth/adminLoginUser', async (cre
 
 export const logoutUser = createAsyncThunk('auth/logoutUser', async (_, { rejectWithValue }) => {
   try {
-    await apiClient.post('/v1/auth/logout');
+    await apiClient.post('v1/auth/logout');
     return null;
   } catch (error) {
     // Even if logout fails on server, clear client-side tokens

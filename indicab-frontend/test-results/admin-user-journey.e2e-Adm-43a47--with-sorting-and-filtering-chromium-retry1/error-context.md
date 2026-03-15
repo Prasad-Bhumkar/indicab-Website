@@ -1,0 +1,53 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e3]:
+  - complementary [ref=e4]:
+    - generic [ref=e5]:
+      - heading "Indicab Admin" [level=2] [ref=e6]
+      - button "✕" [ref=e7] [cursor=pointer]
+    - navigation [ref=e8]:
+      - link "📊 Dashboard" [ref=e9] [cursor=pointer]:
+        - /url: /admin
+        - generic [ref=e10]: 📊
+        - generic [ref=e11]: Dashboard
+      - link "📈 Analytics" [ref=e12] [cursor=pointer]:
+        - /url: /admin/analytics
+        - generic [ref=e13]: 📈
+        - generic [ref=e14]: Analytics
+      - link "📋 Audit Logs" [ref=e15] [cursor=pointer]:
+        - /url: /admin/audit-logs
+        - generic [ref=e16]: 📋
+        - generic [ref=e17]: Audit Logs
+      - link "👥 Users" [active] [ref=e18] [cursor=pointer]:
+        - /url: /admin/users
+        - generic [ref=e19]: 👥
+        - generic [ref=e20]: Users
+      - link "🚕 Drivers" [ref=e21] [cursor=pointer]:
+        - /url: /admin/drivers
+        - generic [ref=e22]: 🚕
+        - generic [ref=e23]: Drivers
+      - link "🚗 Bookings" [ref=e24] [cursor=pointer]:
+        - /url: /admin/bookings
+        - generic [ref=e25]: 🚗
+        - generic [ref=e26]: Bookings
+      - link "🚙 Vehicles" [ref=e27] [cursor=pointer]:
+        - /url: /admin/vehicles
+        - generic [ref=e28]: 🚙
+        - generic [ref=e29]: Vehicles
+      - link "📦 Packages" [ref=e30] [cursor=pointer]:
+        - /url: /admin/packages
+        - generic [ref=e31]: 📦
+        - generic [ref=e32]: Packages
+      - link "📝 Blogs" [ref=e33] [cursor=pointer]:
+        - /url: /admin/blogs
+        - generic [ref=e34]: 📝
+        - generic [ref=e35]: Blogs
+    - button "🚪 Logout" [ref=e37] [cursor=pointer]:
+      - generic [ref=e38]: 🚪
+      - generic [ref=e39]: Logout
+  - main [ref=e40]:
+    - generic [ref=e41]:
+      - heading "Admin Dashboard" [level=1] [ref=e43]
+      - generic [ref=e45]: Admin User
+```

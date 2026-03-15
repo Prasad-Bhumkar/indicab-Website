@@ -1,0 +1,40 @@
+# Allow all search engine bots
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /admin/*
+Disallow: /login
+Disallow: /register
+Disallow: /profile
+Disallow: /booking-history
+Disallow: /*.jsx
+Disallow: /*.js
+Disallow: /node_modules/
+Disallow: /.env
+
+# Sitemap location
+Sitemap: https://indicab.com/sitemap.xml
+
+# Crawl delay (in seconds)
+Crawl-delay: 1
+
+# Request rate limit
+Request-rate: 30/60
+
+# Google specific
+User-agent: Googlebot
+Allow: /
+
+# Bing specific
+User-agent: Bingbot
+Allow: /
+
+# Block bad bots
+User-agent: MJ12bot
+Disallow: /
+
+User-agent: AhrefsBot
+Disallow: /
+
+User-agent: SemrushBot
+Disallow: /

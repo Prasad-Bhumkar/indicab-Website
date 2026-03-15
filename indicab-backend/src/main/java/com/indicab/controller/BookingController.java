@@ -1,5 +1,6 @@
 package com.indicab.controller;
 
+import com.indicab.dto.BookingPublicDTO;
 import com.indicab.dto.BookingRequestDTO;
 import com.indicab.dto.BookingResponseDTO;
 import com.indicab.dto.PagedResponseDTO;
@@ -100,6 +101,18 @@ public class BookingController {
     public ResponseEntity<BookingResponseDTO> getBookingById(@PathVariable Long id) {
         return bookingService.getBookingById(id)
                 .map(booking -> ResponseEntity.ok(BookingMapper.toDto(booking)))
+                .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    @GetMapping("/{id}/public")
+    @Operation(summary = "Get public booking status (guest lookup)", description = "Retrieve booking status without authentication - shows only public details (no personal data)")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Booking status retrieved successfully"),
+        @ApiResponse(responseCode = "404", description = "Booking not found")
+    })
+    public ResponseEntity<BookingPublicDTO> getPublicBookingStatus(@PathVariable Long id) {
+        return bookingService.getBookingById(id)
+                .map(booking -> ResponseEntity.ok(BookingMapper.toPublicDto(booking)))
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 

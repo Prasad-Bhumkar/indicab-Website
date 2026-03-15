@@ -28,13 +28,33 @@ public class AdminPackageController {
     private PackageService packageService;
     
     /**
-     * Get all packages with pagination and sorting
+     * Get all packages with pagination, sorting, and search
      */
     @GetMapping
-    @Operation(summary = "Get all packages", description = "Retrieve all packages with pagination and sorting")
-    public ResponseEntity<Page<Package>> getAllPackages(Pageable pageable) {
+    @Operation(summary = "Get all packages", description = "Retrieve all packages with pagination, sorting, and search filters")
+    public ResponseEntity<Page<Package>> getAllPackages(
+            Pageable pageable,
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) Boolean isActive,
+            @RequestParam(required = false) String type) {
         try {
-            Page<Package> packages = packageService.getAllPackages(pageable);
+            com.indicab.util.SearchSpecification.SpecificationBuilder<Package> builder =
+                new com.indicab.util.SearchSpecification.SpecificationBuilder<>();
+
+            if (search != null && !search.isEmpty()) {
+                builder.with("name", search, com.indicab.util.SearchSpecification.SearchOperator.CONTAINS)
+                       .with("description", search, com.indicab.util.SearchSpecification.SearchOperator.CONTAINS);
+            }
+
+            if (isActive != null) {
+                builder.with("isActive", isActive.toString(), com.indicab.util.SearchSpecification.SearchOperator.EQUALS);
+            }
+
+            if (type != null && !type.isEmpty()) {
+                builder.with("type", type, com.indicab.util.SearchSpecification.SearchOperator.EQUALS);
+            }
+
+            Page<Package> packages = packageService.getAllPackages(pageable, builder.build());
             return ResponseEntity.ok(packages);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
@@ -42,13 +62,26 @@ public class AdminPackageController {
     }
 
     /**
-     * Get active packages with pagination and sorting
+     * Get active packages with pagination, sorting, and search
      */
     @GetMapping("/active")
-    @Operation(summary = "Get active packages", description = "Retrieve only active packages with pagination and sorting")
-    public ResponseEntity<Page<Package>> getActivePackages(Pageable pageable) {
+    @Operation(summary = "Get active packages", description = "Retrieve only active packages with pagination, sorting, and search")
+    public ResponseEntity<Page<Package>> getActivePackages(
+            Pageable pageable,
+            @RequestParam(required = false) String search) {
         try {
-            Page<Package> packages = packageService.getActivePackages(pageable);
+            com.indicab.util.SearchSpecification.SpecificationBuilder<Package> builder =
+                new com.indicab.util.SearchSpecification.SpecificationBuilder<>();
+
+            // Always filter by isActive=true
+            builder.with("isActive", "true", com.indicab.util.SearchSpecification.SearchOperator.EQUALS);
+
+            if (search != null && !search.isEmpty()) {
+                builder.with("name", search, com.indicab.util.SearchSpecification.SearchOperator.CONTAINS)
+                       .with("description", search, com.indicab.util.SearchSpecification.SearchOperator.CONTAINS);
+            }
+
+            Page<Package> packages = packageService.getAllPackages(pageable, builder.build());
             return ResponseEntity.ok(packages);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
@@ -56,15 +89,26 @@ public class AdminPackageController {
     }
 
     /**
-     * Get packages by type with pagination and sorting
+     * Get packages by type with pagination, sorting, and search
      */
     @GetMapping("/type/{type}")
-    @Operation(summary = "Get packages by type", description = "Retrieve packages filtered by type with pagination and sorting")
+    @Operation(summary = "Get packages by type", description = "Retrieve packages filtered by type with pagination, sorting, and search")
     public ResponseEntity<Page<Package>> getPackagesByType(
             @PathVariable String type,
-            Pageable pageable) {
+            Pageable pageable,
+            @RequestParam(required = false) String search) {
         try {
-            Page<Package> packages = packageService.getPackagesByType(type, pageable);
+            com.indicab.util.SearchSpecification.SpecificationBuilder<Package> builder =
+                new com.indicab.util.SearchSpecification.SpecificationBuilder<>();
+
+            builder.with("type", type, com.indicab.util.SearchSpecification.SearchOperator.EQUALS);
+
+            if (search != null && !search.isEmpty()) {
+                builder.with("name", search, com.indicab.util.SearchSpecification.SearchOperator.CONTAINS)
+                       .with("description", search, com.indicab.util.SearchSpecification.SearchOperator.CONTAINS);
+            }
+
+            Page<Package> packages = packageService.getAllPackages(pageable, builder.build());
             return ResponseEntity.ok(packages);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();

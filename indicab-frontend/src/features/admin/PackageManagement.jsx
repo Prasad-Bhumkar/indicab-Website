@@ -10,6 +10,9 @@ import {
   clearError,
 } from './adminSlice';
 import { FiEdit2, FiTrash2, FiPlus } from 'react-icons/fi';
+import PaginationControls from '../../components/PaginationControls';
+import FilterBar from '../../components/FilterBar';
+import SortableHeader from '../../components/SortableHeader';
 import { HeaderCheckbox, RowCheckbox } from '../../components/CheckboxColumn';
 import BulkActionBar from '../../components/BulkActionBar';
 import ExportModal from '../../components/ExportModal';
@@ -26,11 +29,16 @@ import './ManagementPages.css';
 
 const PackageManagement = () => {
   const dispatch = useDispatch();
-  const { packages, loading, error, successMessage } = useSelector((state) => state.admin);
+  const { packages, loading, error, successMessage, pagination } = useSelector((state) => state.admin);
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [showExportModal, setShowExportModal] = useState(false);
   const [selectedPackages, setSelectedPackages] = useState(new Set());
+  const [page, setPage] = useState(0);
+  const [pageSize, setPageSize] = useState(10);
+  const [sortColumn, setSortColumn] = useState('name');
+  const [sortDirection, setSortDirection] = useState('asc');
+  const [filters, setFilters] = useState({});
   const [formData, setFormData] = useState({
     name: '',
     type: 'hourly',
@@ -43,8 +51,14 @@ const PackageManagement = () => {
   });
 
   useEffect(() => {
-    dispatch(fetchPackages());
-  }, [dispatch]);
+    const params = {
+      page,
+      size: pageSize,
+      sort: `${sortColumn},${sortDirection}`,
+      ...filters,
+    };
+    dispatch(fetchPackages(params));
+  }, [dispatch, page, pageSize, sortColumn, sortDirection, filters]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -101,6 +115,55 @@ const PackageManagement = () => {
     }
   };
 
+  const handlePageChange = (newPage) => {
+    setPage(newPage);
+  };
+
+  const handlePageSizeChange = (newSize) => {
+    setPageSize(newSize);
+    setPage(0);
+  };
+
+  const handleSort = (column, direction) => {
+    setSortColumn(column);
+    setSortDirection(direction);
+    setPage(0);
+  };
+
+  const handleFilterChange = (newFilters) => {
+    setFilters(newFilters);
+    setPage(0);
+  };
+
+  const handleRowCheckboxChange = (packageId) => {
+    setSelectedPackages(toggleItemSelection(selectedPackages, packageId));
+  };
+
+  const handleSelectAllChange = () => {
+    const stats = getSelectionStats(selectedPackages, packages);
+    if (stats.isAllSelected) {
+      setSelectedPackages(clearSelection());
+    } else {
+      setSelectedPackages(selectAllItems(packages));
+    }
+  };
+
+  const handleBulkDelete = () => {
+    const stats = getSelectionStats(selectedPackages, packages);
+    const confirmMsg = getBulkActionConfirmMessage('delete', stats.totalSelected, 'package');
+
+    if (window.confirm(confirmMsg)) {
+      const ids = formatSelectedIdsForAPI(selectedPackages);
+      dispatch(bulkDeletePackages(ids)).then(() => {
+        setSelectedPackages(clearSelection());
+      });
+    }
+  };
+
+  const handleClearSelection = () => {
+    setSelectedPackages(clearSelection());
+  };
+
   return (
     <div className="management-page">
       <div className="page-header">
@@ -122,7 +185,26 @@ const PackageManagement = () => {
         </div>
       </div>
 
+      <FilterBar
+        onFilterChange={handleFilterChange}
+        filters={filters}
+        filterOptions={{
+          showSearch: true,
+        }}
+      />
+
       {error && <div className="alert alert-danger">{error}</div>}
+
+      <BulkActionBar
+        selectedCount={selectedPackages.size}
+        totalCount={packages.length}
+        isAllSelected={selectedPackages.size === packages.length && packages.length > 0}
+        entityType="package"
+        onDelete={handleBulkDelete}
+        onClearSelection={handleClearSelection}
+        onSelectAll={() => setSelectedPackages(selectAllItems(packages))}
+        loading={loading}
+      />
 
       {showForm && (
         <div className="form-container">
@@ -241,46 +323,95 @@ const PackageManagement = () => {
       )}
 
       <div className="table-container">
-        {loading ? (
+        {loading && !packages.length ? (
           <p>Loading packages...</p>
         ) : packages && packages.length > 0 ? (
-          <table className="table">
-            <thead>
-              <tr>
-                <th>Name</th>
-                <th>Type</th>
-                <th>Duration</th>
-                <th>Base Fare</th>
-                <th>Discount</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {packages.map((pkg) => (
-                <tr key={pkg.id}>
-                  <td>{pkg.name}</td>
-                  <td>{pkg.type}</td>
-                  <td>{pkg.duration}</td>
-                  <td>₹{pkg.baseFare}</td>
-                  <td>{pkg.discountPercentage}%</td>
-                  <td>
-                    <button
-                      className="btn btn-sm btn-warning me-2"
-                      onClick={() => handleEdit(pkg)}
-                    >
-                      <FiEdit2 />
-                    </button>
-                    <button
-                      className="btn btn-sm btn-danger"
-                      onClick={() => handleDelete(pkg.id)}
-                    >
-                      <FiTrash2 />
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          <>
+            <div className="table-responsive">
+              <table className="management-table">
+                <thead>
+                  <tr>
+                    <HeaderCheckbox
+                      isAllSelected={selectedPackages.size === packages.length && packages.length > 0}
+                      isIndeterminate={selectedPackages.size > 0 && selectedPackages.size < packages.length}
+                      onChange={handleSelectAllChange}
+                      disabled={loading || packages.length === 0}
+                      title="Select all packages"
+                    />
+                    <SortableHeader
+                      column="name"
+                      label="Name"
+                      sortColumn={sortColumn}
+                      sortDirection={sortDirection}
+                      onSort={handleSort}
+                    />
+                    <th>Type</th>
+                    <th>Duration</th>
+                    <SortableHeader
+                      column="baseFare"
+                      label="Base Fare"
+                      sortColumn={sortColumn}
+                      sortDirection={sortDirection}
+                      onSort={handleSort}
+                    />
+                    <SortableHeader
+                      column="discountPercentage"
+                      label="Discount"
+                      sortColumn={sortColumn}
+                      sortDirection={sortDirection}
+                      onSort={handleSort}
+                    />
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {packages.map((pkg) => (
+                    <tr key={pkg.id}>
+                      <RowCheckbox
+                        isSelected={isItemSelected(selectedPackages, pkg.id)}
+                        onChange={() => handleRowCheckboxChange(pkg.id)}
+                        disabled={loading}
+                        rowId={pkg.id}
+                      />
+                      <td>{pkg.name}</td>
+                      <td>{pkg.type}</td>
+                      <td>{pkg.duration}</td>
+                      <td>₹{pkg.baseFare}</td>
+                      <td>{pkg.discountPercentage}%</td>
+                      <td>
+                        <div className="action-buttons">
+                          <button
+                            className="btn-icon btn-edit"
+                            onClick={() => handleEdit(pkg)}
+                            title="Edit"
+                          >
+                            ✏️
+                          </button>
+                          <button
+                            className="btn-icon btn-delete"
+                            onClick={() => handleDelete(pkg.id)}
+                            title="Delete"
+                          >
+                            🗑️
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            {packages.length > 0 && (
+              <PaginationControls
+                currentPage={page}
+                totalPages={pagination?.totalPages || 1}
+                totalElements={pagination?.totalElements || packages.length}
+                pageSize={pageSize}
+                onPageChange={handlePageChange}
+                onPageSizeChange={handlePageSizeChange}
+              />
+            )}
+          </>
         ) : (
           <p>No packages found. Create your first package!</p>
         )}

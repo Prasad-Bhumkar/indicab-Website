@@ -1,12 +1,14 @@
 import React, { lazy, Suspense, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
+import { HelmetProvider } from 'react-helmet-async';
 import Header from './components/Header';
 import OfflineIndicator from './components/OfflineIndicator';
 import ProtectedRoute from './components/ProtectedRoute';
 import AdminProtectedRoute from './components/AdminProtectedRoute';
 import AdminLayout from './components/AdminLayout';
 import ErrorBoundary from './components/ErrorBoundary';
+import SEOHead from './components/SEOHead';
 import { setLogoutHandler } from './config/apiConfig';
 import { logout } from './features/auth/authSlice';
 
@@ -24,8 +26,11 @@ const AdminLogin = lazy(() => import('./components/AdminLogin'));
 const Register = lazy(() => import('./components/Register'));
 const Profile = lazy(() => import('./components/Profile'));
 const BookingHistory = lazy(() => import('./components/BookingHistory'));
+const GuestBookingStatus = lazy(() => import('./components/GuestBookingStatus'));
 const DriverDashboard = lazy(() => import('./components/DriverDashboard'));
 const RideTracker = lazy(() => import('./components/RideTracker'));
+const CityPage = lazy(() => import('./components/CityPage'));
+const ServicePage = lazy(() => import('./components/ServicePage'));
 const AdminRoutes = lazy(() => import('./features/admin/AdminRoutes'));
 
 // Loading fallback
@@ -39,6 +44,7 @@ const PageLoader = () => (
 
 const HomePage = () => (
   <>
+    <SEOHead pageKey="home" />
     <Header />
     <Suspense fallback={<PageLoader />}>
       <HeroSection />
@@ -71,23 +77,33 @@ function AppContent() {
         <Routes>
           {/* Public Routes */}
           <Route path="/" element={<HomePage />} />
-          <Route path="/about" element={<><Header /><AboutUs /></>} />
-          <Route path="/packages" element={<><Header /><TravelPackages /></>} />
-          <Route path="/blog" element={<><Header /><Blog /></>} />
-          <Route path="/contact" element={<><Header /><ContactUs /></>} />
+          <Route path="/about" element={<><SEOHead pageKey="about" /><Header /><AboutUs /></>} />
+          <Route path="/packages" element={<><SEOHead pageKey="packages" /><Header /><TravelPackages /></>} />
+          <Route path="/blog" element={<><SEOHead pageKey="blog" /><Header /><Blog /></>} />
+          <Route path="/contact" element={<><SEOHead pageKey="contact" /><Header /><ContactUs /></>} />
+
+          {/* City Pages */}
+          <Route path="/city/:cityName" element={<Suspense fallback={<PageLoader />}><CityPage /></Suspense>} />
+
+          {/* Service Pages */}
+          <Route path="/service/:serviceName" element={<Suspense fallback={<PageLoader />}><ServicePage /></Suspense>} />
 
           {/* User Authentication Routes */}
-          <Route path="/login" element={<><Header /><Login /></>} />
-          <Route path="/register" element={<><Header /><Register /></>} />
+          <Route path="/login" element={<><SEOHead pageKey="login" /><Header /><Login /></>} />
+          <Route path="/register" element={<><SEOHead pageKey="register" /><Header /><Register /></>} />
+
+          {/* Guest Booking Status Route (public, no auth required) */}
+          <Route path="/bookings/status/:bookingId" element={<><SEOHead pageKey="home" /><Header /><GuestBookingStatus /></>} />
+          <Route path="/bookings/status" element={<><SEOHead pageKey="home" /><Header /><GuestBookingStatus /></>} />
 
           {/* Admin Authentication Route */}
-          <Route path="/admin-login" element={<><Header /><AdminLogin /></>} />
+          <Route path="/admin-login" element={<><SEOHead pageKey="login" /><Header /><AdminLogin /></>} />
 
           {/* User Protected Routes */}
-          <Route path="/history" element={<ProtectedRoute><><Header /><BookingHistory /></></ProtectedRoute>} />
-          <Route path="/profile" element={<ProtectedRoute><><Header /><Profile /></></ProtectedRoute>} />
-          <Route path="/ride-tracker" element={<ProtectedRoute><><Header /><RideTracker /></></ProtectedRoute>} />
-          <Route path="/driver/dashboard" element={<ProtectedRoute><><Header /><DriverDashboard /></></ProtectedRoute>} />
+          <Route path="/history" element={<ProtectedRoute><><SEOHead pageKey="bookingHistory" /><Header /><BookingHistory /></></ProtectedRoute>} />
+          <Route path="/profile" element={<ProtectedRoute><><SEOHead pageKey="profile" /><Header /><Profile /></></ProtectedRoute>} />
+          <Route path="/ride-tracker" element={<ProtectedRoute><><SEOHead pageKey="home" /><Header /><RideTracker /></></ProtectedRoute>} />
+          <Route path="/driver/dashboard" element={<ProtectedRoute><><SEOHead pageKey="home" /><Header /><DriverDashboard /></></ProtectedRoute>} />
 
           {/* Admin Protected Routes */}
           <Route
@@ -113,11 +129,13 @@ function AppContent() {
 
 function App() {
   return (
-    <ErrorBoundary>
-      <Router basename="/">
-        <AppContent />
-      </Router>
-    </ErrorBoundary>
+    <HelmetProvider>
+      <ErrorBoundary>
+        <Router basename="/">
+          <AppContent />
+        </Router>
+      </ErrorBoundary>
+    </HelmetProvider>
   );
 }
 
