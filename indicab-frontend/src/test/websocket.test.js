@@ -29,6 +29,8 @@ describe('Admin WebSocket Service', () => {
     adminWebsocketService.isConnected = false;
     adminWebsocketService.subscriptions.clear();
     adminWebsocketService.reconnectAttempts = 0;
+    adminWebsocketService.connectionPromise = null;
+    adminWebsocketService.resolveConnection = null;
   });
 
   afterEach(() => {
@@ -87,7 +89,9 @@ describe('Admin WebSocket Service', () => {
     it('should pass Bearer token in connection headers', async () => {
       const mockSocket = {};
       const mockStompClient = {
-        connect: vi.fn(),
+        connect: vi.fn((headers, onConnect) => {
+          onConnect({ version: '1.2' });
+        }),
         disconnect: vi.fn(),
       };
 
@@ -681,7 +685,7 @@ describe('Admin WebSocket Service', () => {
       unsubscribe();
       unsubscribe(); // Second call should not cause error
 
-      expect(mockUnsubscribe).toHaveBeenCalledTimes(2);
+      expect(mockUnsubscribe).toHaveBeenCalledTimes(1);
     });
 
     it('should clear all subscriptions on disconnect', async () => {

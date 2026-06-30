@@ -45,42 +45,38 @@ describe('AdminDashboard Component', () => {
   it('should render admin dashboard component', () => {
     renderWithProviders(<AdminDashboard />, store);
     
-    expect(screen.getByRole('heading', { name: /admin dashboard/i })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /dashboard overview/i })).toBeInTheDocument();
   });
 
   it('should display dashboard title', () => {
     renderWithProviders(<AdminDashboard />, store);
     
-    const heading = screen.getByText(/admin dashboard/i);
+    const heading = screen.getByText(/dashboard overview/i);
     expect(heading).toBeInTheDocument();
     expect(heading.tagName).toBe('H2');
   });
 
-  it('should display placeholder message for backend integration', () => {
+  it('should display metric cards', () => {
     renderWithProviders(<AdminDashboard />, store);
     
-    expect(screen.getByText(/manage users, drivers, and bookings/i)).toBeInTheDocument();
+    expect(screen.getByText(/total bookings/i)).toBeInTheDocument();
+    expect(screen.getByText(/total revenue/i)).toBeInTheDocument();
+    const driverTexts = screen.getAllByText(/active drivers/i);
+    expect(driverTexts.length).toBeGreaterThanOrEqual(1);
   });
 
-  it('should be contained in a bootstrap container', () => {
+  it('should have admin-dashboard container class', () => {
     const { container } = renderWithProviders(<AdminDashboard />, store);
     
-    const containerDiv = container.querySelector('.container');
-    expect(containerDiv).toBeInTheDocument();
+    const dashboardDiv = container.querySelector('.admin-dashboard');
+    expect(dashboardDiv).toBeInTheDocument();
   });
 
-  it('should have margin top bootstrap class', () => {
-    const { container } = renderWithProviders(<AdminDashboard />, store);
-    
-    const mainDiv = container.querySelector('.container');
-    expect(mainDiv?.classList.contains('mt-5')).toBe(true);
-  });
-
-  it('should have margin bottom on heading', () => {
+  it('should have dashboard-title class on heading', () => {
     const { container } = renderWithProviders(<AdminDashboard />, store);
     
     const heading = container.querySelector('h2');
-    expect(heading?.classList.contains('mb-4')).toBe(true);
+    expect(heading?.classList.contains('dashboard-title')).toBe(true);
   });
 
   it('should render without crashing', () => {
@@ -89,25 +85,23 @@ describe('AdminDashboard Component', () => {
     }).not.toThrow();
   });
 
-  it('should display management instructions', () => {
+  it('should display quick actions section', () => {
     renderWithProviders(<AdminDashboard />, store);
     
-    const text = screen.getByText(/manage users, drivers, and bookings/i);
-    expect(text).toBeInTheDocument();
+    expect(screen.getByText(/quick actions/i)).toBeInTheDocument();
   });
 
-  it('should mention backend integration pending', () => {
+  it('should display recent bookings section', () => {
     renderWithProviders(<AdminDashboard />, store);
     
-    expect(screen.getByText(/backend integration pending/i)).toBeInTheDocument();
+    expect(screen.getByText(/recent bookings/i)).toBeInTheDocument();
   });
 
-  it('should reference tables and controls in the UI', () => {
+  it('should display an active drivers section', () => {
     renderWithProviders(<AdminDashboard />, store);
     
-    // Component mentions tables and controls for management
-    const text = screen.getByText(/add tables and controls/i);
-    expect(text).toBeInTheDocument();
+    const driverTexts = screen.getAllByText(/active drivers/i);
+    expect(driverTexts.length).toBeGreaterThanOrEqual(1);
   });
 });
 
@@ -156,57 +150,55 @@ describe('Admin Panel Integration Tests', () => {
   it('should navigate to admin dashboard', async () => {
     renderWithProviders(<AdminDashboard />, store);
     
-    const heading = screen.getByRole('heading', { name: /admin dashboard/i });
+    const heading = screen.getByRole('heading', { name: /dashboard overview/i });
     expect(heading).toBeInTheDocument();
   });
 
-  it('should display users management section title', () => {
+  it('should display dashboard with metric labels', () => {
     renderWithProviders(<AdminDashboard />, store);
     
-    // Look for management-related text
-    const managementText = screen.getByText(/manage/i);
-    expect(managementText).toBeInTheDocument();
+    expect(screen.getByText(/total bookings/i)).toBeInTheDocument();
+    expect(screen.getByText(/total users/i)).toBeInTheDocument();
   });
 
-  it('should display drivers management section title', () => {
+  it('should display drivers section title', () => {
     renderWithProviders(<AdminDashboard />, store);
     
-    const managementText = screen.getByText(/drivers/i);
-    expect(managementText).toBeInTheDocument();
+    const driverTexts = screen.getAllByText(/active drivers/i);
+    expect(driverTexts.length).toBeGreaterThanOrEqual(1);
   });
 
-  it('should display bookings management section title', () => {
+  it('should display bookings section title', () => {
     renderWithProviders(<AdminDashboard />, store);
     
-    const managementText = screen.getByText(/bookings/i);
-    expect(managementText).toBeInTheDocument();
+    const bookingsText = screen.getByText(/recent bookings/i);
+    expect(bookingsText).toBeInTheDocument();
   });
 
-  it('should show pending backend integration message', () => {
+  it('should display quick actions section', () => {
     renderWithProviders(<AdminDashboard />, store);
     
-    expect(screen.getByText(/backend integration pending/i)).toBeInTheDocument();
+    expect(screen.getByText(/quick actions/i)).toBeInTheDocument();
   });
 
-  it('should reference admin panel functionality', () => {
+  it('should show dashboard overview heading', () => {
     renderWithProviders(<AdminDashboard />, store);
     
-    // Component is an admin dashboard with admin-related functionality
-    const heading = screen.getByText(/admin dashboard/i);
+    const heading = screen.getByText(/dashboard overview/i);
     expect(heading).toBeInTheDocument();
   });
 
   it('should have proper semantic HTML structure', () => {
     const { container } = renderWithProviders(<AdminDashboard />, store);
     
-    // Check for div container
-    expect(container.querySelector('.container')).toBeInTheDocument();
+    // Check for dashboard container
+    expect(container.querySelector('.admin-dashboard')).toBeInTheDocument();
     
     // Check for heading
     expect(container.querySelector('h2')).toBeInTheDocument();
     
-    // Check for paragraph text
-    expect(container.querySelector('p')).toBeInTheDocument();
+    // Check for data table
+    expect(container.querySelector('table')).toBeInTheDocument();
   });
 });
 
@@ -269,11 +261,11 @@ describe('Admin Panel Form Validation', () => {
     };
 
     const isValid = userForm.name && userForm.email;
-    expect(isValid).toBe(false);
+    expect(isValid).toBeFalsy();
 
     userForm.name = 'John Doe';
     userForm.email = 'john@example.com';
-    expect(userForm.name && userForm.email).toBe(true);
+    expect(userForm.name && userForm.email).toBeTruthy();
   });
 
   it('should validate email format', () => {
@@ -593,18 +585,18 @@ describe('Admin Panel Responsive Design', () => {
     expect(navOrientation).toBe('vertical');
   });
 
-  it('should use responsive container classes', () => {
+  it('should use admin-dashboard responsive class', () => {
     const { container } = renderWithProviders(<AdminDashboard />, store);
     
-    const containerDiv = container.querySelector('.container');
-    expect(containerDiv).toBeInTheDocument();
+    const dashboardDiv = container.querySelector('.admin-dashboard');
+    expect(dashboardDiv).toBeInTheDocument();
   });
 
-  it('should use responsive spacing classes', () => {
+  it('should use dashboard-title class on heading', () => {
     const { container } = renderWithProviders(<AdminDashboard />, store);
     
     const heading = container.querySelector('h2');
-    expect(heading?.classList.contains('mb-4')).toBe(true);
+    expect(heading?.classList.contains('dashboard-title')).toBe(true);
   });
 });
 
@@ -673,12 +665,8 @@ describe('Admin Panel Error Handling', () => {
       return { success: true };
     });
 
-    try {
-      await mockRetry();
-      await mockRetry();
-    } catch (error) {
-      // Expected on first attempt
-    }
+    try { await mockRetry(); } catch (e) { /* expected */ }
+    try { await mockRetry(); } catch (e) { /* expected */ }
 
     expect(mockRetry).toHaveBeenCalledTimes(2);
   });
