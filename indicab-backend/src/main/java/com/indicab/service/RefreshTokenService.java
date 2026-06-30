@@ -7,6 +7,7 @@ import com.indicab.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.Optional;
@@ -16,6 +17,7 @@ import java.util.UUID;
  * Service for managing refresh tokens
  */
 @Service
+@Transactional
 public class RefreshTokenService {
 
     @Autowired

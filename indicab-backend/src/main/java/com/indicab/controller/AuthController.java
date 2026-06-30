@@ -29,7 +29,7 @@ import java.time.LocalDateTime;
  * Authentication controller handling login, registration, and token refresh
  */
 @RestController
-@RequestMapping("/api/v1/auth")
+@RequestMapping({"/api/v1/auth", "/api/auth"})
 @Tag(name = "Authentication", description = "User authentication endpoints")
 public class AuthController {
 

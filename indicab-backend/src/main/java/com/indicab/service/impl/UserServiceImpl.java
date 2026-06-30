@@ -59,8 +59,12 @@ public class UserServiceImpl implements UserService {
         User savedUser = userRepository.save(newUser);
         logger.info("User registered successfully with ID: {}", savedUser.getId());
 
-        // Notify admin via WebSocket
-        adminWebSocketController.broadcastNewUser(savedUser);
+        // Notify admin via WebSocket (non-critical; log and continue on failure)
+        try {
+            adminWebSocketController.broadcastNewUser(savedUser);
+        } catch (Exception e) {
+            logger.warn("Failed to broadcast new user via WebSocket: {}", e.getMessage());
+        }
 
         return savedUser;
     }

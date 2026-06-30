@@ -32,7 +32,7 @@ public class EncryptionServiceImpl implements EncryptionService {
     /**
      * Initialize the secret key from the configured encryption key
      */
-    public EncryptionServiceImpl(@Value("${}") String encryptionKey) {
+    public EncryptionServiceImpl(@Value("${encryption.key}") String encryptionKey) {
         if (encryptionKey == null || encryptionKey.trim().isEmpty()) {
             throw new IllegalStateException("encryption.key property must be configured in environment variables or application properties. Do not use default keys in production.");
         }

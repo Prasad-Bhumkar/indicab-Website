@@ -32,7 +32,7 @@ public class AuditLoggingAspect {
      * Log successful admin operations
      * Targets all methods in Admin controllers
      */
-    @AfterReturning(pointcut = "execution(* com.indicab.controller.Admin*Controller.*(..))", returning = "result")
+    @AfterReturning(pointcut = "execution(* com.indicab.controller.Admin*Controller.*(..)) && !execution(* com.indicab.controller.AdminWebSocketController.*(..))", returning = "result")
     public void logAdminOperation(JoinPoint joinPoint, Object result) {
         try {
             String methodName = joinPoint.getSignature().getName();
@@ -71,7 +71,7 @@ public class AuditLoggingAspect {
     /**
      * Log failed admin operations
      */
-    @AfterThrowing(pointcut = "execution(* com.indicab.controller.Admin*Controller.*(..))", throwing = "exception")
+    @AfterThrowing(pointcut = "execution(* com.indicab.controller.Admin*Controller.*(..)) && !execution(* com.indicab.controller.AdminWebSocketController.*(..))", throwing = "exception")
     public void logAdminOperationError(JoinPoint joinPoint, Throwable exception) {
         try {
             String methodName = joinPoint.getSignature().getName();

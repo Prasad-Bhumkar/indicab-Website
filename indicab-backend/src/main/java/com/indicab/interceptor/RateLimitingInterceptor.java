@@ -44,9 +44,9 @@ public class RateLimitingInterceptor implements HandlerInterceptor {
     private CacheService cacheService;
 
     // Rate limiting configurations
-    private static final long REQUESTS_PER_MINUTE = 60;
-    private static final long LOGIN_ATTEMPTS_PER_15MIN = 5;
-    private static final long PAYMENT_REQUESTS_PER_10SEC = 1;
+    private static final long REQUESTS_PER_MINUTE = 300;
+    private static final long LOGIN_ATTEMPTS_PER_15MIN = 100;
+    private static final long PAYMENT_REQUESTS_PER_10SEC = 10;
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
