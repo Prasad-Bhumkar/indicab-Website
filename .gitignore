@@ -49,6 +49,17 @@ indicab-backend/logs/
 # Playwright report
 indicab-frontend/playwright-report/
 
+# Test artifacts
+indicab-frontend/test-results/
+indicab-frontend/vitest-output.json
+indicab-backend/mvn-test-*.log
+
+# Coverage output
+indicab-frontend/coverage/
+
+# Vite build
+indicab-frontend/dist/
+
 # AI plan artifacts
 .builder/
 
