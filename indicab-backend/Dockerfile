@@ -1,20 +1,4 @@
-# Multi-stage build for production-ready Spring Boot application
-# Stage 1: Build stage
-FROM maven:3.9-eclipse-temurin-17 AS builder
-
-WORKDIR /app
-
-# Copy pom.xml and download dependencies
-COPY pom.xml .
-RUN mvn dependency:go-offline
-
-# Copy source code
-COPY src ./src
-
-# Build the application with retry logic for transient network failures
-RUN mvn clean package -DskipTests -Dmaven.wagon.http.retryHandler.count=3
-
-# Stage 2: Runtime stage
+# Single-stage build using pre-built JAR from local Maven build
 FROM eclipse-temurin:17-jre-jammy
 
 WORKDIR /app
@@ -23,8 +7,8 @@ WORKDIR /app
 RUN groupadd -g 1000 appuser && \
     useradd -u 1000 -g appuser appuser
 
-# Copy the built application from builder stage
-COPY --from=builder /app/target/indicab-backend-*.jar app.jar
+# Copy the pre-built application JAR
+COPY target/indicab-backend-*.jar app.jar
 
 # Create logs directory
 RUN mkdir -p /app/logs && \
