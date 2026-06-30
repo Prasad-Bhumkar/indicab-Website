@@ -2127,88 +2127,69 @@ docker-compose config --quiet
 
 ---
 
-**ISSUE #13: Missing Timestamp Filtering** [STATUS: PENDING - 2026-03-15]
+**ISSUE #13: Missing Timestamp Filtering** [STATUS: ✅ RESOLVED - 2026-03-15]
 - **Priority:** 🔵 LOW
 - **Owner:** Backend Developer
 - **Impact:** Admin filtering less efficient without date range queries
-- **Recommended fix:** Add date range filter parameters to booking/audit endpoints
-- **Action:** Assign to Backend Developer
+- **Status:** ✅ RESOLVED
 
-**Recommendation:**
-```java
-@GetMapping("/dashboard/bookings")
-public ResponseEntity<Page<Booking>> getBookings(
-  Pageable pageable,
-  @RequestParam(required = false) LocalDateTime fromDate,
-  @RequestParam(required = false) LocalDateTime toDate
-)
-```
+**Resolution:**
+- `AuditLoggingService.getAuditLogsByDateRange()` supports startDate/endDate filtering
+- Admin booking endpoints support `dateFrom`/`dateTo` query parameters
+- Specification-based filtering allows date range on any entity
 
 ---
 
-**ISSUE #14: No Search Optimization** [STATUS: PENDING - 2026-03-15]
+**ISSUE #14: No Search Optimization** [STATUS: ✅ RESOLVED - 2026-03-15 by Database Engineer]
 - **Priority:** 🔵 LOW
 - **Owner:** Database Engineer
 - **Impact:** Admin search could be slow on 100k+ users
-- **Recommended fix:** Add full-text search indexes
-- **Action:** Assign to Database Engineer
+- **Status:** ✅ RESOLVED
 
-**Recommendation:**
-```sql
-ALTER TABLE users ADD FULLTEXT INDEX idx_search (name, email);
-```
+**Resolution:**
+- `DatabaseIndexInitializer` creates FULLTEXT index on users(name, email) at startup
+- Composite index on bookings(user_id, status) for common queries
+- Index on audit_logs(created_at) for date range queries
+- All indexes created after Hibernate schema generation, with idempotent error handling
 
 ---
 
-**ISSUE #15: Insufficient Logging** [STATUS: PENDING - 2026-03-15]
+**ISSUE #15: Insufficient Logging** [STATUS: ✅ RESOLVED - 2026-03-15]
 - **Priority:** 🔵 LOW
 - **Owner:** Backend Developer
 - **Impact:** Limited visibility into operations for debugging
-- **Recommended fix:** Add structured logging to all service methods
-- **Action:** Assign to Backend Developer
+- **Status:** ✅ RESOLVED
 
-**Recommendation:**
-```java
-logger.info("Creating booking for user={}, route={}->{}",
-  userId, pickupLocation, dropoffLocation);
-```
+**Resolution:**
+- All service classes use SLF4J with structured logging patterns
+- `BookingServiceImpl`: All CRUD operations logged with IDs and context
+- `AuditLoggingServiceImpl`: Operations logged with user, operation, resource details
+- `UserServiceImpl`: All operations logged with user info
+- Log levels appropriately used (INFO for business ops, DEBUG for detailed tracing, WARN/ERROR for failures)
 
 ---
 
-**ISSUE #16: No Error Metrics** [STATUS: PENDING - 2026-03-15]
+**ISSUE #16: No Error Metrics** [STATUS: ✅ RESOLVED - 2026-03-15]
 - **Priority:** 🔵 LOW
 - **Owner:** SRE/DevOps
 - **Impact:** Limited monitoring of system errors
-- **Recommended fix:** Add error metrics with MeterRegistry
-- **Action:** Assign to SRE/DevOps
+- **Status:** ✅ RESOLVED
 
-**Recommendation:**
-```java
-Counter.builder("booking.errors")
-  .tag("type", errorType)
-  .register(meterRegistry)
-  .increment();
-```
+**Resolution:**
+- `MetricsHelper` class uses Micrometer Counter for `service.errors`, `validation.errors`, `business.errors`
+- Tracked per service name, error type, and method for granularity
+- Integrated across `BookingServiceImpl`, `AuditLoggingServiceImpl`, and other services
+- Metrics exposed via Actuator `/actuator/metrics` endpoint
 
 ---
 
 ### 🟠 MEDIUM PRIORITY ISSUES - BACKEND ENHANCEMENTS
 
-**ISSUE #2: Missing CSRF Protection** [STATUS: PENDING - 2026-03-15]
+**ISSUE #2: Missing CSRF Protection** [STATUS: ✅ RESOLVED - 2026-03-15]
 - **Priority:** 🟠 MEDIUM (CSRF attack risk)
 - **Owner:** Backend Developer
 - **Impact:** Form-based attacks possible on sensitive operations
-- **Status:** PENDING
-- **Recommended fix:** Add CookieCsrfTokenRepository in SecurityConfig
-- **Action:** Assign to Backend Developer
-
-**Recommendation:**
-```java
-.csrf(csrf -> csrf
-  .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
-  .ignoringRequestMatchers("/api/**")
-)
-```
+- **Status:** ✅ RESOLVED - Already implemented in SecurityConfig using CookieCsrfTokenRepository.withHttpOnlyFalse(), ignoring /api/** and /v1/** paths for JWT-based auth
 
 ---
 
@@ -2271,23 +2252,17 @@ Counter.builder("booking.errors")
 
 ---
 
-**ISSUE #8: Missing Referential Integrity Check** [STATUS: PENDING - 2026-03-15]
+**ISSUE #8: Missing Referential Integrity Check** [STATUS: ✅ RESOLVED - 2026-03-15]
 - **Priority:** 🟠 MEDIUM (data consistency risk)
 - **Owner:** Backend Developer
 - **Impact:** Orphaned bookings could reference non-existent users
-- **Status:** PENDING
+- **Status:** ✅ RESOLVED
 
-**Root cause:**
-- Guest bookings set `currentUserId = null`
-- No validation ensures user exists for non-guest bookings
-
-**Recommended fix:**
-```java
-@ManyToOne(fetch = FetchType.LAZY)
-@JoinColumn(name = "user_id", nullable = true)
-@NotNull(message = "User required for authenticated bookings", groups = ValidatedBooking.class)
-private User user;
-```
+**Resolution:**
+- `Booking.validateReferentialIntegrity()` validates user reference before persisting
+- `BookingServiceImpl.createBooking()` calls `validateReferentialIntegrity()` at line 82
+- Guest bookings (user=null) allowed; authenticated bookings require valid user with ID
+- `@ManyToOne(fetch = FetchType.LAZY)` with `nullable = true` for guest support
 
 ---
 
@@ -2324,23 +2299,18 @@ private User user;
 
 ---
 
-**ISSUE #11: Audit Log Details Are Cleartext** [STATUS: PENDING - 2026-03-15]
+**ISSUE #11: Audit Log Details Are Cleartext** [STATUS: ✅ RESOLVED - 2026-03-15]
 - **Priority:** 🟠 MEDIUM (data privacy risk)
 - **Owner:** Backend Developer
 - **Impact:** Admin actions logged in plaintext, sensitive data visible
-- **Status:** PENDING
+- **Status:** ✅ RESOLVED
 
-**Root cause:**
-- Admin actions logged with full details in cleartext
-- No encryption of sensitive information in audit logs
-
-**Recommended fix:**
-```java
-public void logBulkOperation(...) {
-  AuditLog log = new AuditLog();
-  log.setDetails(encryptionService.encrypt(details));
-}
-```
+**Resolution:**
+- `AuditLoggingServiceImpl.logOperation()` encrypts details via `encryptionService.encrypt()` (line 66)
+- `AuditLoggingServiceImpl.logBulkOperation()` encrypts details (line 179)
+- `AuditLoggingServiceImpl.logFailedBulkOperation()` now also encrypts details (fixed)
+- `EncryptionServiceImpl` uses AES-256 encryption with SHA-256 key derivation
+- Sensitive PII in audit logs is encrypted at rest
 
 ---
 
@@ -2555,15 +2525,15 @@ public void logBulkOperation(...) {
 
 ### 🔵 MEDIUM PRIORITY ISSUES - BACKEND ENHANCEMENTS (PENDING)
 
-**ISSUE #15: No Rate Limiting on Public Endpoints** [STATUS: PENDING - 2026-03-15]
+**ISSUE #15: No Rate Limiting on Public Endpoints** [STATUS: ✅ RESOLVED - 2026-03-15]
 - **Priority:** 🔵 MEDIUM (brute force risk on auth)
-- **Recommended fix:** Implement bucket4j for rate limiting
-- **Action:** Assign to Backend Developer
+- **Status:** ✅ RESOLVED - `RateLimitingInterceptor` with Bucket4j implements per-endpoint rate limits (300/min general, 100/15min login, 1/10s payments)
+- **Action:** Already implemented in `interceptor/RateLimitingInterceptor.java` and registered via `WebConfig`
 
-**ISSUE #16: Missing CSRF Protection** [STATUS: PENDING - 2026-03-15]
+**ISSUE #16: Missing CSRF Protection** [STATUS: ✅ RESOLVED - 2026-03-15]
 - **Priority:** 🔵 MEDIUM (CSRF attack risk)
-- **Recommended fix:** Add CookieCsrfTokenRepository in SecurityConfig
-- **Action:** Assign to Backend Developer
+- **Status:** ✅ RESOLVED - `SecurityConfig.java` uses `CookieCsrfTokenRepository.withHttpOnlyFalse()` with `/api/**` and `/v1/**` ignored for JWT-based auth
+- **Action:** Already implemented in `SecurityConfig.java`
 
 ---
 
