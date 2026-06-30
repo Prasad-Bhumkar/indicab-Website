@@ -1,3 +1,0 @@
--- DEPRECATED: This file has been moved to V014__ensure_core_schema.sql
--- Please use V014 instead.
--- This file should be deleted from the build.
