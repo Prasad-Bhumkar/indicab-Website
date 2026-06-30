@@ -14,6 +14,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -289,6 +290,7 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void bulkDeleteBookings(List<Long> ids) {
         logger.info("Bulk deleting {} bookings", ids.size());
         try {
@@ -302,6 +304,7 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void bulkUpdateBookingsStatus(List<Long> ids, String status) {
         logger.info("Bulk updating status for {} bookings to {}", ids.size(), status);
         try {

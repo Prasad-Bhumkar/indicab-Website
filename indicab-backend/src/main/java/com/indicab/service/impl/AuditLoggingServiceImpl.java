@@ -212,7 +212,7 @@ public class AuditLoggingServiceImpl implements AuditLoggingService {
             auditLog.setUserId(userId);
             auditLog.setOperation("BULK_" + operation);
             auditLog.setResourceType(resourceType);
-            auditLog.setDetails(bulkDetails);
+            auditLog.setDetails(encryptionService.encrypt(bulkDetails));
             auditLog.setStatus("FAILED");
             auditLog.setFailureReason(failureReason);
             auditLog.setIpAddress(ipAddress);
