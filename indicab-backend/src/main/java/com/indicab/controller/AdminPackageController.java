@@ -47,7 +47,7 @@ public class AdminPackageController {
             }
 
             if (isActive != null) {
-                builder.with("isActive", isActive.toString(), com.indicab.util.SearchSpecification.SearchOperator.EQUALS);
+                builder.with("isActive", isActive, com.indicab.util.SearchSpecification.SearchOperator.EQUALS);
             }
 
             if (type != null && !type.isEmpty()) {
@@ -74,7 +74,7 @@ public class AdminPackageController {
                 new com.indicab.util.SearchSpecification.SpecificationBuilder<>();
 
             // Always filter by isActive=true
-            builder.with("isActive", "true", com.indicab.util.SearchSpecification.SearchOperator.EQUALS);
+            builder.with("isActive", Boolean.TRUE, com.indicab.util.SearchSpecification.SearchOperator.EQUALS);
 
             if (search != null && !search.isEmpty()) {
                 builder.with("name", search, com.indicab.util.SearchSpecification.SearchOperator.CONTAINS)

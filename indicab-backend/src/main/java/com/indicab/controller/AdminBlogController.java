@@ -56,7 +56,7 @@ public class AdminBlogController {
 
         if (search != null && !search.isEmpty()) {
             builder.with("title", search, com.indicab.util.SearchSpecification.SearchOperator.CONTAINS)
-                   .with("content", search, com.indicab.util.SearchSpecification.SearchOperator.CONTAINS);
+                   .or().with("content", search, com.indicab.util.SearchSpecification.SearchOperator.CONTAINS);
         }
 
         if (status != null && !status.isEmpty()) {
@@ -88,7 +88,7 @@ public class AdminBlogController {
 
         if (search != null && !search.isEmpty()) {
             builder.with("title", search, com.indicab.util.SearchSpecification.SearchOperator.CONTAINS)
-                   .with("content", search, com.indicab.util.SearchSpecification.SearchOperator.CONTAINS);
+                   .or().with("content", search, com.indicab.util.SearchSpecification.SearchOperator.CONTAINS);
         }
 
         Page<Blog> blogs = blogService.getAllBlogs(pageable, builder.build());

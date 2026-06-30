@@ -68,7 +68,7 @@ public class AdminBookingController {
         if (search != null && !search.isEmpty()) {
             // Search in pickup and dropoff addresses
             builder.with("pickupAddress", search, com.indicab.util.SearchSpecification.SearchOperator.CONTAINS)
-                   .with("dropoffAddress", search, com.indicab.util.SearchSpecification.SearchOperator.CONTAINS);
+                   .or().with("dropoffAddress", search, com.indicab.util.SearchSpecification.SearchOperator.CONTAINS);
         }
 
         if (status != null && !status.isEmpty()) {
