@@ -49,6 +49,7 @@ class BookingServiceImplTest {
         testBooking.setPhoneNumber("9876543210");
         testBooking.setPickupAddress("123 Main St, Bangalore");
         testBooking.setStatus("PENDING");
+        testBooking.setId(1L);
 
         bookingRequestDTO = new BookingRequestDTO();
         bookingRequestDTO.setFrom("Bangalore");

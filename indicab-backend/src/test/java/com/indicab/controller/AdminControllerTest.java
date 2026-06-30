@@ -215,8 +215,8 @@ class AdminControllerTest {
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
 
-        // Assert
-        assertThat(userRepository.existsById(user.getId())).isFalse();
+        // Assert - soft delete: record still exists but deletedAt is set
+        assertThat(userRepository.findById(user.getId())).isEmpty();
     }
 
     @Test

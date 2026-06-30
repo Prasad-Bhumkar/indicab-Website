@@ -43,6 +43,7 @@ class AdminBlogControllerTest {
         Blog blog = new Blog();
         blog.setTitle(title);
         blog.setContent(content);
+        blog.setAuthor("Admin");
         blog.setStatus(status);
         blog.setCreatedAt(LocalDateTime.now());
         blog.setUpdatedAt(LocalDateTime.now());

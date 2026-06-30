@@ -5,6 +5,7 @@ import com.indicab.dto.UserRegistrationDTO;
 import com.indicab.entity.User;
 import com.indicab.controller.AdminWebSocketController;
 import com.indicab.repository.UserRepository;
+import com.indicab.util.MetricsHelper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -35,6 +36,9 @@ class UserServiceImplTest {
 
     @Mock
     private AdminWebSocketController adminWebSocketController;
+
+    @Mock
+    private MetricsHelper metricsHelper;
 
     @Mock
     private PasswordEncoder passwordEncoder;

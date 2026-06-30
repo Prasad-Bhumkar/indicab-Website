@@ -3,6 +3,7 @@ package com.indicab.util;
 import com.indicab.entity.User;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Expression;
 import jakarta.persistence.criteria.Path;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
@@ -37,19 +38,27 @@ class SearchSpecificationTest {
     private CriteriaBuilder cb;
 
     @BeforeEach
+    @SuppressWarnings({"unchecked", "rawtypes"})
     void setup() {
         MockitoAnnotations.openMocks(this);
 
         // Provide default behavior for common CriteriaBuilder operations
         when(cb.conjunction()).thenReturn(mock(Predicate.class));
-        when(cb.equal(any(), any())).thenReturn(mock(Predicate.class));
-        when(cb.notEqual(any(), any())).thenReturn(mock(Predicate.class));
-        when(cb.like(any(), anyString())).thenReturn(mock(Predicate.class));
+        doAnswer(invocation -> mock(Predicate.class)).when(cb).equal(any(Expression.class), any(Object.class));
+        doAnswer(invocation -> mock(Predicate.class)).when(cb).notEqual(any(Expression.class), any(Object.class));
+        doAnswer(invocation -> mock(Predicate.class)).when(cb).like(any(Expression.class), anyString());
 
         // Provide a stable path for root.get(...) calls
         doReturn(path).when(root).get(anyString());
         doReturn(path).when(path).as(String.class);
         doReturn(path).when(path).as(Comparable.class);
+
+        // Provide default behavior for comparison operations
+        when(cb.lower(any(Expression.class))).thenReturn((Expression) mock(Expression.class));
+        when(cb.greaterThan(any(Expression.class), any(Comparable.class))).thenReturn(mock(Predicate.class));
+        when(cb.lessThan(any(Expression.class), any(Comparable.class))).thenReturn(mock(Predicate.class));
+        when(cb.greaterThanOrEqualTo(any(Expression.class), any(Comparable.class))).thenReturn(mock(Predicate.class));
+        when(cb.lessThanOrEqualTo(any(Expression.class), any(Comparable.class))).thenReturn(mock(Predicate.class));
     }
 
     @Test

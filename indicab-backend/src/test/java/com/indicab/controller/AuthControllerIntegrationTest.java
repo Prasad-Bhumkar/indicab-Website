@@ -3,7 +3,9 @@ package com.indicab.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.indicab.dto.LoginRequestDTO;
 import com.indicab.dto.UserRegistrationDTO;
+import com.indicab.entity.RefreshToken;
 import com.indicab.entity.User;
+import com.indicab.repository.RefreshTokenRepository;
 import com.indicab.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -40,6 +42,9 @@ class AuthControllerIntegrationTest {
     private UserRepository userRepository;
 
     @Autowired
+    private RefreshTokenRepository refreshTokenRepository;
+
+    @Autowired
     private PasswordEncoder passwordEncoder;
 
     private User testUser;
@@ -48,6 +53,7 @@ class AuthControllerIntegrationTest {
 
     @BeforeEach
     void setUp() {
+        refreshTokenRepository.deleteAll();
         userRepository.deleteAll();
 
         testUser = new User();

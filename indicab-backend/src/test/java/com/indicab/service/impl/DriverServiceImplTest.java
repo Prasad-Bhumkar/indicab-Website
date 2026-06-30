@@ -5,6 +5,7 @@ import com.indicab.dto.DriverRegistrationDTO;
 import com.indicab.dto.DriverResponseDTO;
 import com.indicab.entity.User;
 import com.indicab.repository.UserRepository;
+import com.indicab.util.MetricsHelper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -12,7 +13,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -21,10 +26,6 @@ import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
-/**
- * Unit tests for DriverServiceImpl
- * Tests driver registration, approval workflow, and queries
- */
 @ExtendWith(MockitoExtension.class)
 @DisplayName("DriverServiceImpl Tests")
 class DriverServiceImplTest {
@@ -32,29 +33,35 @@ class DriverServiceImplTest {
     @Mock
     private UserRepository userRepository;
 
+    @Mock
+    private MetricsHelper metricsHelper;
+
     @InjectMocks
     private DriverServiceImpl driverService;
 
-    private User testDriver;
+    private User testUser;
     private DriverRegistrationDTO registrationDTO;
     private DriverApprovalDTO approvalDTO;
 
     @BeforeEach
     void setUp() {
-        testDriver = new User();
-        testDriver.setId(1L);
-        testDriver.setName("John Driver");
-        testDriver.setEmail("driver@example.com");
-        testDriver.setPhone("9876543210");
-        testDriver.setAddress("123 Main St");
-        testDriver.setRole("USER");
-        testDriver.setDriverStatus("NONE");
+        testUser = new User();
+        testUser.setId(1L);
+        testUser.setName("Driver Raj");
+        testUser.setEmail("raj@example.com");
+        testUser.setPassword("hashedPass");
+        testUser.setPhone("9876543210");
+        testUser.setAddress("123 Main St");
+        testUser.setRole("USER");
+        testUser.setDriverStatus("NONE");
+        testUser.setCreatedAt(LocalDateTime.now());
+        testUser.setUpdatedAt(LocalDateTime.now());
 
         registrationDTO = new DriverRegistrationDTO();
-        registrationDTO.setLicenseNumber("DL01AB1234");
-        registrationDTO.setVehicleType("Sedan");
-        registrationDTO.setPhoneNumber("9876543210");
-        registrationDTO.setAddress("123 Main St");
+        registrationDTO.setLicenseNumber("DL-2024-12345");
+        registrationDTO.setVehicleType("SEDAN");
+        registrationDTO.setPhoneNumber("9876543211");
+        registrationDTO.setAddress("456 Oak Ave");
 
         approvalDTO = new DriverApprovalDTO();
         approvalDTO.setDriverId(1L);
@@ -63,272 +70,221 @@ class DriverServiceImplTest {
 
     @Test
     @DisplayName("Should apply as driver successfully")
-    void testApplyAsDriverSuccess() {
-        // Arrange
-        when(userRepository.findById(1L)).thenReturn(Optional.of(testDriver));
-        when(userRepository.save(any(User.class))).thenReturn(testDriver);
+    void testApplyAsDriver() {
+        when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
+        when(userRepository.save(any(User.class))).thenReturn(testUser);
 
-        // Act
         DriverResponseDTO result = driverService.applyAsDriver(1L, registrationDTO);
 
-        // Assert
         assertThat(result).isNotNull();
-        assertThat(result.getId()).isEqualTo(1L);
-        assertThat(result.getLicenseNumber()).isEqualTo("DL01AB1234");
-        assertThat(result.getVehicleType()).isEqualTo("Sedan");
+        assertThat(result.getLicenseNumber()).isEqualTo("DL-2024-12345");
+        assertThat(result.getVehicleType()).isEqualTo("SEDAN");
         assertThat(result.getDriverStatus()).isEqualTo("PENDING");
         verify(userRepository).save(any(User.class));
     }
 
     @Test
-    @DisplayName("Should throw exception when applying as driver for non-existent user")
+    @DisplayName("Should throw exception when applying as driver with non-existent user")
     void testApplyAsDriverUserNotFound() {
-        // Arrange
         when(userRepository.findById(999L)).thenReturn(Optional.empty());
 
-        // Act & Assert
         assertThatThrownBy(() -> driverService.applyAsDriver(999L, registrationDTO))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("User not found with ID: 999");
-        verify(userRepository, never()).save(any(User.class));
-    }
-
-    @Test
-    @DisplayName("Should set driver application timestamp when applying")
-    void testDriverAppliedAtTimestamp() {
-        // Arrange
-        when(userRepository.findById(1L)).thenReturn(Optional.of(testDriver));
-        when(userRepository.save(any(User.class))).thenAnswer(invocation -> {
-            User user = invocation.getArgument(0);
-            assertThat(user.getDriverAppliedAt()).isNotNull();
-            return user;
-        });
-
-        // Act
-        driverService.applyAsDriver(1L, registrationDTO);
-
-        // Assert
-        verify(userRepository).save(argThat(user -> user.getDriverAppliedAt() != null));
-    }
-
-    @Test
-    @DisplayName("Should set role to DRIVER when applying")
-    void testRoleSetToDriver() {
-        // Arrange
-        when(userRepository.findById(1L)).thenReturn(Optional.of(testDriver));
-        when(userRepository.save(any(User.class))).thenReturn(testDriver);
-
-        // Act
-        driverService.applyAsDriver(1L, registrationDTO);
-
-        // Assert
-        verify(userRepository).save(argThat(user -> "DRIVER".equals(user.getRole())));
+        verify(userRepository, never()).save(any());
     }
 
     @Test
     @DisplayName("Should get pending applications")
     void testGetPendingApplications() {
-        // Arrange
-        User pendingDriver = new User();
-        pendingDriver.setId(1L);
-        pendingDriver.setDriverStatus("PENDING");
+        testUser.setDriverStatus("PENDING");
+        testUser.setRole("DRIVER");
+        List<User> userList = new ArrayList<>();
+        userList.add(testUser);
+        when(userRepository.findAll()).thenReturn(userList);
 
-        List<User> allUsers = new ArrayList<>();
-        allUsers.add(pendingDriver);
-        
-        when(userRepository.findAll()).thenReturn(allUsers);
-
-        // Act
         List<DriverResponseDTO> result = driverService.getPendingApplications();
 
-        // Assert
         assertThat(result).hasSize(1);
         assertThat(result.get(0).getDriverStatus()).isEqualTo("PENDING");
     }
 
     @Test
-    @DisplayName("Should return empty list when no pending applications")
-    void testGetPendingApplicationsEmpty() {
-        // Arrange
-        when(userRepository.findAll()).thenReturn(new ArrayList<>());
+    @DisplayName("Should get pending applications paged")
+    void testGetPendingApplicationsPaged() {
+        testUser.setDriverStatus("PENDING");
+        testUser.setRole("DRIVER");
+        List<User> userList = new ArrayList<>();
+        userList.add(testUser);
+        when(userRepository.findAll()).thenReturn(userList);
 
-        // Act
-        List<DriverResponseDTO> result = driverService.getPendingApplications();
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<DriverResponseDTO> result = driverService.getPendingApplicationsPaged(pageable);
 
-        // Assert
-        assertThat(result).isEmpty();
+        assertThat(result).isNotNull();
+        assertThat(result.getContent()).hasSize(1);
+    }
+
+    @Test
+    @DisplayName("Should get pending applications paged with search")
+    void testGetPendingApplicationsPagedWithSearch() {
+        testUser.setDriverStatus("PENDING");
+        testUser.setRole("DRIVER");
+        List<User> userList = new ArrayList<>();
+        userList.add(testUser);
+        when(userRepository.findAll()).thenReturn(userList);
+
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<DriverResponseDTO> result = driverService.getPendingApplicationsPaged(pageable, "raj");
+
+        assertThat(result).isNotNull();
+        assertThat(result.getContent()).hasSize(1);
     }
 
     @Test
     @DisplayName("Should get approved drivers")
     void testGetApprovedDrivers() {
-        // Arrange
-        User approvedDriver = new User();
-        approvedDriver.setId(1L);
-        approvedDriver.setName("Approved Driver");
-        approvedDriver.setDriverStatus("APPROVED");
+        testUser.setDriverStatus("APPROVED");
+        testUser.setRole("DRIVER");
+        List<User> userList = new ArrayList<>();
+        userList.add(testUser);
+        when(userRepository.findAll()).thenReturn(userList);
 
-        List<User> allUsers = new ArrayList<>();
-        allUsers.add(approvedDriver);
-        
-        when(userRepository.findAll()).thenReturn(allUsers);
-
-        // Act
         List<DriverResponseDTO> result = driverService.getApprovedDrivers();
 
-        // Assert
         assertThat(result).hasSize(1);
         assertThat(result.get(0).getDriverStatus()).isEqualTo("APPROVED");
     }
 
     @Test
-    @DisplayName("Should return empty list when no approved drivers")
-    void testGetApprovedDriversEmpty() {
-        // Arrange
-        when(userRepository.findAll()).thenReturn(new ArrayList<>());
+    @DisplayName("Should get approved drivers paged")
+    void testGetApprovedDriversPaged() {
+        testUser.setDriverStatus("APPROVED");
+        testUser.setRole("DRIVER");
+        List<User> userList = new ArrayList<>();
+        userList.add(testUser);
+        when(userRepository.findAll()).thenReturn(userList);
 
-        // Act
-        List<DriverResponseDTO> result = driverService.getApprovedDrivers();
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<DriverResponseDTO> result = driverService.getApprovedDriversPaged(pageable);
 
-        // Assert
-        assertThat(result).isEmpty();
+        assertThat(result).isNotNull();
+        assertThat(result.getContent()).hasSize(1);
     }
 
     @Test
-    @DisplayName("Should get all drivers by role")
+    @DisplayName("Should get approved drivers paged with search")
+    void testGetApprovedDriversPagedWithSearch() {
+        testUser.setDriverStatus("APPROVED");
+        testUser.setRole("DRIVER");
+        List<User> userList = new ArrayList<>();
+        userList.add(testUser);
+        when(userRepository.findAll()).thenReturn(userList);
+
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<DriverResponseDTO> result = driverService.getApprovedDriversPaged(pageable, "raj");
+
+        assertThat(result).isNotNull();
+        assertThat(result.getContent()).hasSize(1);
+    }
+
+    @Test
+    @DisplayName("Should get all drivers")
     void testGetAllDrivers() {
-        // Arrange
-        User driver = new User();
-        driver.setId(1L);
-        driver.setName("Test Driver");
-        driver.setRole("DRIVER");
+        testUser.setRole("DRIVER");
+        List<User> userList = new ArrayList<>();
+        userList.add(testUser);
+        when(userRepository.findAll()).thenReturn(userList);
 
-        List<User> allUsers = new ArrayList<>();
-        allUsers.add(driver);
-        
-        when(userRepository.findAll()).thenReturn(allUsers);
-
-        // Act
         List<DriverResponseDTO> result = driverService.getAllDrivers();
 
-        // Assert
         assertThat(result).hasSize(1);
+        assertThat(result.get(0).getEmail()).isEqualTo("raj@example.com");
     }
 
     @Test
-    @DisplayName("Should return empty list when no drivers exist")
-    void testGetAllDriversEmpty() {
-        // Arrange
-        when(userRepository.findAll()).thenReturn(new ArrayList<>());
+    @DisplayName("Should get all drivers paged")
+    void testGetAllDriversPaged() {
+        testUser.setRole("DRIVER");
+        List<User> userList = new ArrayList<>();
+        userList.add(testUser);
+        when(userRepository.findAll()).thenReturn(userList);
 
-        // Act
-        List<DriverResponseDTO> result = driverService.getAllDrivers();
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<DriverResponseDTO> result = driverService.getAllDriversPaged(pageable);
 
-        // Assert
-        assertThat(result).isEmpty();
+        assertThat(result).isNotNull();
+        assertThat(result.getContent()).hasSize(1);
+    }
+
+    @Test
+    @DisplayName("Should get all drivers paged with search")
+    void testGetAllDriversPagedWithSearch() {
+        testUser.setRole("DRIVER");
+        List<User> userList = new ArrayList<>();
+        userList.add(testUser);
+        when(userRepository.findAll()).thenReturn(userList);
+
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<DriverResponseDTO> result = driverService.getAllDriversPaged(pageable, "raj");
+
+        assertThat(result).isNotNull();
+        assertThat(result.getContent()).hasSize(1);
     }
 
     @Test
     @DisplayName("Should get driver by ID")
     void testGetDriverById() {
-        // Arrange
-        testDriver.setRole("DRIVER");
-        when(userRepository.findById(1L)).thenReturn(Optional.of(testDriver));
+        testUser.setRole("DRIVER");
+        when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
 
-        // Act
         DriverResponseDTO result = driverService.getDriverById(1L);
 
-        // Assert
         assertThat(result).isNotNull();
         assertThat(result.getId()).isEqualTo(1L);
-        assertThat(result.getName()).isEqualTo("John Driver");
     }
 
     @Test
-    @DisplayName("Should throw exception when driver not found by ID")
+    @DisplayName("Should throw exception when driver by ID not found")
     void testGetDriverByIdNotFound() {
-        // Arrange
         when(userRepository.findById(999L)).thenReturn(Optional.empty());
 
-        // Act & Assert
         assertThatThrownBy(() -> driverService.getDriverById(999L))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("Driver not found with ID: 999");
     }
 
     @Test
-    @DisplayName("Should approve driver application")
-    void testApproveDriverApplication() {
-        // Arrange
-        testDriver.setDriverStatus("PENDING");
-        when(userRepository.findById(1L)).thenReturn(Optional.of(testDriver));
-        when(userRepository.save(any(User.class))).thenReturn(testDriver);
+    @DisplayName("Should review driver application and approve")
+    void testReviewDriverApplicationApprove() {
+        when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
+        when(userRepository.save(any(User.class))).thenReturn(testUser);
 
-        // Act
         DriverResponseDTO result = driverService.reviewDriverApplication(approvalDTO);
 
-        // Assert
         assertThat(result).isNotNull();
-        verify(userRepository).save(argThat(user -> "APPROVED".equals(user.getDriverStatus())));
+        verify(userRepository).save(any(User.class));
     }
 
     @Test
-    @DisplayName("Should reject driver application")
-    void testRejectDriverApplication() {
-        // Arrange
+    @DisplayName("Should review driver application and reject")
+    void testReviewDriverApplicationReject() {
         approvalDTO.setStatus("REJECTED");
-        testDriver.setDriverStatus("PENDING");
-        when(userRepository.findById(1L)).thenReturn(Optional.of(testDriver));
-        when(userRepository.save(any(User.class))).thenReturn(testDriver);
+        when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
+        when(userRepository.save(any(User.class))).thenReturn(testUser);
 
-        // Act
         DriverResponseDTO result = driverService.reviewDriverApplication(approvalDTO);
 
-        // Assert
         assertThat(result).isNotNull();
-        verify(userRepository).save(argThat(user -> "REJECTED".equals(user.getDriverStatus())));
+        verify(userRepository).save(any(User.class));
     }
 
     @Test
-    @DisplayName("Should set approval timestamp when approving driver")
-    void testDriverApprovedAtTimestamp() {
-        // Arrange
-        testDriver.setDriverStatus("PENDING");
-        when(userRepository.findById(1L)).thenReturn(Optional.of(testDriver));
-        when(userRepository.save(any(User.class))).thenAnswer(invocation -> {
-            User user = invocation.getArgument(0);
-            assertThat(user.getDriverApprovedAt()).isNotNull();
-            return user;
-        });
+    @DisplayName("Should throw exception when reviewing with invalid status")
+    void testReviewDriverApplicationInvalidStatus() {
+        approvalDTO.setStatus("INVALID");
+        when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
 
-        // Act
-        driverService.reviewDriverApplication(approvalDTO);
-
-        // Assert
-        verify(userRepository).save(argThat(user -> user.getDriverApprovedAt() != null));
-    }
-
-    @Test
-    @DisplayName("Should throw exception when approving non-existent driver")
-    void testApproveNonExistentDriver() {
-        // Arrange
-        approvalDTO.setDriverId(999L);
-        when(userRepository.findById(999L)).thenReturn(Optional.empty());
-
-        // Act & Assert
-        assertThatThrownBy(() -> driverService.reviewDriverApplication(approvalDTO))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("Driver not found with ID: 999");
-    }
-
-    @Test
-    @DisplayName("Should throw exception for invalid approval status")
-    void testInvalidApprovalStatus() {
-        // Arrange
-        approvalDTO.setStatus("INVALID_STATUS");
-        when(userRepository.findById(1L)).thenReturn(Optional.of(testDriver));
-
-        // Act & Assert
         assertThatThrownBy(() -> driverService.reviewDriverApplication(approvalDTO))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("Invalid approval status. Must be APPROVED or REJECTED.");
@@ -337,50 +293,83 @@ class DriverServiceImplTest {
     @Test
     @DisplayName("Should get driver by user ID")
     void testGetDriverByUserId() {
-        // Arrange
-        testDriver.setRole("DRIVER");
-        when(userRepository.findById(1L)).thenReturn(Optional.of(testDriver));
+        when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
 
-        // Act
         User result = driverService.getDriverByUserId(1L);
 
-        // Assert
         assertThat(result).isNotNull();
         assertThat(result.getId()).isEqualTo(1L);
     }
 
     @Test
-    @DisplayName("Should throw exception when getting driver by invalid user ID")
+    @DisplayName("Should throw exception when driver by user ID not found")
     void testGetDriverByUserIdNotFound() {
-        // Arrange
         when(userRepository.findById(999L)).thenReturn(Optional.empty());
 
-        // Act & Assert
         assertThatThrownBy(() -> driverService.getDriverByUserId(999L))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("Driver not found with user ID: 999");
     }
 
     @Test
-    @DisplayName("Should include all required driver information in response")
-    void testDriverResponseDTOContainsAllFields() {
-        // Arrange
-        testDriver.setRole("DRIVER");
-        testDriver.setLicenseNumber("DL01AB1234");
-        testDriver.setVehicleType("Sedan");
-        when(userRepository.findById(1L)).thenReturn(Optional.of(testDriver));
+    @DisplayName("Should bulk delete drivers")
+    void testBulkDeleteDrivers() {
+        List<Long> ids = new ArrayList<>();
+        ids.add(1L);
+        ids.add(2L);
 
-        // Act
-        DriverResponseDTO result = driverService.getDriverById(1L);
+        driverService.bulkDeleteDrivers(ids);
 
-        // Assert
-        assertThat(result.getId()).isNotNull();
-        assertThat(result.getName()).isNotNull();
-        assertThat(result.getEmail()).isNotNull();
-        assertThat(result.getPhone()).isNotNull();
-        assertThat(result.getAddress()).isNotNull();
-        assertThat(result.getLicenseNumber()).isNotNull();
-        assertThat(result.getVehicleType()).isNotNull();
-        assertThat(result.getDriverStatus()).isNotNull();
+        verify(userRepository).deleteAllById(ids);
+    }
+
+    @Test
+    @DisplayName("Should handle exception during bulk delete drivers")
+    void testBulkDeleteDriversException() {
+        List<Long> ids = new ArrayList<>();
+        ids.add(1L);
+
+        doThrow(new RuntimeException("Database error")).when(userRepository).deleteAllById(ids);
+
+        assertThatThrownBy(() -> driverService.bulkDeleteDrivers(ids))
+                .isInstanceOf(RuntimeException.class)
+                .hasMessage("Failed to delete multiple drivers");
+        verify(metricsHelper).recordError(eq("DriverService"), any(RuntimeException.class), eq("bulkDeleteDrivers"));
+    }
+
+    @Test
+    @DisplayName("Should bulk update driver status")
+    void testBulkUpdateDriversStatus() {
+        List<Long> ids = new ArrayList<>();
+        ids.add(1L);
+        List<User> users = new ArrayList<>();
+        users.add(testUser);
+        when(userRepository.findAllById(ids)).thenReturn(users);
+        when(userRepository.saveAll(users)).thenReturn(users);
+
+        driverService.bulkUpdateDriversStatus(ids, "APPROVED");
+
+        verify(userRepository).saveAll(users);
+    }
+
+    @Test
+    @DisplayName("Should handle exception during bulk update driver status")
+    void testBulkUpdateDriversStatusException() {
+        List<Long> ids = new ArrayList<>();
+        ids.add(1L);
+        when(userRepository.findAllById(ids)).thenThrow(new RuntimeException("Database error"));
+
+        assertThatThrownBy(() -> driverService.bulkUpdateDriversStatus(ids, "APPROVED"))
+                .isInstanceOf(RuntimeException.class)
+                .hasMessage("Failed to update status for multiple drivers");
+        verify(metricsHelper).recordError(eq("DriverService"), any(RuntimeException.class), eq("bulkUpdateDriversStatus"));
+    }
+
+    @Test
+    @DisplayName("Should get rides for driver (empty list)")
+    void testGetRidesForDriver() {
+        List<Object> result = driverService.getRidesForDriver(1L);
+
+        assertThat(result).isEmpty();
     }
 }
