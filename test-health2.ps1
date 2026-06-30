@@ -1,0 +1,1 @@
+try { $wc = New-Object System.Net.WebClient; $f = $wc.DownloadString("http://localhost/"); Write-Host "FRONTEND:200"; Write-Host ("FRONTEND-LEN:" + $f.Length) } catch { Write-Host $_.Exception.Message; exit 1 }
