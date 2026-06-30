@@ -78,7 +78,7 @@ public class AdminWebSocketController {
         Map<String, Object> payload = new HashMap<>(stats);
         payload.put("type", "DASHBOARD_UPDATE");
         payload.put("timestamp", LocalDateTime.now());
-        messagingTemplate.convertAndSend("/topic/admin/dashboard", payload);
+        safeBroadcast("/topic/admin/dashboard", payload);
     }
 
     /**
@@ -90,7 +90,7 @@ public class AdminWebSocketController {
         payload.put("type", "NEW_BOOKING");
         payload.put("data", booking);
         payload.put("timestamp", LocalDateTime.now());
-        messagingTemplate.convertAndSend("/topic/admin/bookings", payload);
+        safeBroadcast("/topic/admin/bookings", payload);
     }
 
     /**
@@ -103,7 +103,7 @@ public class AdminWebSocketController {
         payload.put("bookingId", bookingId);
         payload.put("status", status);
         payload.put("timestamp", LocalDateTime.now());
-        messagingTemplate.convertAndSend("/topic/admin/bookings", payload);
+        safeBroadcast("/topic/admin/bookings", payload);
     }
 
     /**
@@ -117,7 +117,7 @@ public class AdminWebSocketController {
         payload.put("status", status);
         payload.put("count", bookingIds.size());
         payload.put("timestamp", LocalDateTime.now());
-        messagingTemplate.convertAndSend("/topic/admin/bookings", payload);
+        safeBroadcast("/topic/admin/bookings", payload);
     }
 
     /**
@@ -129,7 +129,7 @@ public class AdminWebSocketController {
         payload.put("type", "NEW_USER");
         payload.put("data", user);
         payload.put("timestamp", LocalDateTime.now());
-        messagingTemplate.convertAndSend("/topic/admin/users", payload);
+        safeBroadcast("/topic/admin/users", payload);
     }
 
     /**
@@ -142,7 +142,7 @@ public class AdminWebSocketController {
         payload.put("userIds", userIds);
         payload.put("count", userIds.size());
         payload.put("timestamp", LocalDateTime.now());
-        messagingTemplate.convertAndSend("/topic/admin/users", payload);
+        safeBroadcast("/topic/admin/users", payload);
     }
 
     /**
@@ -156,7 +156,19 @@ public class AdminWebSocketController {
         payload.put("role", role);
         payload.put("count", userIds.size());
         payload.put("timestamp", LocalDateTime.now());
-        messagingTemplate.convertAndSend("/topic/admin/users", payload);
+        safeBroadcast("/topic/admin/users", payload);
+    }
+
+    /**
+     * Safely broadcast a message to a topic, catching any WebSocket errors
+     * so they don't propagate to the caller.
+     */
+    private void safeBroadcast(String topic, Object payload) {
+        try {
+            messagingTemplate.convertAndSend(topic, payload);
+        } catch (Exception e) {
+            logger.warn("WebSocket broadcast to {} failed (no subscribers?): {}", topic, e.getMessage());
+        }
     }
 
     /**
@@ -168,7 +180,7 @@ public class AdminWebSocketController {
         payload.put("type", "NEW_AUDIT_LOG");
         payload.put("data", auditLog);
         payload.put("timestamp", LocalDateTime.now());
-        messagingTemplate.convertAndSend("/topic/admin/audit-logs", payload);
+        safeBroadcast("/topic/admin/audit-logs", payload);
     }
 
     /**
@@ -185,7 +197,7 @@ public class AdminWebSocketController {
         payload.put("success", success);
         payload.put("message", message);
         payload.put("timestamp", LocalDateTime.now());
-        messagingTemplate.convertAndSend("/topic/admin/operations", payload);
+        safeBroadcast("/topic/admin/operations", payload);
     }
 
     /**
@@ -200,7 +212,7 @@ public class AdminWebSocketController {
         payload.put("total", total);
         payload.put("percentage", (int) ((progress * 100) / total));
         payload.put("timestamp", LocalDateTime.now());
-        messagingTemplate.convertAndSend("/topic/admin/operations", payload);
+        safeBroadcast("/topic/admin/operations", payload);
     }
 
     /**
@@ -212,7 +224,7 @@ public class AdminWebSocketController {
         payload.put("type", "NEW_DRIVER");
         payload.put("data", driver);
         payload.put("timestamp", LocalDateTime.now());
-        messagingTemplate.convertAndSend("/topic/admin/drivers", payload);
+        safeBroadcast("/topic/admin/drivers", payload);
     }
 
     /**
@@ -225,7 +237,7 @@ public class AdminWebSocketController {
         payload.put("driverId", driverId);
         payload.put("status", status);
         payload.put("timestamp", LocalDateTime.now());
-        messagingTemplate.convertAndSend("/topic/admin/drivers", payload);
+        safeBroadcast("/topic/admin/drivers", payload);
     }
 
     /**
@@ -239,7 +251,7 @@ public class AdminWebSocketController {
         payload.put("status", status);
         payload.put("count", driverIds.size());
         payload.put("timestamp", LocalDateTime.now());
-        messagingTemplate.convertAndSend("/topic/admin/drivers", payload);
+        safeBroadcast("/topic/admin/drivers", payload);
     }
 
     /**
