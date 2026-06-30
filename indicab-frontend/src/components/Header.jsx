@@ -137,7 +137,7 @@ const Header = () => {
             {/* Login Button - only for unauthenticated users */}
             {!user && (
               <li className="nav-item">
-                <Link className="nav-link login-btn" to="/login" onClick={closeMenu}>
+                <Link className="nav-link text-white" to="/login" onClick={closeMenu}>
                   <i className="bi bi-box-arrow-in-right me-1"></i>
                   Login
                 </Link>

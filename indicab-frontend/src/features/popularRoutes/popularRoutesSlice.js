@@ -14,11 +14,8 @@ export const fetchPopularRoutes = createAsyncThunk('popularRoutes/fetchPopularRo
       { id: 4, fromLocation: 'Chennai', toLocation: 'Hyderabad', price: 900, distance: 580, description: 'Distance: 580 km', image: 'https://images.unsplash.com/photo-1496442226666-8d4d0e62e6e9?w=500&h=300&fit=crop' },
       { id: 5, fromLocation: 'Kolkata', toLocation: 'Darjeeling', price: 600, distance: 350, description: 'Distance: 350 km', image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=500&h=300&fit=crop' }
     ];
-    if (import.meta.env.DEV) {
-      console.warn('Using fallback mock routes - API unavailable');
-      return mockRoutes;
-    }
-    throw new Error(error.response?.data?.message || 'Failed to fetch popular routes');
+    console.warn('API unavailable, using fallback mock routes');
+    return mockRoutes;
   }
 });
 
@@ -63,7 +60,7 @@ const popularRoutesSlice = createSlice({
       })
       .addCase(fetchPopularRoutes.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.error.message;
+        state.error = action.error?.message || 'Failed';
       });
   },
 });

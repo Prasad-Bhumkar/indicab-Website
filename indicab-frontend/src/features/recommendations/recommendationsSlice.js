@@ -15,11 +15,8 @@ export const fetchRecommendations = createAsyncThunk('recommendations/fetchRecom
       { id: 5, title: 'Beach Trip', location: 'Coastal Area', image: 'https://images.unsplash.com/photo-1473496169904-658ba7c44d8a?w=500&h=300&fit=crop', price: 800, rating: 4.8, reviews: 423 },
       { id: 6, title: 'Night Ride', location: 'City Center', image: 'https://images.unsplash.com/photo-1489824904134-891ab64532f1?w=500&h=300&fit=crop', price: 180, rating: 4.5, reviews: 267 }
     ];
-    if (import.meta.env.DEV) {
-      console.warn('Using fallback mock recommendations - API unavailable');
-      return mockRecommendations;
-    }
-    throw new Error(error.response?.data?.message || 'Failed to fetch recommendations');
+    console.warn('API unavailable, using fallback mock recommendations');
+    return mockRecommendations;
   }
 });
 
@@ -66,7 +63,7 @@ const recommendationsSlice = createSlice({
       })
       .addCase(fetchRecommendations.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.error.message;
+        state.error = action.error?.message || 'Fail';
       });
   },
 });

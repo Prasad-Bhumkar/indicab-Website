@@ -21,11 +21,8 @@ export const fetchServiceCities = createAsyncThunk('serviceCities/fetchServiceCi
         support: '24/7'
       }
     };
-    if (import.meta.env.DEV) {
-      console.warn('Using fallback mock service cities - API unavailable');
-      return mockData;
-    }
-    throw new Error(error.response?.data?.message || 'Failed to fetch service cities');
+    console.warn('API unavailable, using fallback mock service cities');
+    return mockData;
   }
 });
 
@@ -51,7 +48,7 @@ const serviceCitiesSlice = createSlice({
       })
       .addCase(fetchServiceCities.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.error.message;
+        state.error = action.error?.message || 'API error';
       });
   },
 });

@@ -83,7 +83,7 @@ function Login() {
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="auth-form">
+        <form onSubmit={handleSubmit} className="auth-form" noValidate>
           <div className="form-group">
             <label htmlFor="email" className="form-label">
               Email Address

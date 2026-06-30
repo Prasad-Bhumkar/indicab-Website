@@ -59,7 +59,7 @@ const AdminLogin = () => {
           <p className="admin-login-subtitle">Access the admin panel with your credentials</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="admin-login-form">
+        <form onSubmit={handleSubmit} className="admin-login-form" noValidate>
           {/* General error message */}
           {(error || validationErrors.general) && (
             <div className="admin-login-alert alert-danger" role="alert">
